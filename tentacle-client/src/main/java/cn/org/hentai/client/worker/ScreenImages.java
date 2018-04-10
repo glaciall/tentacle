@@ -12,8 +12,22 @@ public final class ScreenImages
     static LinkedList<Screenshot> screenshotImages = new LinkedList<Screenshot>();
     static LinkedList<Object> screenDifferences = new LinkedList<Object>();
 
-    public static void addScreenShot(Screenshot screenshot)
+    public static void addScreenshot(Screenshot screenshot)
     {
-
+        synchronized (screenshotImages)
+        {
+            screenshotImages.add(screenshot);
+        }
     }
+
+    public static Screenshot getScreenshot()
+    {
+        if (screenshotImages.size() == 0) return null;
+        synchronized (screenshotImages)
+        {
+            return screenshotImages.removeFirst();
+        }
+    }
+
+
 }
