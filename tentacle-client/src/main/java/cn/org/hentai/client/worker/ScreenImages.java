@@ -1,6 +1,6 @@
 package cn.org.hentai.client.worker;
 
-import cn.org.hentai.tentacle.graphic.Screen;
+import cn.org.hentai.tentacle.graphic.Screenshot;
 
 import java.util.LinkedList;
 
@@ -9,6 +9,11 @@ import java.util.LinkedList;
  */
 public final class ScreenImages
 {
-    static LinkedList<Screen> screenImages = new LinkedList<Screen>();
+    static LinkedList<Screenshot> screenshotImages = new LinkedList<Screenshot>();
     static LinkedList<Object> screenDifferences = new LinkedList<Object>();
+
+    public static void addScreenShot(Screenshot screenshot)
+    {
+
+    }
 }

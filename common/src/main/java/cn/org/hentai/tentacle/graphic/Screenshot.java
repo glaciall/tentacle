@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 /**
  * Created by matrixy on 2018/4/9.
  */
-public final class Screen
+public final class Screenshot
 {
     // 截屏时间
     public long captureTime;
@@ -19,7 +19,7 @@ public final class Screen
     // RGB
     public int[] bitmap;
 
-    public Screen(BufferedImage img)
+    public Screenshot(BufferedImage img)
     {
         this.captureTime = System.currentTimeMillis();
         this.width = img.getWidth();

@@ -1,9 +1,8 @@
 package cn.org.hentai.tentacle.system;
 
-import cn.org.hentai.tentacle.graphic.Screen;
+import cn.org.hentai.tentacle.graphic.Screenshot;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 /**
  * Created by matrixy on 2018/4/9.
@@ -16,9 +15,9 @@ public final class LocalComputer
      * 创建整屏截图
      * @return
      */
-    public static Screen captureScreen()
+    public static Screenshot captureScreen()
     {
-        return new Screen(robot.createScreenCapture(getScreenSize()));
+        return new Screenshot(robot.createScreenCapture(getScreenSize()));
     }
 
     /**
