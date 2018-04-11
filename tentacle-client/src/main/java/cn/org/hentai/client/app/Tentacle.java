@@ -1,6 +1,7 @@
 package cn.org.hentai.client.app;
 
 import cn.org.hentai.client.test.ScreenCanvas;
+import cn.org.hentai.tentacle.compress.RLEncoding;
 import cn.org.hentai.tentacle.system.LocalComputer;
 
 import javax.swing.*;
@@ -17,9 +18,18 @@ public class Tentacle
 
     public Tentacle()
     {
+        initCore();
         initWindow();
     }
 
+    // 核心模块初始化，提高运行中的性能
+    private void initCore()
+    {
+        // 静态成员初始化
+        RLEncoding.init();
+    }
+
+    // 窗口UI初始化
     private void initWindow()
     {
         Rectangle screenSize = LocalComputer.getScreenSize();
