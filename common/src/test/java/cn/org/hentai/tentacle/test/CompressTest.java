@@ -1,5 +1,6 @@
 package cn.org.hentai.tentacle.test;
 
+import cn.org.hentai.tentacle.compress.RLEncoding;
 import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.util.ByteUtils;
 
@@ -15,7 +16,32 @@ import java.util.HashMap;
  */
 public class CompressTest
 {
+    // 行程编码+颜色表图像数据压缩
     public static void main(String[] args) throws Exception
+    {
+        Screenshot screenshot = new Screenshot(ImageIO.read(CompressTest.class.getResourceAsStream("/pretty.jpg")));
+        RLEncoding.init();
+        long time = System.currentTimeMillis();
+        byte[] compressedData = new RLEncoding().compress(screenshot.bitmap);
+        time = System.currentTimeMillis() - time;
+        System.out.println("Before: " + (screenshot.bitmap.length * 4));
+        System.out.println("After: " + compressedData.length);
+        System.out.println("Spend: " + time);
+    }
+
+    // 查找图像中出现次数最多的颜色
+    public static void main_find_main_colors(String[] args) throws Exception
+    {
+        Screenshot screenshot = new Screenshot(ImageIO.read(CompressTest.class.getResourceAsStream("/pretty.jpg")));
+        RLEncoding.init();
+        long time = System.currentTimeMillis();
+        RLEncoding.findMainColors(screenshot.bitmap);
+        time = System.currentTimeMillis() - time;
+        System.out.println("Spend: " + time);
+    }
+
+    // 行程编码压缩测试
+    public static void main_rlecompress_test(String[] args) throws Exception
     {
         Screenshot screenshot = new Screenshot(ImageIO.read(CompressTest.class.getResourceAsStream("/test1.bmp")));
 
