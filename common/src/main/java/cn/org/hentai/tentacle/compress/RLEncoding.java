@@ -17,13 +17,13 @@ public class RLEncoding extends BaseCompressProcessor
     // 以RGB作为数组下标的数组容器，用于保存颜色的出现次数，或是颜色表的下标
     private static int[] colortable = new int[1 << 24];
 
-    // 保存己出现的颜色
+    // 保存己出现的颜色，假设同屏最多出现1920 * 1080种不同的颜色
     private static int[] colors = new int[1920 * 1080];
 
     // 最少需要N次出现才会加入到颜色表中
     private static int N = 20;
 
-    // 保存256个出现最多次的颜色
+    // 最多保存256个出现最多次的颜色
     private static int[] mainColors = new int[512];
 
     // mainColors数组的有效数据下标，也指代了颜色个数
@@ -37,7 +37,17 @@ public class RLEncoding extends BaseCompressProcessor
         // 查找出现次数最多的颜色，建立颜色表
         findMainColors(bitmap);
 
-        // 颜色表/行程编码
+        // 写入颜色表
+        compressedData.write((byte)(colorIndex & 0xff));
+        for (int i = 0; i < mainColors.length; i+=2)
+        {
+            int rgb = mainColors[i + 1] & 0xffffff;
+            compressedData.write((rgb >> 16) & 0xff);
+            compressedData.write((rgb >> 8) & 0xff);
+            compressedData.write(rgb & 0xff);
+        }
+
+        // 行程编码
         int rl = 1;
         int lastColor = bitmap[0] & 0xffffff;
         for (int i = 1; i < bitmap.length; i++)
@@ -117,10 +127,12 @@ public class RLEncoding extends BaseCompressProcessor
             minCount = mainColors[mainColors.length - 2];
         }
 
+        colorIndex = 0;
         for (int i = 0; i < mainColors.length; i+=2)
         {
             int count = mainColors[i];
             if (count == 0) continue;
+            colorIndex++;
             colortable[mainColors[i + 1]] = count;
         }
     }
