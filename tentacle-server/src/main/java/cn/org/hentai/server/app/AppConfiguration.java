@@ -1,8 +1,12 @@
 package cn.org.hentai.server.app;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.socket.server.standard.ServerEndpointExporter;
+
+import javax.websocket.server.ServerEndpointConfig;
 
 /**
  * Created by matrixy on 2017/12/13.
@@ -14,7 +18,13 @@ public class AppConfiguration extends WebMvcConfigurerAdapter
     public void addInterceptors(InterceptorRegistry registry)
     {
         registry.addInterceptor(new CommonInterceptor()).addPathPatterns("/**");
-        registry.addInterceptor(new UserInterceptor()).addPathPatterns("/manage/**");
+        // registry.addInterceptor(new UserInterceptor()).addPathPatterns("/manage/**");
         super.addInterceptors(registry);
+    }
+
+    @Bean
+    public ServerEndpointExporter serverEndpointExporter()
+    {
+        return new ServerEndpointExporter();
     }
 }
