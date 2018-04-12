@@ -14,11 +14,8 @@ public class RLEncoding extends BaseCompressProcessor
     // 压缩后的图像字节数组
     private static ByteArrayOutputStream compressedData = new ByteArrayOutputStream(1024 * 1024 * 2);
 
-    // 颜色表
-    private static HashMap<Integer, Integer> colortable = new HashMap<Integer, Integer>(4096);
-
-    // 记录颜色的出现次数，以RGB作为数组下标
-    private static int[] colorCounting = new int[1 << 24];
+    // 以RGB作为数组下标的数组容器，用于保存颜色的出现次数，或是颜色表的下标
+    private static int[] colortable = new int[1 << 24];
 
     // 保存己出现的颜色
     private static int[] colors = new int[1920 * 1080];
@@ -52,7 +49,7 @@ public class RLEncoding extends BaseCompressProcessor
             }
             else
             {
-                if (!colortable.containsKey(lastColor))
+                if (colortable[lastColor] == 0)
                 {
                     compressedData.write(rl);
                     compressedData.write((byte) ((lastColor >> 16) & 0xff));
@@ -62,12 +59,16 @@ public class RLEncoding extends BaseCompressProcessor
                 else
                 {
                     compressedData.write(rl | 0x80);
-                    compressedData.write(colortable.get(lastColor));
+                    compressedData.write(colortable[lastColor]);
                 }
                 rl = 1;
                 lastColor = color;
             }
         }
+
+        // 清空colortable
+        for (int i = 0; i < mainColors.length; i+=2) colortable[mainColors[i + 1]] = 0;
+
         return compressedData.toByteArray();
     }
 
@@ -82,8 +83,8 @@ public class RLEncoding extends BaseCompressProcessor
         for (int i = 0; i < bitmap.length; i++)
         {
             int color = bitmap[i] & 0xffffff;
-            if (colorCounting[color] == 0) colors[colorIndex++] = color;
-            colorCounting[color] += 1;
+            if (colortable[color] == 0) colors[colorIndex++] = color;
+            colortable[color] += 1;
         }
 
         // 查找主颜色
@@ -91,10 +92,10 @@ public class RLEncoding extends BaseCompressProcessor
         for (int i = 0; i < colorIndex; i++)
         {
             int color = colors[i];
-            int count = colorCounting[color];
+            int count = colortable[color];
 
             // 将colorCounting清零
-            colorCounting[color] = 0;
+            colortable[color] = 0;
 
             if (count < N) continue;
 
@@ -115,12 +116,12 @@ public class RLEncoding extends BaseCompressProcessor
             }
             minCount = mainColors[mainColors.length - 2];
         }
-        colortable.clear();
+
         for (int i = 0; i < mainColors.length; i+=2)
         {
             int count = mainColors[i];
             if (count == 0) continue;
-            colortable.put(mainColors[i + 1], count);
+            colortable[mainColors[i + 1]] = count;
         }
     }
 
