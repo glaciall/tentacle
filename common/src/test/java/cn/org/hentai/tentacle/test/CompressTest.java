@@ -19,14 +19,27 @@ public class CompressTest
     // 行程编码+颜色表图像数据压缩
     public static void main(String[] args) throws Exception
     {
-        Screenshot screenshot = new Screenshot(ImageIO.read(CompressTest.class.getResourceAsStream("/pretty.jpg")));
+        long stime = System.currentTimeMillis();
+        Screenshot screenshot = new Screenshot(ImageIO.read(CompressTest.class.getResourceAsStream("/screenshot.png")));
+        stime = System.currentTimeMillis() - stime;
+        System.out.println("decode: " + stime);
         RLEncoding.init();
+        new RLEncoding().compress(screenshot.bitmap);
+        new RLEncoding().compress(screenshot.bitmap);
         long time = System.currentTimeMillis();
         byte[] compressedData = new RLEncoding().compress(screenshot.bitmap);
         time = System.currentTimeMillis() - time;
         System.out.println("Before: " + (screenshot.bitmap.length * 4));
         System.out.println("After: " + compressedData.length);
         System.out.println("Spend: " + time);
+
+        BufferedImage img = new BufferedImage(screenshot.width, screenshot.height, BufferedImage.TYPE_INT_RGB);
+        img.setRGB(0, 0, screenshot.width, screenshot.height, screenshot.bitmap, 0, screenshot.width);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(4096 * 1024);
+        stime = System.currentTimeMillis();
+        ImageIO.write(img, "JPG", baos);
+        stime = System.currentTimeMillis() - stime;
+        System.out.println("system encoder: " + stime);
     }
 
     // 查找图像中出现次数最多的颜色
