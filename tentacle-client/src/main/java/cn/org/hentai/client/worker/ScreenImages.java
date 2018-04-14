@@ -12,6 +12,7 @@ public final class ScreenImages
     static LinkedList<Screenshot> screenshotImages = new LinkedList<Screenshot>();
     static LinkedList<Object> compressedScreens = new LinkedList<Object>();
 
+    // 原始截图相关
     public static void addScreenshot(Screenshot screenshot)
     {
         synchronized (screenshotImages)
@@ -29,5 +30,9 @@ public final class ScreenImages
         }
     }
 
-
+    // 压缩后的图像数据相关
+    public static boolean hasCompressedScreens()
+    {
+        return compressedScreens.size() > 0;
+    }
 }
