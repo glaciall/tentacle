@@ -10,7 +10,7 @@ import java.util.LinkedList;
 public final class ScreenImages
 {
     static LinkedList<Screenshot> screenshotImages = new LinkedList<Screenshot>();
-    static LinkedList<Object> screenDifferences = new LinkedList<Object>();
+    static LinkedList<Object> compressedScreens = new LinkedList<Object>();
 
     public static void addScreenshot(Screenshot screenshot)
     {

@@ -1,5 +1,6 @@
 package cn.org.hentai.client.worker;
 
+import cn.org.hentai.tentacle.compress.CompressUtil;
 import cn.org.hentai.tentacle.graphic.Screenshot;
 
 /**
@@ -7,18 +8,25 @@ import cn.org.hentai.tentacle.graphic.Screenshot;
  */
 public class CompressWorker extends Thread
 {
+    Screenshot lastScreen = null;
+
     private void compress() throws Exception
     {
         Screenshot screenshot = ScreenImages.getScreenshot();
         if (screenshot == null) return;
         while (screenshot.isExpired()) screenshot = ScreenImages.getScreenshot();
 
-        // 与上一张屏幕截图进行差异化比较
-        // 进行压缩
-        // 压缩后的格式，应该是什么样的？
-        // COLOR_TABLE x 256
-        // RLEncoding...
-        //
+        // 分辨率是否发生了变化？
+        if (lastScreen.width != screenshot.width || lastScreen.height != screenshot.height) lastScreen = null;
+        // 1. 求差
+        for (int i = 0; lastScreen != null && i < lastScreen.bitmap.length; i++)
+            screenshot.bitmap[i] = screenshot.bitmap[i] == lastScreen.bitmap[i] ? 0 : screenshot.bitmap[i];
+
+        // 2. 压缩
+        byte[] compressedData = CompressUtil.process("rle", screenshot.bitmap);
+
+        // 3. 入队列
+
     }
 
     public void run()
