@@ -2,6 +2,8 @@ package cn.org.hentai.tentacle.protocol;
 
 import cn.org.hentai.tentacle.util.ByteUtils;
 
+import java.io.InputStream;
+
 /**
  * Created by matrixy on 2018/4/14.
  */
@@ -36,6 +38,16 @@ public class Packet
         System.arraycopy(ByteUtils.toBytes(length), 0, p.data, 7, 4);
         p.size = 11;
         return p;
+    }
+
+    /**
+     * TODO: 从流中读取并建立一个数据包
+     * @param inputStream
+     * @return
+     */
+    public static Packet read(InputStream inputStream)
+    {
+        return null;
     }
 
     public Packet addByte(byte b)
