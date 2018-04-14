@@ -6,7 +6,6 @@
 function decompress(method, compressedData, imageData)
 {
     // 行程编码解码
-    console.log(compressedData);
     var f = 0;
     var x = 0;
     for (var i = (compressedData[0] & 0xff) * 3 + 1, k = 0; i < compressedData.length; )
