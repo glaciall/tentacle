@@ -39,9 +39,9 @@ public class RLEncoding extends BaseCompressProcessor
 
         // 写入颜色表
         compressedData.write((byte)(colorIndex & 0xff));
-        for (int i = 0; i < colorIndex; i+=2)
+        for (int i = 0; i < colorIndex; i++)
         {
-            int rgb = mainColors[i + 1] & 0xffffff;
+            int rgb = mainColors[i * 2 + 1] & 0xffffff;
             compressedData.write((rgb >> 16) & 0xff);
             compressedData.write((rgb >> 8) & 0xff);
             compressedData.write(rgb & 0xff);
@@ -49,31 +49,42 @@ public class RLEncoding extends BaseCompressProcessor
 
         // 行程编码
         int rl = 1;
-        int lastColor = bitmap[0] & 0xffffff;
-        for (int i = 1; i < bitmap.length; i++)
+        int color, lastColor = bitmap[0] & 0xffffff;
+        for (int i = 1, l = bitmap.length; i < l; i++)
         {
-            int color = bitmap[i] & 0xffffff;
-            if (color == lastColor && rl < 126)
+            color = bitmap[i] & 0xffffff;
+            if (color == lastColor && rl < 127)
             {
                 rl += 1;
+                continue;
+            }
+
+            if (colortable[lastColor] == 0)
+            {
+                compressedData.write(rl & 0x7f);
+                compressedData.write((byte) ((lastColor >> 16) & 0xff));
+                compressedData.write((byte) ((lastColor >> 8) & 0xff));
+                compressedData.write((byte) (lastColor & 0xff));
             }
             else
             {
-                if (colortable[lastColor] == 0 || i > 0)
-                {
-                    compressedData.write(rl & 0x7f);
-                    compressedData.write((byte) ((lastColor >> 16) & 0xff));
-                    compressedData.write((byte) ((lastColor >> 8) & 0xff));
-                    compressedData.write((byte) (lastColor & 0xff));
-                }
-                else
-                {
-                    compressedData.write(rl | 0x80);
-                    compressedData.write(colortable[lastColor]);
-                }
-                rl = 1;
-                lastColor = color;
+                compressedData.write(rl | 0x80);
+                compressedData.write(colortable[lastColor]);
             }
+            rl = 1;
+            lastColor = color;
+        }
+        if (colortable[lastColor] == 0)
+        {
+            compressedData.write(rl & 0x7f);
+            compressedData.write((byte) ((lastColor >> 16) & 0xff));
+            compressedData.write((byte) ((lastColor >> 8) & 0xff));
+            compressedData.write((byte) (lastColor & 0xff));
+        }
+        else
+        {
+            compressedData.write(rl | 0x80);
+            compressedData.write(colortable[lastColor]);
         }
 
         // 清空colortable
