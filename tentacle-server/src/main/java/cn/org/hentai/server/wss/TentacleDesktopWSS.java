@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import javax.imageio.ImageIO;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 
 /**
@@ -18,6 +19,8 @@ import java.nio.ByteBuffer;
 public class TentacleDesktopWSS
 {
     Session session;
+    // 上一屏的图像
+    int[] lastBitmap = null;
 
     @OnOpen
     public void onOpen(Session session)
@@ -29,13 +32,30 @@ public class TentacleDesktopWSS
     @OnMessage
     public void onMessage(String message, Session session)
     {
-        System.out.println("receive: " + message);
         try
         {
             // this.session.getBasicRemote().sendText(message.toUpperCase());
-            String fname = ("00000" + message).replaceAll("^0+(\\d{5})$", "$1");
-            Screenshot screenshot = new Screenshot(ImageIO.read(TentacleDesktopWSS.class.getResourceAsStream("/movie/IMG" + fname + ".bmp")));
-            this.session.getBasicRemote().sendBinary(ByteBuffer.wrap(new RLEncoding().compress(screenshot.bitmap)));
+            // String fname = ("00000" + message).replaceAll("^0+(\\d{5})$", "$1");
+            int[] current = new Screenshot(ImageIO.read(TentacleDesktopWSS.class.getResourceAsStream("/movie/" + message + ".png"))).bitmap;
+            long time = System.currentTimeMillis();
+            int[] diff = new int[current.length];
+            if (lastBitmap != null)
+            {
+                for (int i = 0; i < current.length; i++)
+                {
+                    // 如果相同，则保留0，否则为新的颜色
+                    diff[i] = current[i] == lastBitmap[i] ? 0 : current[i];
+                }
+            }
+            byte[] compressedData = new RLEncoding().compress(lastBitmap == null ? current : diff);
+            time = System.currentTimeMillis() - time;
+            // System.out.println("original: " + current.length * 4);
+            // System.out.println("compressed: " + compressedData.length);
+            System.out.println("ratio: " + new BigDecimal((current.length * 4.0f / compressedData.length)).setScale(2, BigDecimal.ROUND_DOWN));
+            System.out.println("Spend: " + time);
+            System.out.println("*******************************************************");
+            this.session.getBasicRemote().sendBinary(ByteBuffer.wrap(compressedData));
+            lastBitmap = current;
         }
         catch(Exception ex)
         {

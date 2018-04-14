@@ -15,6 +15,12 @@ function decompress(method, compressedData, imageData)
         var red, green, blue;
         if ((rl & 0x80) > 0)
         {
+            if ((compressedData[i + 1] & 0xff) == 0)
+            {
+                k += times * 4;
+                i += 2;
+                continue;
+            }
             var index = (compressedData[i + 1] & 0xff) * 3 + 1;
             red = compressedData[index] & 0xff;
             green = compressedData[index + 1] & 0xff;
