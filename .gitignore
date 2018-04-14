@@ -1,5 +1,5 @@
 *.iml
 .idea/
 */target/
-IMG*.bmp
+tentacle-server/src/main/resources/movie/*
 *.sqlite
