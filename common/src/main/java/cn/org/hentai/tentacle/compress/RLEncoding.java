@@ -49,42 +49,52 @@ public class RLEncoding extends BaseCompressProcessor
 
         // 行程编码
         int rl = 1;
-        int color, lastColor = bitmap[0] & 0xffffff;
+        int color, lastColor = bitmap[0];
         for (int i = 1, l = bitmap.length; i < l; i++)
         {
-            color = bitmap[i] & 0xffffff;
+            color = bitmap[i];
             if (color == lastColor && rl < 127)
             {
                 rl += 1;
                 continue;
             }
 
-            if (colortable[lastColor] == 0)
+            if (lastColor == 0)
+            {
+                compressedData.write(rl | 0x80);
+                compressedData.write(0);
+            }
+            else if (colortable[lastColor & 0xffffff] > 0)
+            {
+                compressedData.write(rl | 0x80);
+                compressedData.write(colortable[lastColor & 0xffffff]);
+            }
+            else
             {
                 compressedData.write(rl & 0x7f);
                 compressedData.write((byte) ((lastColor >> 16) & 0xff));
                 compressedData.write((byte) ((lastColor >> 8) & 0xff));
                 compressedData.write((byte) (lastColor & 0xff));
             }
-            else
-            {
-                compressedData.write(rl | 0x80);
-                compressedData.write(colortable[lastColor]);
-            }
             rl = 1;
             lastColor = color;
         }
-        if (colortable[lastColor] == 0)
+        if (lastColor == 0)
+        {
+            compressedData.write(rl | 0x80);
+            compressedData.write(0);
+        }
+        else if (colortable[lastColor & 0xffffff] > 0)
+        {
+            compressedData.write(rl | 0x80);
+            compressedData.write(colortable[lastColor & 0xffffff]);
+        }
+        else
         {
             compressedData.write(rl & 0x7f);
             compressedData.write((byte) ((lastColor >> 16) & 0xff));
             compressedData.write((byte) ((lastColor >> 8) & 0xff));
             compressedData.write((byte) (lastColor & 0xff));
-        }
-        else
-        {
-            compressedData.write(rl | 0x80);
-            compressedData.write(colortable[lastColor]);
         }
 
         // 清空colortable
@@ -104,6 +114,7 @@ public class RLEncoding extends BaseCompressProcessor
         for (int i = 0; i < bitmap.length; i++)
         {
             int color = bitmap[i] & 0xffffff;
+            if (bitmap[i] == 0) continue;
             if (colortable[color] == 0) colors[colorIndex++] = color;
             colortable[color] += 1;
         }
