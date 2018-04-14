@@ -33,7 +33,8 @@ public class TentacleDesktopWSS
         try
         {
             // this.session.getBasicRemote().sendText(message.toUpperCase());
-            Screenshot screenshot = new Screenshot(ImageIO.read(TentacleDesktopWSS.class.getResourceAsStream("/movie/IMG00000.bmp")));
+            String fname = ("00000" + message).replaceAll("^0+(\\d{5})$", "$1");
+            Screenshot screenshot = new Screenshot(ImageIO.read(TentacleDesktopWSS.class.getResourceAsStream("/movie/IMG" + fname + ".bmp")));
             this.session.getBasicRemote().sendBinary(ByteBuffer.wrap(new RLEncoding().compress(screenshot.bitmap)));
         }
         catch(Exception ex)

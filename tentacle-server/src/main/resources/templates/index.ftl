@@ -39,12 +39,8 @@
 
         ws.onmessage = function(resp)
         {
-            console.log('receive', resp);
             if (!(resp.data instanceof ArrayBuffer)) return console.error('wrong packet received: ', resp.data);
-            var time = new Date().getTime();
             decompress('rle', new Uint8Array(resp.data), imageData);
-            time = new Date().getTime() - time;
-            console.log('spend: ' + time);
             canvas.putImageData(imageData, 0, 0);
         }
 
@@ -66,6 +62,14 @@
                 $(this).val('');
             }
         });
+
+        var index = 0;
+        setInterval(function()
+        {
+            ws.send(index);
+            index++;
+            if (index > 200) index = 0;
+        }, 60);
     });
 
 </script>
