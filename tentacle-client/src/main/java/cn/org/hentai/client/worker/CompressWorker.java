@@ -30,7 +30,7 @@ public class CompressWorker implements Runnable
         while (screenshot.isExpired()) screenshot = ScreenImages.getScreenshot();
 
         // 分辨率是否发生了变化？
-        if (lastScreen.width != screenshot.width || lastScreen.height != screenshot.height) lastScreen = null;
+        if (lastScreen != null && (lastScreen.width != screenshot.width || lastScreen.height != screenshot.height)) lastScreen = null;
         // 1. 求差
         for (int i = 0; lastScreen != null && i < lastScreen.bitmap.length; i++)
             screenshot.bitmap[i] = screenshot.bitmap[i] == lastScreen.bitmap[i] ? 0 : screenshot.bitmap[i];

@@ -1,5 +1,6 @@
 package cn.org.hentai.server.rds;
 
+import cn.org.hentai.server.util.ByteUtils;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
 import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.protocol.Command;
@@ -9,6 +10,7 @@ import jdk.internal.util.xml.impl.Input;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Date;
 
 /**
  * Created by matrixy on 2018/4/15.
@@ -45,6 +47,22 @@ public class RDSession extends Thread
         {
             sendHeartbeat();
 
+            if (startCapture)
+            {
+                outputStream.write(Packet.create(Command.CONTROL_REQUEST, 3).addByte((byte)0x01).addByte((byte)0x00).addByte((byte)0x03).getBytes());
+                outputStream.flush();
+                System.out.println("control command sent");
+                Packet resp = null;
+                while (true)
+                {
+                    resp = Packet.read(inputStream);
+                    if (null != resp) break;
+                    sleep(10);
+                }
+                startCapture = false;
+                System.out.println("client response: " + ByteUtils.toString(resp.getBytes()));
+            }
+
             Packet packet = Packet.read(inputStream);
             if (packet != null)
             {
@@ -67,7 +85,7 @@ public class RDSession extends Thread
             int height = packet.nextShort();
             long captureTime = packet.nextLong();
             byte[] data = packet.nextBytes(dataLength - 12);
-
+            System.out.println("Screen: " + width + " x " + height + ", time: " + new Date(captureTime).toLocaleString());
             websocketService.sendScreenshot(data);
         }
 

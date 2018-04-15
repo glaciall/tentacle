@@ -17,6 +17,11 @@
             border: solid 2px #f1f1f1;
             display: block;
         }
+        body
+        {
+            margin: 0px;
+            padding: 0px;
+        }
     </style>
 </head>
 <body>
@@ -62,14 +67,6 @@
                 $(this).val('');
             }
         });
-
-        var index = 0;
-        setInterval(function()
-        {
-            ws.send(index);
-            index++;
-            if (index > 145) index = 0;
-        }, 60);
     });
 
 </script>

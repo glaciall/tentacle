@@ -42,7 +42,9 @@ public class TentacleDesktopWSS
             if (null == rdSession)
             {
                 this.session.getBasicRemote().sendText("client is not connected yet");
+                return;
             }
+            rdSession.bind(this);
         }
         catch(Exception ex)
         {

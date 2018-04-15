@@ -80,7 +80,7 @@ public class Client extends Thread
             int bandWidth = packet.nextByte() & 0xff;
             int colorBits = packet.nextByte() & 0xff;
 
-            resp = Packet.create(Command.CONTROL_RESPONSE, 3)
+            resp = Packet.create(Command.CONTROL_RESPONSE, 11)
                     .addByte((byte)0x01)                            // 压缩方式
                     .addByte((byte)0x00)                            // 带宽
                     .addByte((byte)0x03)                            // 颜色位数
@@ -110,11 +110,13 @@ public class Client extends Thread
     }
 
     // 发送压缩后的屏幕截图
-    private void sendScreenImages()
+    private void sendScreenImages() throws Exception
     {
         if (!working) return;
-
-
+        Packet p = ScreenImages.getCompressedScreen();
+        outputStream.write(p.getBytes());
+        outputStream.flush();
+        System.out.println("screenshot sent...");
     }
 
     // 关闭连接，中断工作线程
