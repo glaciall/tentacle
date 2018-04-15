@@ -19,6 +19,17 @@ public final class Screenshot
     // RGB
     public int[] bitmap;
 
+    // 压缩后的图像数据
+    public byte[] compressedData;
+
+    public Screenshot(int width, int height, long captureTime, byte[] compressedData)
+    {
+        this.width = width;
+        this.height = height;
+        this.captureTime = captureTime;
+        this.compressedData = compressedData;
+    }
+
     public Screenshot(BufferedImage img)
     {
         this.captureTime = System.currentTimeMillis();

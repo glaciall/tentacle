@@ -20,13 +20,13 @@
     </style>
 </head>
 <body>
-<canvas width="638" height="470" id="screen"></canvas>
+<canvas width="1920" height="1080" id="screen"></canvas>
 <input type="text" id="message-box" placeholder="输入内容后回车" />
 <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript" src="${web_resource}/decompress.js"></script>
 <script type="text/javascript">
     var canvas = document.getElementById('screen').getContext('2d');
-    var imageData = canvas.createImageData(638, 470);
+    var imageData = canvas.createImageData(1920, 1080);
     $(function()
     {
         var ws = new WebSocket('ws://localhost:8888/tentacle/desktop/wss');
@@ -39,7 +39,7 @@
 
         ws.onmessage = function(resp)
         {
-            if (!(resp.data instanceof ArrayBuffer)) return console.error('wrong packet received: ', resp.data);
+            if (!(resp.data instanceof ArrayBuffer)) return console.error('server response: ' + resp.data);
             decompress('rle', new Uint8Array(resp.data), imageData);
             canvas.putImageData(imageData, 0, 0);
         }

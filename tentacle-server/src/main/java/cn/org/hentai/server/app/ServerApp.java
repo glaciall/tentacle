@@ -1,5 +1,7 @@
 package cn.org.hentai.server.app;
 
+import cn.org.hentai.server.rds.RDServer;
+import cn.org.hentai.server.rds.RDSession;
 import cn.org.hentai.server.util.BeanUtils;
 import cn.org.hentai.tentacle.util.Configs;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ public class ServerApp
     {
         ApplicationContext context = SpringApplication.run(ServerApp.class, args);
         Configs.init("/application.properties");
+        new Thread(new RDServer()).start();
     }
 
     @Bean
