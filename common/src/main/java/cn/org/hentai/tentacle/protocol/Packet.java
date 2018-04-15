@@ -3,6 +3,7 @@ package cn.org.hentai.tentacle.protocol;
 import cn.org.hentai.tentacle.util.ByteUtils;
 
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Created by matrixy on 2018/4/14.
@@ -11,6 +12,7 @@ public class Packet
 {
     int size = 0;
     int offset = 0;
+    int maxSize = 0;
     public byte[] data;
 
     private Packet()
@@ -37,6 +39,7 @@ public class Packet
         p.data[6] = command;
         System.arraycopy(ByteUtils.toBytes(length), 0, p.data, 7, 4);
         p.size = 11;
+        p.maxSize = length;
         return p;
     }
 
@@ -133,7 +136,13 @@ public class Packet
 
     public byte[] getBytes()
     {
-        return this.data;
+        if (size == maxSize) return this.data;
+        else
+        {
+            byte[] buff = new byte[size];
+            System.arraycopy(this.data, 0, buff, 0, size);
+            return buff;
+        }
     }
 
     public static void main(String[] args) throws Exception
