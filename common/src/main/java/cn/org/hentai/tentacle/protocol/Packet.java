@@ -2,6 +2,8 @@ package cn.org.hentai.tentacle.protocol;
 
 import cn.org.hentai.tentacle.util.ByteUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Arrays;
 
@@ -44,13 +46,31 @@ public class Packet
     }
 
     /**
-     * TODO: 从流中读取并建立一个数据包
+     * 从流中读取并建立一个数据包
      * @param inputStream
      * @return
      */
-    public static Packet read(InputStream inputStream)
+    public static Packet read(InputStream inputStream) throws Exception
     {
-        return null;
+        if (inputStream.available() < 11) return null;
+        byte[] head = new byte[11];
+        int len = inputStream.read(head);
+        int dataLength = ByteUtils.getInt(head, 7,4);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(dataLength + 10);
+        byte[] buff = new byte[512];
+        for (int i = 0; i < dataLength; i += len)
+        {
+            len = inputStream.read(buff, 0, Math.min(512, dataLength - i));
+            if (len == -1) break;
+            baos.write(buff, 0, len);
+        }
+        Packet p = new Packet();
+        p.data = new byte[dataLength + 6 + 1 + 4];
+        p.size = 0;
+        p.maxSize = p.size;
+        p.addBytes(head);
+        p.addBytes(baos.toByteArray());
+        return p;
     }
 
     public Packet addByte(byte b)
@@ -146,6 +166,13 @@ public class Packet
     }
 
     public static void main(String[] args) throws Exception
+    {
+        ByteArrayInputStream bais = new ByteArrayInputStream(ByteUtils.parse("01 02 03 04 05 06 07 00 00 00 11 12 13 14 15 16 17 18 19 20 21 22 23 24 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40"));
+        Packet p = Packet.read(bais);
+        System.out.println(ByteUtils.toString(p.getBytes()));
+    }
+
+    public static void main_packet_rw(String[] args) throws Exception
     {
         Packet p = Packet.create(Command.HID_COMMAND, 16);
         p.addByte((byte)0x11).addShort((short)0x2233).addInt(0x44556677).addLong(0x8899aabbccddeeffL).addByte((byte)0xfa);
