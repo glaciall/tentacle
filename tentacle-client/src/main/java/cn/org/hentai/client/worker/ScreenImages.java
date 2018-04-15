@@ -1,6 +1,7 @@
 package cn.org.hentai.client.worker;
 
 import cn.org.hentai.tentacle.graphic.Screenshot;
+import cn.org.hentai.tentacle.protocol.Packet;
 
 import java.util.LinkedList;
 
@@ -10,7 +11,7 @@ import java.util.LinkedList;
 public final class ScreenImages
 {
     static LinkedList<Screenshot> screenshotImages = new LinkedList<Screenshot>();
-    static LinkedList<Object> compressedScreens = new LinkedList<Object>();
+    static LinkedList<Packet> compressedScreens = new LinkedList<Packet>();
 
     // 原始截图相关
     public static void addScreenshot(Screenshot screenshot)
@@ -34,5 +35,22 @@ public final class ScreenImages
     public static boolean hasCompressedScreens()
     {
         return compressedScreens.size() > 0;
+    }
+
+    public static void addCompressedScreen(Packet packet)
+    {
+        synchronized (compressedScreens)
+        {
+            compressedScreens.add(packet);
+        }
+    }
+
+    public static Packet getCompressedScreen()
+    {
+        if (compressedScreens.size() == 0) return null;
+        synchronized (compressedScreens)
+        {
+            return compressedScreens.removeFirst();
+        }
     }
 }
