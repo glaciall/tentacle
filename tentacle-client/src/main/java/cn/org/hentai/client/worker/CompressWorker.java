@@ -6,7 +6,7 @@ import cn.org.hentai.tentacle.graphic.Screenshot;
 /**
  * Created by matrixy on 2018/4/10.
  */
-public class CompressWorker extends Thread
+public class CompressWorker implements Runnable
 {
     Screenshot lastScreen = null;
 

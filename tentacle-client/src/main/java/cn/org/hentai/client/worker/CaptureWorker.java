@@ -5,7 +5,7 @@ import cn.org.hentai.tentacle.system.LocalComputer;
 /**
  * Created by matrixy on 2018/4/9.
  */
-public class CaptureWorker extends Thread
+public class CaptureWorker implements Runnable
 {
     private void captureAndStore() throws Exception
     {
