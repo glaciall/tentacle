@@ -148,6 +148,13 @@ public class Packet
                 | ((long)this.data[offset++] & 0xff);
     }
 
+    public byte[] nextBytes(int length)
+    {
+        byte[] buf = new byte[length];
+        System.arraycopy(this.data, offset, buf, 0, buf.length);
+        return buf;
+    }
+
     public Packet skip(int offset)
     {
         this.offset += offset;
