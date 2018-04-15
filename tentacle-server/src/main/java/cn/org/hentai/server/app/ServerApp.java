@@ -1,6 +1,7 @@
 package cn.org.hentai.server.app;
 
 import cn.org.hentai.server.util.BeanUtils;
+import cn.org.hentai.tentacle.util.Configs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -27,6 +28,7 @@ public class ServerApp
     public static void main(String[] args) throws Exception
     {
         ApplicationContext context = SpringApplication.run(ServerApp.class, args);
+        Configs.init("/application.properties");
     }
 
     @Bean
