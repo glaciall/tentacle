@@ -45,7 +45,10 @@
         ws.onmessage = function(resp)
         {
             if (!(resp.data instanceof ArrayBuffer)) return console.error('server response: ' + resp.data);
+            var time = new Date().getTime();
             decompress('rle', new Uint8Array(resp.data), imageData);
+            time = new Date().getTime() - time;
+            console.log('decompress spend: ' + time);
             canvas.putImageData(imageData, 0, 0);
         }
 
