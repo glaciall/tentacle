@@ -5,6 +5,7 @@ import cn.org.hentai.client.worker.CompressWorker;
 import cn.org.hentai.client.worker.ScreenImages;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.util.ByteUtils;
 import cn.org.hentai.tentacle.util.Configs;
 
 import java.io.InputStream;
@@ -116,7 +117,6 @@ public class Client extends Thread
         Packet p = ScreenImages.getCompressedScreen();
         outputStream.write(p.getBytes());
         outputStream.flush();
-        System.out.println("screenshot sent...");
     }
 
     // 关闭连接，中断工作线程
