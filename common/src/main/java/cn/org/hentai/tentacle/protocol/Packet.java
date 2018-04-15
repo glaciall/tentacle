@@ -151,7 +151,8 @@ public class Packet
     public byte[] nextBytes(int length)
     {
         byte[] buf = new byte[length];
-        System.arraycopy(this.data, offset, buf, 0, buf.length);
+        System.arraycopy(this.data, offset, buf, 0, length);
+        offset += length;
         return buf;
     }
 
@@ -176,7 +177,8 @@ public class Packet
     {
         ByteArrayInputStream bais = new ByteArrayInputStream(ByteUtils.parse("01 02 03 04 05 06 07 00 00 00 11 12 13 14 15 16 17 18 19 20 21 22 23 24 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40"));
         Packet p = Packet.read(bais);
-        System.out.println(ByteUtils.toString(p.getBytes()));
+        System.out.println(ByteUtils.toString(p.nextBytes(5)));
+        System.out.println(ByteUtils.toString(p.nextBytes(5)));
     }
 
     public static void main_packet_rw(String[] args) throws Exception
