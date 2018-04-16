@@ -15,8 +15,8 @@ import java.awt.*;
 public class Tentacle
 {
     JFrame frame;
-    private static final int WINDOW_WIDTH = 800;
-    private static final int WINDOW_HEIGHT = 600;
+    private static final int WINDOW_WIDTH = 320;
+    private static final int WINDOW_HEIGHT = 240;
 
     public Tentacle()
     {
