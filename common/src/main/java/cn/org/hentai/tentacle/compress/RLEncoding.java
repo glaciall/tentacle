@@ -52,7 +52,7 @@ public class RLEncoding extends BaseCompressProcessor
         int color, lastColor = bitmap[0];
         for (int i = 1, l = bitmap.length; i < l; i++)
         {
-            color = bitmap[i];
+            color = bitmap[i] & 0xffe0e0e0;
             if (color == lastColor && rl < 127)
             {
                 rl += 1;
@@ -113,7 +113,7 @@ public class RLEncoding extends BaseCompressProcessor
         // 颜色计数
         for (int i = 0; i < bitmap.length; i++)
         {
-            int color = bitmap[i] & 0xffffff;
+            int color = bitmap[i] & 0xe0e0e0;
             if (bitmap[i] == 0) continue;
             if (colortable[color] == 0) colors[colorIndex++] = color;
             colortable[color] += 1;

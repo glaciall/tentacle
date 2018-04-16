@@ -45,18 +45,19 @@ public class CompressWorker implements Runnable
         {
             for (int i = 0; i < lastScreen.bitmap.length; i++)
             {
-                if (screenshot.bitmap[i] == lastScreen.bitmap[i])
+                if ((screenshot.bitmap[i] & 0xe0e0e0) == (lastScreen.bitmap[i] & 0xe0e0e0))
                 {
                     bitmap[i] = 0;
                 }
                 else
                 {
                     changedColors += 1;
-                    bitmap[i] = screenshot.bitmap[i];
+                    bitmap[i] = screenshot.bitmap[i] & 0xe0e0e0;
                 }
             }
         }
         if (lastScreen != null && changedColors == 0) return;
+        Log.debug("Changed colors: " + changedColors);
 
         // 2. 压缩
         byte[] compressedData = CompressUtil.process(this.compressMethod, screenshot.bitmap);
