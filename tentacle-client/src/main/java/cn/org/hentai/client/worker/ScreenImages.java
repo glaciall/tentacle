@@ -24,9 +24,9 @@ public final class ScreenImages
 
     public static Screenshot getScreenshot()
     {
-        if (screenshotImages.size() == 0) return null;
         synchronized (screenshotImages)
         {
+            if (screenshotImages.size() == 0) return null;
             return screenshotImages.removeFirst();
         }
     }
@@ -52,9 +52,9 @@ public final class ScreenImages
 
     public static Packet getCompressedScreen()
     {
-        if (compressedScreens.size() == 0) return null;
         synchronized (compressedScreens)
         {
+            if (compressedScreens.size() == 0) return null;
             return compressedScreens.removeFirst();
         }
     }
