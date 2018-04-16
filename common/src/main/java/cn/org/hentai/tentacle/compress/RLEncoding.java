@@ -24,7 +24,7 @@ public class RLEncoding extends BaseCompressProcessor
     private static int N = 20;
 
     // 最多保存256个出现最多次的颜色
-    private static int[] mainColors = new int[512];
+    private static int[] mainColors = new int[510];
 
     // mainColors数组的有效数据下标，也指代了颜色个数
     private static int colorIndex = 0;

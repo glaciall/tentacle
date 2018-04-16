@@ -4,6 +4,7 @@ import cn.org.hentai.tentacle.compress.CompressUtil;
 import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.util.ByteUtils;
 
 /**
  * Created by matrixy on 2018/4/10.
@@ -23,6 +24,7 @@ public class CompressWorker implements Runnable
         this.compressMethod = method;
     }
 
+    int count = 0;
     private void compress() throws Exception
     {
         Screenshot screenshot = ScreenImages.getScreenshot();
@@ -31,9 +33,11 @@ public class CompressWorker implements Runnable
 
         // 分辨率是否发生了变化？
         if (lastScreen != null && (lastScreen.width != screenshot.width || lastScreen.height != screenshot.height)) lastScreen = null;
+
         // 1. 求差
+        int[] bitmap = new int[screenshot.bitmap.length];
         for (int i = 0; lastScreen != null && i < lastScreen.bitmap.length; i++)
-            screenshot.bitmap[i] = screenshot.bitmap[i] == lastScreen.bitmap[i] ? 0 : screenshot.bitmap[i];
+            bitmap[i] = screenshot.bitmap[i] == lastScreen.bitmap[i] ? 0 : screenshot.bitmap[i];
 
         // 2. 压缩
         byte[] compressedData = CompressUtil.process(this.compressMethod, screenshot.bitmap);
@@ -56,7 +60,7 @@ public class CompressWorker implements Runnable
             try
             {
                 compress();
-                Thread.sleep(100);
+                Thread.sleep(60);
             }
             catch(Exception e)
             {
