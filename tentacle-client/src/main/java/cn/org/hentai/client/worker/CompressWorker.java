@@ -5,6 +5,7 @@ import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
 import cn.org.hentai.tentacle.util.ByteUtils;
+import cn.org.hentai.tentacle.util.Log;
 
 /**
  * Created by matrixy on 2018/4/10.
@@ -29,8 +30,8 @@ public class CompressWorker implements Runnable
         Screenshot screenshot = null;
         while (true)
         {
-            screenshot = ScreenImages.getScreenshot();
             if (!ScreenImages.hasScreenshots()) break;
+            screenshot = ScreenImages.getScreenshot();
         }
         if (screenshot == null || screenshot.isExpired()) return;
 
@@ -40,19 +41,22 @@ public class CompressWorker implements Runnable
         // 1. 求差
         int[] bitmap = new int[screenshot.bitmap.length];
         int changedColors = 0;
-        for (int i = 0; lastScreen != null && i < lastScreen.bitmap.length; i++)
+        if (lastScreen != null)
         {
-            if (screenshot.bitmap[i] == lastScreen.bitmap[i])
+            for (int i = 0; i < lastScreen.bitmap.length; i++)
             {
-                bitmap[i] = 0;
-            }
-            else
-            {
-                changedColors += 1;
-                bitmap[i] = screenshot.bitmap[i];
+                if (screenshot.bitmap[i] == lastScreen.bitmap[i])
+                {
+                    bitmap[i] = 0;
+                }
+                else
+                {
+                    changedColors += 1;
+                    bitmap[i] = screenshot.bitmap[i];
+                }
             }
         }
-        if (changedColors == 0) return;
+        if (lastScreen != null && changedColors == 0) return;
 
         // 2. 压缩
         byte[] compressedData = CompressUtil.process(this.compressMethod, screenshot.bitmap);
