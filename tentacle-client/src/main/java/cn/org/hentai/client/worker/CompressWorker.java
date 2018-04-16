@@ -24,20 +24,35 @@ public class CompressWorker implements Runnable
         this.compressMethod = method;
     }
 
-    int count = 0;
     private void compress() throws Exception
     {
         Screenshot screenshot = ScreenImages.getScreenshot();
-        if (screenshot == null) return;
-        while (screenshot.isExpired()) screenshot = ScreenImages.getScreenshot();
+        while (true)
+        {
+            screenshot = ScreenImages.getScreenshot();
+            if (!ScreenImages.hasScreenshots()) break;
+        }
+        if (screenshot.isExpired()) return;
 
         // 分辨率是否发生了变化？
         if (lastScreen != null && (lastScreen.width != screenshot.width || lastScreen.height != screenshot.height)) lastScreen = null;
 
         // 1. 求差
         int[] bitmap = new int[screenshot.bitmap.length];
+        int changedColors = 0;
         for (int i = 0; lastScreen != null && i < lastScreen.bitmap.length; i++)
-            bitmap[i] = screenshot.bitmap[i] == lastScreen.bitmap[i] ? 0 : screenshot.bitmap[i];
+        {
+            if (screenshot.bitmap[i] == lastScreen.bitmap[i])
+            {
+                bitmap[i] = 0;
+            }
+            else
+            {
+                changedColors += 1;
+                bitmap[i] = screenshot.bitmap[i];
+            }
+        }
+        if (changedColors == 0) return;
 
         // 2. 压缩
         byte[] compressedData = CompressUtil.process(this.compressMethod, screenshot.bitmap);
@@ -60,7 +75,7 @@ public class CompressWorker implements Runnable
             try
             {
                 compress();
-                Thread.sleep(60);
+                Thread.sleep(5);
             }
             catch(Exception e)
             {
