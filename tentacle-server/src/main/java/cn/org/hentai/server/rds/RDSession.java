@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Date;
+import java.util.LinkedList;
 
 /**
  * Created by matrixy on 2018/4/15.
@@ -21,6 +22,7 @@ public class RDSession extends Thread
     InputStream inputStream = null;
     OutputStream outputStream = null;
     TentacleDesktopWSS websocketService = null;
+    LinkedList<Packet> hidCommands = new LinkedList<Packet>();
 
     boolean startCapture = false;
 
@@ -31,10 +33,20 @@ public class RDSession extends Thread
         this.connection = conn;
     }
 
+    // 与WebSocket会话绑定，并且通知客户端开始转发截图
     public void bind(TentacleDesktopWSS websocketService)
     {
         this.websocketService = websocketService;
         this.startCapture = true;
+    }
+
+    // 保存键鼠控制指令包，准备下发到客户端
+    public void addHIDCommand(Packet hidPacket)
+    {
+        synchronized (hidCommands)
+        {
+            hidCommands.add(hidPacket);
+        }
     }
 
     private void converse() throws Exception
@@ -68,10 +80,30 @@ public class RDSession extends Thread
             {
                 process(packet);
             }
+            // 下发HID控制指令
+            if (hidCommands.size() > 0)
+            {
+                sendHIDCommands();
+            }
             sleep(10);
         }
     }
 
+    // 下发键鼠控制指令
+    private void sendHIDCommands() throws Exception
+    {
+        synchronized (hidCommands)
+        {
+            while (hidCommands.size() > 0)
+            {
+                Packet hidPacket = hidCommands.removeFirst();
+                outputStream.write(hidPacket.getBytes());
+                outputStream.flush();
+            }
+        }
+    }
+
+    // 接收上发上来的屏幕截图，通过WebSocket转发到浏览器端
     private void process(Packet packet) throws Exception
     {
         packet.skip(6);
@@ -85,7 +117,7 @@ public class RDSession extends Thread
             int height = packet.nextShort();
             long captureTime = packet.nextLong();
             byte[] data = packet.nextBytes(dataLength - 12);
-            System.out.println("Screen: " + width + " x " + height + ", time: " + new Date(captureTime).toLocaleString());
+            // System.out.println("Screen: " + width + " x " + height + ", time: " + new Date(captureTime).toLocaleString());
             websocketService.sendScreenshot(data);
         }
 
