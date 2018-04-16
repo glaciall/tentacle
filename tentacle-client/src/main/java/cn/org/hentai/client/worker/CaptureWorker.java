@@ -20,7 +20,7 @@ public class CaptureWorker implements Runnable
             {
                 captureAndStore();
                 // TODO: FPS控制
-                Thread.sleep(60);
+                Thread.sleep(30);
             }
             catch(Exception e)
             {
