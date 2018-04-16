@@ -14,6 +14,6 @@ public final class Command
     public static final byte HID_COMMAND = 0x06;
     public static final byte SCREENSHOT = 0x07;
 
-    public static final byte TYPE_KEYBOARD = 0x01;
-    public static final byte TYPE_MOUSE = 0x02;
+    public static final byte TYPE_MOUSE = 0x01;
+    public static final byte TYPE_KEYBOARD = 0x02;
 }

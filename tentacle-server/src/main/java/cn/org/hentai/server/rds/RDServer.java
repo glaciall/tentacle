@@ -1,6 +1,7 @@
 package cn.org.hentai.server.rds;
 
 import cn.org.hentai.server.util.Configs;
+import cn.org.hentai.server.util.Log;
 
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -27,6 +28,7 @@ public class RDServer extends Thread
         {
             Socket conn = server.accept();
             (currentSession = new RDSession(conn)).start();
+            Log.info("Client: " + conn.getInetAddress() + " connected...");
         }
     }
 
