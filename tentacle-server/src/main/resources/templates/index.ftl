@@ -61,13 +61,9 @@
             console.log('websocket error', arguments);
         }
 
-        $('#btn-request-control').keyup(function(e)
+        $('#btn-request-control').click(function(e)
         {
-            if (e.keyCode == 10 || e.keyCode == 13)
-            {
-                ws.send('{ \"type\" : "command", \"command\" : \"request-control\" }');
-                $(this).val('');
-            }
+            ws.send('{ \"type\" : "command", \"command\" : \"request-control\" }');
         });
 
         var mousePressing = false;
