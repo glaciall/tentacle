@@ -27,6 +27,8 @@ public class Client extends Thread
     InputStream inputStream;
     OutputStream outputStream;
 
+    long lastActiveTime = 0L;
+
     // 与服务器间的会话处理
     private void converse() throws Exception
     {
@@ -36,25 +38,29 @@ public class Client extends Thread
         inputStream = conn.getInputStream();
         outputStream = conn.getOutputStream();
 
+        lastActiveTime = System.currentTimeMillis();
+
         // TODO 1. 身份验证
         while (true)
         {
+            if (System.currentTimeMillis() - lastActiveTime > 30000) break;
             // 有无下发下来的数据包
             Packet packet = Packet.read(inputStream);
-            if (packet == null)
+            if (packet != null)
             {
-                sleep(30);
-                continue;
+                lastActiveTime = System.currentTimeMillis();
+                processCommand(packet);
             }
 
             // 处理服务器下发的指令
-            processCommand(packet);
-
             // 有无需要上报的截图
             if (ScreenImages.hasCompressedScreens())
             {
+                lastActiveTime = System.currentTimeMillis();
                 sendScreenImages();
+                continue;
             }
+            sleep(5);
         }
     }
 
