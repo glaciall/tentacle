@@ -26,13 +26,13 @@ public class CompressWorker implements Runnable
 
     private void compress() throws Exception
     {
-        Screenshot screenshot = ScreenImages.getScreenshot();
+        Screenshot screenshot = null;
         while (true)
         {
             screenshot = ScreenImages.getScreenshot();
             if (!ScreenImages.hasScreenshots()) break;
         }
-        if (screenshot.isExpired()) return;
+        if (screenshot == null || screenshot.isExpired()) return;
 
         // 分辨率是否发生了变化？
         if (lastScreen != null && (lastScreen.width != screenshot.width || lastScreen.height != screenshot.height)) lastScreen = null;
