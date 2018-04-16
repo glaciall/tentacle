@@ -25,13 +25,13 @@
     </style>
 </head>
 <body>
-<canvas width="1920" height="1080" id="screen"></canvas>
+<canvas width="1280" height="720" id="screen"></canvas>
 <input type="text" id="message-box" placeholder="输入内容后回车" />
 <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript" src="${web_resource}/decompress.js"></script>
 <script type="text/javascript">
     var canvas = document.getElementById('screen').getContext('2d');
-    var imageData = canvas.createImageData(1920, 1080);
+    var imageData = canvas.createImageData(1280, 720);
     $(function()
     {
         var ws = new WebSocket('ws://localhost:8888/tentacle/desktop/wss');
