@@ -7,6 +7,7 @@ import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
 import cn.org.hentai.tentacle.util.ByteUtils;
 import cn.org.hentai.tentacle.util.Configs;
+import cn.org.hentai.tentacle.util.Log;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,6 +40,7 @@ public class Client extends Thread
         outputStream = conn.getOutputStream();
 
         lastActiveTime = System.currentTimeMillis();
+        Log.info("Connected to server...");
 
         // TODO 1. 身份验证
         while (true)
@@ -62,6 +64,7 @@ public class Client extends Thread
             }
             sleep(5);
         }
+        Log.info("Connection closed...");
     }
 
     // 处理服务器端下发的指令
