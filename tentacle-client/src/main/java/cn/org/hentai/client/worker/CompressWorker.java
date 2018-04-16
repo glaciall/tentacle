@@ -12,8 +12,8 @@ import cn.org.hentai.tentacle.util.Log;
  */
 public class CompressWorker implements Runnable
 {
-    String compressMethod = "rle";
-    Screenshot lastScreen = null;
+    String compressMethod = "rle";          // 压缩方式
+    Screenshot lastScreen = null;           // 上一屏的截屏，用于比较图像差
 
     public CompressWorker()
     {
