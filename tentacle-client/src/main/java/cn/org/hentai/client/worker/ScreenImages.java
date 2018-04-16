@@ -31,6 +31,11 @@ public final class ScreenImages
         }
     }
 
+    public static boolean hasScreenshots()
+    {
+        return screenshotImages.size() > 0;
+    }
+
     // 压缩后的图像数据相关
     public static boolean hasCompressedScreens()
     {
