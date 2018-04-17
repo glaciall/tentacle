@@ -119,7 +119,7 @@
         {
             packet.commands.push(hidCommands.shift());
         }
-        ws.send(JSON.stringify(commands));
+        ws.send(JSON.stringify(packet));
     }, 30);
 
 </script>

@@ -3,11 +3,14 @@
  * @param method
  * @param compressedData
  */
+var xxoo = false;
 function decompress(method, compressedData, imageData)
 {
     // 行程编码解码
     var f = 0;
     var x = 0;
+    if (xxoo) console.log(compressedData);
+    xxoo = false;
     for (var i = (compressedData[0] & 0xff) * 3 + 1, k = 0; i < compressedData.length; )
     {
         var rl = compressedData[i] & 0xff;
