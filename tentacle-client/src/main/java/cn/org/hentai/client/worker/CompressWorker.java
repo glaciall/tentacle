@@ -45,14 +45,14 @@ public class CompressWorker implements Runnable
         {
             for (int i = 0; i < lastScreen.bitmap.length; i++)
             {
-                if ((screenshot.bitmap[i] & 0xe0e0e0) == (lastScreen.bitmap[i] & 0xe0e0e0))
+                if (screenshot.bitmap[i] == lastScreen.bitmap[i])
                 {
                     bitmap[i] = 0;
                 }
                 else
                 {
                     changedColors += 1;
-                    bitmap[i] = screenshot.bitmap[i] & 0xe0e0e0;
+                    bitmap[i] = screenshot.bitmap[i];
                 }
             }
         }
@@ -60,7 +60,9 @@ public class CompressWorker implements Runnable
         Log.debug("Changed colors: " + changedColors);
 
         // 2. 压缩
-        byte[] compressedData = CompressUtil.process(this.compressMethod, screenshot.bitmap);
+        byte[] compressedData = CompressUtil.process(this.compressMethod, bitmap);
+
+        Log.debug("Compress Ratio: " + (screenshot.bitmap.length * 4.0f / compressedData.length));
 
         // 3. 入队列
         Packet packet = Packet.create(Command.SCREENSHOT, compressedData.length + 12);
