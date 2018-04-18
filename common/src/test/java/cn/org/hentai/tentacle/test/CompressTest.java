@@ -48,7 +48,7 @@ public class CompressTest
         Screenshot screenshot = new Screenshot(ImageIO.read(CompressTest.class.getResourceAsStream("/pretty.jpg")));
         RLEncoding.init();
         long time = System.currentTimeMillis();
-        RLEncoding.findMainColors(screenshot.bitmap);
+        RLEncoding.findMainColors(screenshot.bitmap, 0, screenshot.bitmap.length);
         time = System.currentTimeMillis() - time;
         System.out.println("Spend: " + time);
     }

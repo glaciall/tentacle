@@ -37,7 +37,7 @@ public class RLEncoding extends BaseCompressProcessor
         compressedData.reset();
 
         // 查找出现次数最多的颜色，建立颜色表
-        findMainColors(bitmap);
+        findMainColors(bitmap, from, to);
 
         // 写入颜色表
         compressedData.write((byte)((colorIndex - 1) & 0xff));
@@ -52,7 +52,7 @@ public class RLEncoding extends BaseCompressProcessor
         // 行程编码
         int rl = 1;
         int color, lastColor = bitmap[0] & 0xffffff;
-        for (int i = 1, l = bitmap.length; i < l; i++)
+        for (int i = 1, l = to; i <= to; i++)
         {
             color = bitmap[i] & 0xffffff;
             if (color == lastColor && rl < 32767)
@@ -111,14 +111,14 @@ public class RLEncoding extends BaseCompressProcessor
     }
 
     // 查找次数出现最多的颜色
-    public static void findMainColors(int[] bitmap)
+    public static void findMainColors(int[] bitmap, int from, int to)
     {
         // 重置
         colorIndex = 0;
         Arrays.fill(mainColors, 0);
 
         // 颜色计数
-        for (int i = 0; i < bitmap.length; i++)
+        for (int i = from; i <= to; i++)
         {
             int color = bitmap[i] & 0xffffff;
             if (bitmap[i] == 0) continue;
