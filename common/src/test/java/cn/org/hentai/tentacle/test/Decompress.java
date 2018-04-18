@@ -16,7 +16,7 @@ public class Decompress
     public static void main(String[] args) throws Exception
     {
         Screenshot screenshot = new Screenshot(ImageIO.read(Decompress.class.getResourceAsStream("/10x10.png")));
-        byte[] compressedData = new RLEncoding().compress(screenshot.bitmap);
+        byte[] compressedData = new RLEncoding().compress(screenshot.bitmap, 0, screenshot.bitmap.length);
 
         System.out.println(ByteUtils.toString(compressedData));
 
@@ -25,22 +25,29 @@ public class Decompress
         {
             int rl = compressedData[i] & 0xff;
             int red, green, blue;
-            if ((rl & 0x80) > 0)
+            if ((rl & 0x8000) > 0)
             {
-                int index = (compressedData[i + 1] & 0xff) * 3 + 1;
+                int index = (compressedData[i + 1] & 0xff);
+                if (index == 0)
+                {
+                    k += (rl & 0x7fff) * 4;
+                    i += 3;
+                    continue;
+                }
+                index = index * 3 + 1;
                 red = compressedData[index] & 0xff;
                 green = compressedData[index + 1] & 0xff;
                 blue = compressedData[index + 2] & 0xff;
-                i += 2;
+                i += 3;
             }
             else
             {
-                red = compressedData[i + 1] & 0xff;
-                green = compressedData[i + 2] & 0xff;
-                blue = compressedData[i + 3] & 0xff;
-                i += 4;
+                red = compressedData[i + 2] & 0xff;
+                green = compressedData[i + 3] & 0xff;
+                blue = compressedData[i + 4] & 0xff;
+                i += 5;
             }
-            for (int s = 0, l = rl & 0x7f; s < l; s++)
+            for (int s = 0, l = rl & 0x7fff; s < l; s++)
                 bitmap[k++] = (red << 16) | (green << 8) | blue;
         }
         BufferedImage img = new BufferedImage(screenshot.width, screenshot.height, BufferedImage.TYPE_INT_RGB);

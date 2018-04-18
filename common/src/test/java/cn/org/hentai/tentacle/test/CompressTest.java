@@ -24,10 +24,10 @@ public class CompressTest
         stime = System.currentTimeMillis() - stime;
         System.out.println("decode: " + stime);
         RLEncoding.init();
-        new RLEncoding().compress(screenshot.bitmap);
-        new RLEncoding().compress(screenshot.bitmap);
+        new RLEncoding().compress(screenshot.bitmap, 0, screenshot.bitmap.length);
+        new RLEncoding().compress(screenshot.bitmap, 0, screenshot.bitmap.length);
         long time = System.currentTimeMillis();
-        byte[] compressedData = new RLEncoding().compress(screenshot.bitmap);
+        byte[] compressedData = new RLEncoding().compress(screenshot.bitmap, 0, screenshot.bitmap.length);
         time = System.currentTimeMillis() - time;
         System.out.println("Before: " + (screenshot.bitmap.length * 4));
         System.out.println("After: " + compressedData.length);
