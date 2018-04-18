@@ -5,5 +5,5 @@ package cn.org.hentai.tentacle.compress;
  */
 public abstract class BaseCompressProcessor
 {
-    public abstract byte[] compress(int[] bitmap);
+    public abstract byte[] compress(int[] bitmap, int from, int to);
 }
