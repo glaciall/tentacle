@@ -11,8 +11,8 @@ public final class CompressUtil
      * @param argbArray ARGB序列的颜色数组
      * @return
      */
-    public static byte[] process(String method, int[] argbArray)
+    public static byte[] process(String method, int[] argbArray, int from, int to)
     {
-        return new RLEncoding().compress(argbArray);
+        return new RLEncoding().compress(argbArray, from, to);
     }
 }
