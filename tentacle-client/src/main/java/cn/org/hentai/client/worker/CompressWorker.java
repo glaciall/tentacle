@@ -60,7 +60,7 @@ public class CompressWorker implements Runnable
         Log.debug("Changed colors: " + changedColors);
 
         // 2. 压缩
-        byte[] compressedData = CompressUtil.process(this.compressMethod, bitmap);
+        byte[] compressedData = CompressUtil.process(this.compressMethod, bitmap, 0, bitmap.length);
 
         Log.debug("Compress Ratio: " + (screenshot.bitmap.length * 4.0f / compressedData.length));
 
