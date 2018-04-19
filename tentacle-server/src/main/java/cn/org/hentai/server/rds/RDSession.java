@@ -1,6 +1,7 @@
 package cn.org.hentai.server.rds;
 
 import cn.org.hentai.server.util.ByteUtils;
+import cn.org.hentai.server.util.Log;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
 import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.protocol.Command;
@@ -25,6 +26,8 @@ public class RDSession extends Thread
     LinkedList<Packet> hidCommands = new LinkedList<Packet>();
 
     boolean startCapture = false;
+    boolean remoteControlling = false;
+    boolean closeControl = false;
 
     long lastHeartbeatTime = 0;
 
@@ -38,6 +41,12 @@ public class RDSession extends Thread
     {
         this.websocketService = websocketService;
         this.startCapture = true;
+    }
+
+    // 结束会话
+    public void closeControl()
+    {
+        this.closeControl = true;
     }
 
     // 保存键鼠控制指令包，准备下发到客户端
@@ -57,6 +66,12 @@ public class RDSession extends Thread
 
         while (!Thread.interrupted())
         {
+            if (remoteControlling && closeControl)
+            {
+                remoteControlling = false;
+                closeControl = false;
+                sendCloseControlCommand();
+            }
             sendHeartbeat();
 
             if (startCapture)
@@ -72,6 +87,7 @@ public class RDSession extends Thread
                     sleep(10);
                 }
                 startCapture = false;
+                remoteControlling = true;
                 System.out.println("client response: " + ByteUtils.toString(resp.getBytes()));
             }
 
@@ -87,6 +103,16 @@ public class RDSession extends Thread
             }
             sleep(10);
         }
+    }
+
+    // 下发关闭控制指令
+    private void sendCloseControlCommand() throws Exception
+    {
+        Packet p = Packet.create(Command.CLOSE_REQUEST, 5);
+        p.addBytes("CLOSE".getBytes());
+        outputStream.write(p.getBytes());
+        outputStream.flush();
+        while (Packet.read(inputStream) == null) sleep(5);
     }
 
     // 下发键鼠控制指令
@@ -118,7 +144,9 @@ public class RDSession extends Thread
             long captureTime = packet.nextLong();
             byte[] data = packet.nextBytes(dataLength - 12);
             // System.out.println("Screen: " + width + " x " + height + ", time: " + new Date(captureTime).toLocaleString());
-            websocketService.sendScreenshot(data);
+            packet.rewind();
+            packet.skip(11);
+            websocketService.sendScreenshot(packet.nextBytes(dataLength));
         }
 
         if (resp != null)

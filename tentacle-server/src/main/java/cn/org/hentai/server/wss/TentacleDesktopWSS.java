@@ -120,6 +120,8 @@ public class TentacleDesktopWSS
     public void onClose()
     {
         System.out.println("websocket closed...");
+        if (null == rdSession) return;
+        rdSession.closeControl();
     }
 
     @OnError

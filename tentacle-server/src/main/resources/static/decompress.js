@@ -11,31 +11,42 @@ function decompress(method, compressedData, imageData)
     var x = 0;
     if (xxoo) console.log(compressedData);
     xxoo = false;
-    for (var i = (compressedData[0] & 0xff) * 3 + 1, k = 0; i < compressedData.length; )
+    var headerLength = 12;
+    var width = ((compressedData[0] << 8) | compressedData[1]) & 0xffff;
+    var height = ((compressedData[2] << 8) | compressedData[3]) & 0xffff;
+    var x = '';
+    for (var i = 4; i < 12; i++)
     {
-        var rl = compressedData[i] & 0xff;
-        var times = rl & 0x7f;
+        x = x + ('00' + compressedData[i].toString(16)).replace(/^0+(\w{2})$/gi, '$1');
+    }
+    var captureTime = parseInt(x, 16);
+    console.log('width: ', width, 'height: ', height, 'captureTime: ', captureTime);
+    for (var i = (compressedData[headerLength] & 0xff) * 3 + 1 + headerLength, k = 0; i < compressedData.length; )
+    {
+        var rl = (((compressedData[i] & 0xff) << 8) | (compressedData[i + 1] & 0xff)) & 0xffff
+        var times = rl & 0x7fff;
         var red, green, blue;
-        if ((rl & 0x80) > 0)
+        if ((rl & 0x8000) > 0)
         {
-            if ((compressedData[i + 1] & 0xff) == 0)
+            var index = compressedData[i + 2] & 0xff;
+            if (index == 0)
             {
                 k += times * 4;
-                i += 2;
+                i += 3;
                 continue;
             }
-            var index = (compressedData[i + 1] & 0xff) * 3 + 1;
+            var index = (index - 1) * 3 + 1 + headerLength;
             red = compressedData[index] & 0xff;
             green = compressedData[index + 1] & 0xff;
             blue = compressedData[index + 2] & 0xff;
-            i += 2;
+            i += 3;
         }
         else
         {
-            red = compressedData[i + 1] & 0xff;
-            green = compressedData[i + 2] & 0xff;
-            blue = compressedData[i + 3] & 0xff;
-            i += 4;
+            red = compressedData[i + 2] & 0xff;
+            green = compressedData[i + 3] & 0xff;
+            blue = compressedData[i + 4] & 0xff;
+            i += 5;
         }
 
         for (var s = 0; s < times; s++)
