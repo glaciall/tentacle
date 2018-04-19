@@ -52,7 +52,7 @@ public class RLEncoding extends BaseCompressProcessor
         // 行程编码
         int rl = 1;
         int color, lastColor = bitmap[0] & 0xffffff;
-        for (int i = 1, l = to; i <= to; i++)
+        for (int i = 1, l = to; i < to; i++)
         {
             color = bitmap[i] & 0xffffff;
             if (color == lastColor && rl < 32767)
@@ -118,7 +118,7 @@ public class RLEncoding extends BaseCompressProcessor
         Arrays.fill(mainColors, 0);
 
         // 颜色计数
-        for (int i = from; i <= to; i++)
+        for (int i = from; i < to; i++)
         {
             int color = bitmap[i] & 0xffffff;
             if (bitmap[i] == 0) continue;
