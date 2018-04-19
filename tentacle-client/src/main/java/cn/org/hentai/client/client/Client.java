@@ -1,5 +1,6 @@
 package cn.org.hentai.client.client;
 
+import cn.org.hentai.client.worker.BaseWorker;
 import cn.org.hentai.client.worker.CaptureWorker;
 import cn.org.hentai.client.worker.CompressWorker;
 import cn.org.hentai.client.worker.ScreenImages;
@@ -21,8 +22,8 @@ public class Client extends Thread
     // 是否正在发送截图
     boolean working = false;
 
-    Thread captureWorker;
-    Thread compressWorker;
+    BaseWorker captureWorker;
+    BaseWorker compressWorker;
 
     Socket conn;
     InputStream inputStream;
@@ -95,8 +96,8 @@ public class Client extends Thread
                     .addByte((byte)0x00)                            // 带宽
                     .addByte((byte)0x03)                            // 颜色位数
                     .addLong(System.currentTimeMillis());           // 当前系统时间戳
-            (captureWorker = new Thread(new CaptureWorker())).start();
-            (compressWorker = new Thread(new CompressWorker())).start();
+            (captureWorker = new CaptureWorker()).start();
+            (compressWorker = new CompressWorker()).start();
         }
         // TODO: 键鼠事件处理
         else if (cmd == Command.HID_COMMAND)
@@ -106,9 +107,10 @@ public class Client extends Thread
         // 停止远程控制
         else if (cmd == Command.CLOSE_REQUEST)
         {
+            resp = Packet.create(Command.CLOSE_RESPONSE, 4).addBytes("OJBK".getBytes());
             working = false;
-            captureWorker.interrupt();
-            compressWorker.interrupt();
+            captureWorker.terminate();
+            compressWorker.terminate();
         }
 
         // 发送响应至服务器端

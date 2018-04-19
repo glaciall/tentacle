@@ -1,11 +1,12 @@
 package cn.org.hentai.client.worker;
 
 import cn.org.hentai.tentacle.system.LocalComputer;
+import cn.org.hentai.tentacle.util.Log;
 
 /**
  * Created by matrixy on 2018/4/9.
  */
-public class CaptureWorker implements Runnable
+public class CaptureWorker extends BaseWorker
 {
     private void captureAndStore() throws Exception
     {
@@ -14,17 +15,17 @@ public class CaptureWorker implements Runnable
 
     public void run()
     {
-        while (!Thread.interrupted())
+        while (!this.isTerminated())
         {
             try
             {
                 captureAndStore();
                 // TODO: FPS控制
-                Thread.sleep(30);
+                sleep(30);
             }
             catch(Exception e)
             {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
     }

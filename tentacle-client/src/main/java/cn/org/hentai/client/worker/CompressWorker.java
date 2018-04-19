@@ -7,10 +7,14 @@ import cn.org.hentai.tentacle.protocol.Packet;
 import cn.org.hentai.tentacle.util.ByteUtils;
 import cn.org.hentai.tentacle.util.Log;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
+
 /**
  * Created by matrixy on 2018/4/10.
  */
-public class CompressWorker implements Runnable
+public class CompressWorker extends BaseWorker
 {
     String compressMethod = "rle";          // 压缩方式
     Screenshot lastScreen = null;           // 上一屏的截屏，用于比较图像差
@@ -40,17 +44,19 @@ public class CompressWorker implements Runnable
 
         // 1. 求差
         int[] bitmap = new int[screenshot.bitmap.length];
-        int changedColors = 0;
+        int changedColors = 0, start = -1, end = bitmap.length;
         if (lastScreen != null)
         {
-            for (int i = 0; i < lastScreen.bitmap.length; i++)
+            for (int i = 0; i < bitmap.length; i++)
             {
-                if (screenshot.bitmap[i] == lastScreen.bitmap[i])
+                if (lastScreen.bitmap[i] == screenshot.bitmap[i])
                 {
                     bitmap[i] = 0;
                 }
                 else
                 {
+                    if (start == -1) start = i;
+                    else end = i;
                     changedColors += 1;
                     bitmap[i] = screenshot.bitmap[i];
                 }
@@ -60,7 +66,8 @@ public class CompressWorker implements Runnable
         Log.debug("Changed colors: " + changedColors);
 
         // 2. 压缩
-        byte[] compressedData = CompressUtil.process(this.compressMethod, bitmap, 0, bitmap.length);
+        start = Math.max(start, 0);
+        byte[] compressedData = CompressUtil.process(this.compressMethod, bitmap, start, end);
 
         Log.debug("Compress Ratio: " + (screenshot.bitmap.length * 4.0f / compressedData.length));
 
@@ -77,16 +84,16 @@ public class CompressWorker implements Runnable
 
     public void run()
     {
-        while (!Thread.interrupted())
+        while (!this.isTerminated())
         {
             try
             {
                 compress();
-                Thread.sleep(5);
+                sleep(5);
             }
             catch(Exception e)
             {
-                e.printStackTrace();
+                Log.error(e);
             }
         }
     }
