@@ -54,7 +54,7 @@ public class RLEncoding extends BaseCompressProcessor
         int color, lastColor = bitmap[0] & 0xffffff;
         for (int i = 1, l = to; i < to; i++)
         {
-            color = bitmap[i] & 0xffffff;
+            color = bitmap[i];
             if (color == lastColor && rl < 32767)
             {
                 rl += 1;
@@ -66,11 +66,11 @@ public class RLEncoding extends BaseCompressProcessor
                 compressedData.write(rl);
                 compressedData.write(0);
             }
-            else if (colortable[lastColor] > 0)
+            else if (colortable[lastColor & 0xffffff] > 0)
             {
                 compressedData.write((rl | 0x8000) >> 8);
                 compressedData.write(rl);
-                compressedData.write(colortable[lastColor]);
+                compressedData.write(colortable[lastColor & 0xffffff]);
             }
             else
             {
@@ -89,11 +89,11 @@ public class RLEncoding extends BaseCompressProcessor
             compressedData.write(rl);
             compressedData.write(0);
         }
-        else if (colortable[lastColor] > 0)
+        else if (colortable[lastColor & 0xffffff] > 0)
         {
             compressedData.write((rl | 0x8000) >> 8);
             compressedData.write(rl);
-            compressedData.write(colortable[lastColor]);
+            compressedData.write(colortable[lastColor & 0xffffff]);
         }
         else
         {
