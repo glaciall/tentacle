@@ -10,10 +10,45 @@
             font-size: 14px;
             width: 100px;
         }
-        canvas
+        .x-screen
         {
-            border: solid 2px #f1f1f1;
+            box-sizing: content-box !important;
+            width: 1280px;
+            height: 720px;
+            position: relative;
+            border: solid 2px #cccccc;
+        }
+        .x-screen canvas
+        {
             display: block;
+        }
+        .x-screen .x-info
+        {
+            width: 300px;
+            height: 30px;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            background-color: #f0ad4e;
+            position: absolute;
+            top: 0px;
+            left: 50%;
+            margin-left: -150px;
+            z-index: 100;
+            text-align: center;
+        }
+        .x-screen .x-info .x-frame
+        {
+            float: left;
+            width: 30%;
+            height: 30px;
+            line-height: 30px;
+        }
+        .x-screen .x-info .x-bytes
+        {
+            float: left;
+            width: 70%;
+            height: 30px;
+            line-height: 30px;
         }
         body
         {
@@ -23,7 +58,14 @@
     </style>
 </head>
 <body>
-<canvas width="1280" height="720" id="screen"></canvas>
+<div class="x-screen">
+    <canvas width="1280" height="720" id="screen"></canvas>
+    <div class="x-info">
+        <div class="x-frame">sequence</div>
+        <div class="x-bytes">package size</div>
+    </div>
+</div>
+
 <input type="button" id="btn-request-control" value="请求控制" />
 <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript" src="${web_resource}/decompress.js"></script>
