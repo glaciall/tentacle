@@ -18,6 +18,7 @@ public class CompressWorker extends BaseWorker
 {
     String compressMethod = "rle";          // 压缩方式
     Screenshot lastScreen = null;           // 上一屏的截屏，用于比较图像差
+    int sequence = 0;
 
     public CompressWorker()
     {
@@ -62,20 +63,26 @@ public class CompressWorker extends BaseWorker
                 }
             }
         }
+        else bitmap = screenshot.bitmap;
+
         if (lastScreen != null && changedColors == 0) return;
         Log.debug("Changed colors: " + changedColors);
 
         // 2. 压缩
         start = Math.max(start, 0);
+        start = 0;
+        end = bitmap.length;
         byte[] compressedData = CompressUtil.process(this.compressMethod, bitmap, start, end);
 
         Log.debug("Compress Ratio: " + (screenshot.bitmap.length * 4.0f / compressedData.length));
+        Log.debug("After: " + (compressedData.length / 1024));
 
         // 3. 入队列
-        Packet packet = Packet.create(Command.SCREENSHOT, compressedData.length + 12);
+        Packet packet = Packet.create(Command.SCREENSHOT, compressedData.length + 16);
         packet.addShort((short)screenshot.width)
                 .addShort((short)screenshot.height)
-                .addLong(screenshot.captureTime);
+                .addLong(screenshot.captureTime)
+                .addInt(sequence++);
         packet.addBytes(compressedData);
         ScreenImages.addCompressedScreen(packet);
 
