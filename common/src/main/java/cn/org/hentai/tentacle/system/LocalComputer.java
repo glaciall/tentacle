@@ -38,7 +38,7 @@ public final class LocalComputer
         }
         catch(AWTException ex)
         {
-            throw new RuntimeException("权限不足");
+            throw new RuntimeException(ex);
         }
     }
 }
