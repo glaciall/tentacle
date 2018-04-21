@@ -3,6 +3,7 @@ package cn.org.hentai.server.wss;
 import cn.org.hentai.server.rds.RDServer;
 import cn.org.hentai.server.rds.RDSession;
 import cn.org.hentai.server.util.ByteUtils;
+import cn.org.hentai.server.util.Configs;
 import cn.org.hentai.server.util.Log;
 import cn.org.hentai.tentacle.compress.RLEncoding;
 import cn.org.hentai.tentacle.graphic.Screenshot;
@@ -51,6 +52,11 @@ public class TentacleDesktopWSS
             String cmd = json.get("command").getAsString();
             if ("request-control".equals(cmd))
             {
+                if (!Configs.get("rds.access.password").equals(json.get("password").getAsString()))
+                {
+                    try { this.session.close(); } catch(Exception e) { }
+                    return;
+                }
                 requestControl();
             }
         }

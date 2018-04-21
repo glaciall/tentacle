@@ -73,6 +73,8 @@
     var ws = null;
     var canvas = document.getElementById('screen').getContext('2d');
     var imageData = canvas.createImageData(1280, 720);
+    var authenticated = false;
+    var remoteControlling = false;
     $(function()
     {
         ws = new WebSocket('ws://localhost:8888/tentacle/desktop/wss');
@@ -86,6 +88,7 @@
         ws.onmessage = function(resp)
         {
             if (!(resp.data instanceof ArrayBuffer)) return console.error('server response: ' + resp.data);
+            remoteControlling = true;
             var time = new Date().getTime();
             decompress('rle', new Uint8Array(resp.data), imageData);
             canvas.putImageData(imageData, 0, 0);
@@ -105,12 +108,16 @@
 
         $('#btn-request-control').click(function(e)
         {
-            ws.send('{ \"type\" : "command", \"command\" : \"request-control\" }');
+            var password = prompt('请输入连接密码：', '');
+            if (typeof(password) == 'undefined') return;
+            if ($.trim(password).length == 0) return alert('请输入密码进行连接');
+            ws.send('{ \"type\" : "command", \"command\" : \"request-control\", \"password\" : \"' + password + '\" }');
         });
 
         var mousePressing = false;
         $('#screen').mousedown(function(e)
         {
+            if (!remoteControlling) return;
             mousePressing = true;
             // 1 左键，2 中键，3 右键
             var key = e.which;
@@ -125,6 +132,7 @@
 
         $('#screen').mouseup(function(e)
         {
+            if (!remoteControlling) return;
             mousePressing = false;
             var key = e.which;
             hidCommands.push({
@@ -139,6 +147,7 @@
         var lastMousePositionCaptured = 0;
         $('#screen').mousemove(function(e)
         {
+            if (!remoteControlling) return;
             var now = new Date().getTime();
             if (mousePressing || (now - lastMousePositionCaptured < 100)) return;
             hidCommands.push({
