@@ -23,7 +23,8 @@ function decompress(method, compressedData, imageData)
     var captureTime = parseInt(x, 16);
     */
     var sequence = (compressedData[12] << 24 | compressedData[13] << 16 | compressedData[14] << 8 | compressedData[15]) & 0xffffffff;
-    console.log("screen sequence: " + sequence);
+    $('.x-screen .x-info .x-frame').html(sequence);
+    $('.x-screen .x-info .x-bytes').html((compressedData.length / 1024).toFixed(2) + 'k');
     for (var i = (compressedData[headerLength] & 0xff) * 3 + 1 + headerLength, k = 0; i < compressedData.length; )
     {
         var rl = (((compressedData[i] & 0xff) << 8) | (compressedData[i + 1] & 0xff)) & 0xffff
