@@ -6,6 +6,7 @@ import cn.org.hentai.server.util.ByteUtils;
 import cn.org.hentai.server.util.Log;
 import cn.org.hentai.tentacle.compress.RLEncoding;
 import cn.org.hentai.tentacle.graphic.Screenshot;
+import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
 import com.google.gson.JsonArray;
@@ -60,26 +61,33 @@ public class TentacleDesktopWSS
             for (int i = 0; i < actions.size(); i++)
             {
                 JsonObject cmd = actions.get(i).getAsJsonObject();
-                Packet p = Packet.create(Command.HID_COMMAND, 7);
+                Packet p = Packet.create(Command.HID_COMMAND, 11);
                 byte hidType = 0x00, eventType = 0x00, key = 0x00;
+                short x = 0, y = 0;
                 int timestamp = cmd.get("timestamp").getAsInt();
                 if ("mouse-down".equals(cmd.get("type").getAsString()))
                 {
-                    hidType = Command.TYPE_MOUSE;
+                    hidType = HIDCommand.TYPE_MOUSE;
                     eventType = 0x01;
+                    x = cmd.get("x").getAsShort();
+                    y = cmd.get("y").getAsShort();
                 }
                 else if ("mouse-up".equals(cmd.get("type").getAsString()))
                 {
-                    hidType = Command.TYPE_MOUSE;
+                    hidType = HIDCommand.TYPE_MOUSE;
                     eventType = 0x02;
+                    x = cmd.get("x").getAsShort();
+                    y = cmd.get("y").getAsShort();
                 }
                 else if ("mouse-move".equals(cmd.get("type").getAsString()))
                 {
-                    hidType = Command.TYPE_MOUSE;
+                    hidType = HIDCommand.TYPE_MOUSE;
                     eventType = 0x03;
+                    x = cmd.get("x").getAsShort();
+                    y = cmd.get("y").getAsShort();
                 }
                 if (cmd.has("key")) key = cmd.get("key").getAsByte();
-                p.addByte(hidType).addByte(eventType).addByte(key).addInt(timestamp);
+                p.addByte(hidType).addByte(eventType).addByte(key).addShort(x).addShort(y).addInt(timestamp);
                 rdSession.addHIDCommand(p);
             }
         }

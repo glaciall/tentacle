@@ -136,15 +136,18 @@
             });
         });
 
+        var lastMousePositionCaptured = 0;
         $('#screen').mousemove(function(e)
         {
-            if (!mousePressing) return;
+            var now = new Date().getTime();
+            if (mousePressing || (now - lastMousePositionCaptured < 100)) return;
             hidCommands.push({
                 type : 'mouse-move',
                 x : e.offsetX,
                 y : e.offsetY,
                 timestamp : parseInt(e.timeStamp)
             });
+            lastMousePositionCaptured = now;
         });
     });
 
