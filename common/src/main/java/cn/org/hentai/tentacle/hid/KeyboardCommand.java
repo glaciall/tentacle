@@ -5,5 +5,10 @@ package cn.org.hentai.tentacle.hid;
  */
 public class KeyboardCommand extends HIDCommand
 {
-
+    public int keycode;
+    public KeyboardCommand(int keycode, int timestamp)
+    {
+        super(TYPE_KEYBOARD, timestamp);
+        this.keycode = keycode;
+    }
 }
