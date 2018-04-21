@@ -11,7 +11,8 @@ function decompress(method, compressedData, imageData)
     var x = 0;
     if (xxoo) console.log(compressedData);
     xxoo = false;
-    var headerLength = 12;
+    var headerLength = 16;
+    /*
     var width = ((compressedData[0] << 8) | compressedData[1]) & 0xffff;
     var height = ((compressedData[2] << 8) | compressedData[3]) & 0xffff;
     var x = '';
@@ -20,7 +21,9 @@ function decompress(method, compressedData, imageData)
         x = x + ('00' + compressedData[i].toString(16)).replace(/^0+(\w{2})$/gi, '$1');
     }
     var captureTime = parseInt(x, 16);
-    console.log('width: ', width, 'height: ', height, 'captureTime: ', captureTime);
+    */
+    var sequence = (compressedData[12] << 24 | compressedData[13] << 16 | compressedData[14] << 8 | compressedData[15]) & 0xffffffff;
+    console.log("screen sequence: " + sequence);
     for (var i = (compressedData[headerLength] & 0xff) * 3 + 1 + headerLength, k = 0; i < compressedData.length; )
     {
         var rl = (((compressedData[i] & 0xff) << 8) | (compressedData[i + 1] & 0xff)) & 0xffff

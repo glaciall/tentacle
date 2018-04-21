@@ -3,11 +3,15 @@ package cn.org.hentai.server.rds;
 import cn.org.hentai.server.util.ByteUtils;
 import cn.org.hentai.server.util.Log;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
+import cn.org.hentai.tentacle.compress.RLEncoding;
 import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
 import jdk.internal.util.xml.impl.Input;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -29,7 +33,7 @@ public class RDSession extends Thread
     boolean remoteControlling = false;
     boolean closeControl = false;
 
-    long lastHeartbeatTime = 0;
+    long lastActiveTime = 0;
 
     public RDSession(Socket conn)
     {
@@ -64,15 +68,19 @@ public class RDSession extends Thread
         inputStream = connection.getInputStream();
         outputStream = connection.getOutputStream();
 
+        lastActiveTime = System.currentTimeMillis();
+
         while (!Thread.interrupted())
         {
+            if (System.currentTimeMillis() - lastActiveTime > 30000) break;
+
             if (remoteControlling && closeControl)
             {
                 remoteControlling = false;
                 closeControl = false;
                 sendCloseControlCommand();
+                lastActiveTime = System.currentTimeMillis();
             }
-            sendHeartbeat();
 
             if (startCapture)
             {
@@ -95,13 +103,15 @@ public class RDSession extends Thread
             if (packet != null)
             {
                 process(packet);
+                lastActiveTime = System.currentTimeMillis();
             }
             // 下发HID控制指令
             if (hidCommands.size() > 0)
             {
                 sendHIDCommands();
+                lastActiveTime = System.currentTimeMillis();
             }
-            sleep(10);
+            sleep(5);
         }
     }
 
@@ -142,11 +152,14 @@ public class RDSession extends Thread
             int width = packet.nextShort();
             int height = packet.nextShort();
             long captureTime = packet.nextLong();
-            byte[] data = packet.nextBytes(dataLength - 12);
-            // System.out.println("Screen: " + width + " x " + height + ", time: " + new Date(captureTime).toLocaleString());
+            int sequence = packet.nextInt();
             packet.rewind();
             packet.skip(11);
             websocketService.sendScreenshot(packet.nextBytes(dataLength));
+        }
+        if (cmd == Command.HEARTBEAT)
+        {
+            // do nothing here...
         }
 
         if (resp != null)
@@ -154,16 +167,6 @@ public class RDSession extends Thread
             outputStream.write(resp.getBytes());
             outputStream.flush();
         }
-    }
-
-    private void sendHeartbeat() throws Exception
-    {
-        if (System.currentTimeMillis() - lastHeartbeatTime < 3000) return;
-        Packet p = Packet.create(Command.HEARTBEAT, 5);
-        p.addBytes("HELLO".getBytes());
-        outputStream.write(p.getBytes());
-        outputStream.flush();
-        while (Packet.read(inputStream) == null) sleep(5);
     }
 
     private void sleep(int ms)

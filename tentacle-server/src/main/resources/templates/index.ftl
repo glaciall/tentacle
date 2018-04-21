@@ -48,7 +48,7 @@
             decompress('rle', new Uint8Array(resp.data), imageData);
             canvas.putImageData(imageData, 0, 0);
             time = new Date().getTime() - time;
-            console.log('spend: ' + time);
+            if (time > 10) console.log('spend: ' + time);
         }
 
         ws.onclose = function()
