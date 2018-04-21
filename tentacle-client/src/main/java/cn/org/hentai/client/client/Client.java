@@ -63,6 +63,15 @@ public class Client extends Thread
                 sendScreenImages();
                 continue;
             }
+            // 如果闲置超过20秒，则发送一个心跳包
+            if (System.currentTimeMillis() - lastActiveTime > 20000)
+            {
+                Packet p = Packet.create(Command.HEARTBEAT, 5);
+                p.addBytes("HELLO".getBytes());
+                outputStream.write(p.getBytes());
+                outputStream.flush();
+                lastActiveTime = System.currentTimeMillis();
+            }
             sleep(5);
         }
         Log.info("Connection closed...");
@@ -111,6 +120,7 @@ public class Client extends Thread
             working = false;
             captureWorker.terminate();
             compressWorker.terminate();
+            ScreenImages.clear();
         }
 
         // 发送响应至服务器端
@@ -126,6 +136,8 @@ public class Client extends Thread
     {
         if (!working) return;
         Packet p = ScreenImages.getCompressedScreen();
+        p.skip(6 + 1 + 4 + 2 + 2 + 8);
+        Log.debug("Sequence: " + p.nextInt());
         outputStream.write(p.getBytes());
         outputStream.flush();
     }
@@ -139,12 +151,12 @@ public class Client extends Thread
         try { conn.close(); } catch(Exception e) { }
         try
         {
-            captureWorker.interrupt();
+            captureWorker.terminate();
         }
         catch(Exception e) { }
         try
         {
-            compressWorker.interrupt();
+            compressWorker.terminate();
         }
         catch(Exception e) { }
     }

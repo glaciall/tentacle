@@ -13,12 +13,25 @@ public final class ScreenImages
     static LinkedList<Screenshot> screenshotImages = new LinkedList<Screenshot>();
     static LinkedList<Packet> compressedScreens = new LinkedList<Packet>();
 
+    // 清空缓存
+    public static void clear()
+    {
+        synchronized (screenshotImages)
+        {
+            screenshotImages.clear();
+        }
+        synchronized (compressedScreens)
+        {
+            compressedScreens.clear();
+        }
+    }
+
     // 原始截图相关
     public static void addScreenshot(Screenshot screenshot)
     {
         synchronized (screenshotImages)
         {
-            screenshotImages.add(screenshot);
+            screenshotImages.addLast(screenshot);
         }
     }
 
@@ -46,7 +59,7 @@ public final class ScreenImages
     {
         synchronized (compressedScreens)
         {
-            compressedScreens.add(packet);
+            compressedScreens.addLast(packet);
         }
     }
 
