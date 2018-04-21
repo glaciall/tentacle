@@ -77,7 +77,7 @@
     var remoteControlling = false;
     $(function()
     {
-        ws = new WebSocket('ws://localhost:8888/tentacle/desktop/wss');
+        ws = new WebSocket('ws://' + location.host + '/tentacle/desktop/wss');
         ws.binaryType = "arraybuffer";
 
         ws.onopen = function()
