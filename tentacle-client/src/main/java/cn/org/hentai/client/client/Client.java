@@ -1,9 +1,9 @@
 package cn.org.hentai.client.client;
 
-import cn.org.hentai.client.worker.BaseWorker;
-import cn.org.hentai.client.worker.CaptureWorker;
-import cn.org.hentai.client.worker.CompressWorker;
-import cn.org.hentai.client.worker.ScreenImages;
+import cn.org.hentai.client.worker.*;
+import cn.org.hentai.tentacle.hid.HIDCommand;
+import cn.org.hentai.tentacle.hid.KeyboardCommand;
+import cn.org.hentai.tentacle.hid.MouseCommand;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
 import cn.org.hentai.tentacle.util.ByteUtils;
@@ -24,6 +24,7 @@ public class Client extends Thread
 
     BaseWorker captureWorker;
     BaseWorker compressWorker;
+    HIDCommandExecutor hidCommandExecutor;
 
     Socket conn;
     InputStream inputStream;
@@ -107,11 +108,27 @@ public class Client extends Thread
                     .addLong(System.currentTimeMillis());           // 当前系统时间戳
             (captureWorker = new CaptureWorker()).start();
             (compressWorker = new CompressWorker()).start();
+            (hidCommandExecutor = new HIDCommandExecutor()).start();
         }
-        // TODO: 键鼠事件处理
+        // 键鼠事件处理
         else if (cmd == Command.HID_COMMAND)
         {
-
+            int hidType = packet.nextByte() & 0x03;
+            int eventType = packet.nextByte() & 0x03;
+            int key = packet.nextByte() & 0xff;
+            short x = packet.nextShort();
+            short y = packet.nextShort();
+            int timestamp = packet.nextInt() & 0xffffffff;
+            HIDCommand hidCommand = null;
+            if (hidType == HIDCommand.TYPE_MOUSE)
+            {
+                hidCommand = new MouseCommand(eventType, key, x, y, timestamp);
+            }
+            else
+            {
+                hidCommand = new KeyboardCommand(key, timestamp);
+            }
+            hidCommandExecutor.add(hidCommand);
         }
         // 停止远程控制
         else if (cmd == Command.CLOSE_REQUEST)
@@ -120,6 +137,7 @@ public class Client extends Thread
             working = false;
             captureWorker.terminate();
             compressWorker.terminate();
+            hidCommandExecutor.terminate();
             ScreenImages.clear();
         }
 
