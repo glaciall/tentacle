@@ -66,14 +66,15 @@ public class RLEncoding extends BaseCompressProcessor
                 compressedData.write(rl);
                 compressedData.write(0);
             }
-            else if (colortable[lastColor & 0xffffff] > 0)
+            else if (colortable[detract(lastColor & 0xffffff)] > 0)
             {
                 compressedData.write((rl | 0x8000) >> 8);
                 compressedData.write(rl);
-                compressedData.write(colortable[lastColor & 0xffffff]);
+                compressedData.write(colortable[detract(lastColor & 0xffffff)]);
             }
             else
             {
+                lastColor = detract(lastColor & 0xffffff);
                 compressedData.write((rl & 0x7fff) >> 8);
                 compressedData.write(rl);
                 compressedData.write((byte) ((lastColor >> 16) & 0xff));
@@ -89,14 +90,15 @@ public class RLEncoding extends BaseCompressProcessor
             compressedData.write(rl);
             compressedData.write(0);
         }
-        else if (colortable[lastColor & 0xffffff] > 0)
+        else if (colortable[detract(lastColor & 0xffffff)] > 0)
         {
             compressedData.write((rl | 0x8000) >> 8);
             compressedData.write(rl);
-            compressedData.write(colortable[lastColor & 0xffffff]);
+            compressedData.write(colortable[detract(lastColor & 0xffffff)]);
         }
         else
         {
+            lastColor = detract(lastColor & 0xffffff);
             compressedData.write((rl & 0x7fff) >> 8);
             compressedData.write(rl);
             compressedData.write((byte) ((lastColor >> 16) & 0xff));
@@ -120,7 +122,7 @@ public class RLEncoding extends BaseCompressProcessor
         // 颜色计数
         for (int i = from; i < to; i++)
         {
-            int color = bitmap[i] & 0xffffff;
+            int color = detract(bitmap[i] & 0xffffff);
             if (bitmap[i] == 0) continue;
             if (colortable[color] == 0) colors[colorIndex++] = color;
             colortable[color] += 1;
@@ -163,6 +165,14 @@ public class RLEncoding extends BaseCompressProcessor
             if (count == 0) continue;
             colortable[mainColors[i + 1]] = colorIndex++;
         }
+    }
+
+    // 针对颜色值进行减位，用于压缩处理
+    static int detract(int c)
+    {
+        // 灰色RGB不减位
+        if ((((c >> 16) & 0xff) ^ ((c >> 8) & 0xff)) == (c & 0xff)) return c;
+        return c & 0xf0f0f0;
     }
 
     // 压缩后的图像数据解压
