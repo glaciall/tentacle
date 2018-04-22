@@ -5,10 +5,10 @@ package cn.org.hentai.tentacle.hid;
  */
 public class MouseCommand extends HIDCommand
 {
-    public static final int TYPE_DOWN = 0x01;
-    public static final int TYPE_UP = 0x02;
-    public static final int TYPE_MOVE = 0x03;
-    public static final int TYPE_WHEEL = 0x04;
+    public static final int MOUSE_DOWN = 0x01;
+    public static final int MOUSE_UP = 0x02;
+    public static final int MOUSE_MOVE = 0x03;
+    public static final int MOUSE_WHEEL = 0x04;
 
     public int eventType;           // 事件类型，按下，放开，移动
     public int key;                 // 1左键，2中键，3右键，或1 向上，2向下
