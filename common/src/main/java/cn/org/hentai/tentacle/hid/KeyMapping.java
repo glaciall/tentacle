@@ -1,5 +1,7 @@
 package cn.org.hentai.tentacle.hid;
 
+import cn.org.hentai.tentacle.util.Log;
+
 import java.awt.event.KeyEvent;
 
 /**
@@ -8,6 +10,8 @@ import java.awt.event.KeyEvent;
 public class KeyMapping
 {
     static final int[] mappings = new int[256];
+
+    public static void init()
     {
         mappings[ 13] = KeyEvent.VK_ENTER;
         mappings[  8] = KeyEvent.VK_BACK_SPACE;
@@ -65,8 +69,9 @@ public class KeyMapping
 
     public static int convert(int code)
     {
-        if (mappings[code] > 0) return mappings[code];
-        else return code;
+        int key = code;
+        if (mappings[code] > 0) key = mappings[code];
+        return key;
     }
 }
 
