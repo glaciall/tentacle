@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <title>Tentacle Desktop</title>
     <style type="text/css">
+        *
+        {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
         #btn-request-control
         {
             height: 30px;
