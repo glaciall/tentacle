@@ -1,6 +1,7 @@
 package cn.org.hentai.client.worker;
 
 import cn.org.hentai.tentacle.hid.HIDCommand;
+import cn.org.hentai.tentacle.hid.KeyboardCommand;
 import cn.org.hentai.tentacle.hid.MouseCommand;
 import cn.org.hentai.tentacle.util.Log;
 
@@ -62,7 +63,7 @@ public class HIDCommandExecutor extends BaseWorker
         if (cmd.type == HIDCommand.TYPE_MOUSE)
         {
             MouseCommand mouse = (MouseCommand) cmd;
-            if (mouse.eventType == 1)
+            if (mouse.eventType == MouseCommand.MOUSE_DOWN)
             {
                 int key = InputEvent.BUTTON1_MASK;
                 if (mouse.key == 2) key = InputEvent.BUTTON2_MASK;
@@ -70,7 +71,7 @@ public class HIDCommandExecutor extends BaseWorker
                 robot.mouseMove(mouse.x, mouse.y);
                 robot.mousePress(key);
             }
-            else if (mouse.eventType == 2)
+            else if (mouse.eventType == MouseCommand.MOUSE_UP)
             {
                 int key = InputEvent.BUTTON1_MASK;
                 if (mouse.key == 2) key = InputEvent.BUTTON2_MASK;
@@ -78,14 +79,26 @@ public class HIDCommandExecutor extends BaseWorker
                 robot.mouseMove(mouse.x, mouse.y);
                 robot.mouseRelease(key);
             }
-            else if (mouse.eventType == 3)
+            else if (mouse.eventType == MouseCommand.MOUSE_MOVE)
             {
                 robot.mouseMove(mouse.x, mouse.y);
             }
-            else if (mouse.eventType == 4)
+            else if (mouse.eventType == MouseCommand.MOUSE_WHEEL)
             {
                 robot.mouseMove(mouse.x, mouse.y);
                 robot.mouseWheel(mouse.key == 1 ? -1 : 1);
+            }
+        }
+        else if (cmd.type == HIDCommand.TYPE_KEYBOARD)
+        {
+            KeyboardCommand keyboard = (KeyboardCommand) cmd;
+            if (keyboard.eventType == KeyboardCommand.KEY_PRESS)
+            {
+                robot.keyPress(keyboard.keycode);
+            }
+            else if (keyboard.eventType == KeyboardCommand.KEY_RELEASE)
+            {
+                robot.keyRelease(keyboard.keycode);
             }
         }
     }
