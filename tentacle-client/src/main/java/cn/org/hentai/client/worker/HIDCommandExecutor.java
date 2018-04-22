@@ -1,12 +1,14 @@
 package cn.org.hentai.client.worker;
 
 import cn.org.hentai.tentacle.hid.HIDCommand;
+import cn.org.hentai.tentacle.hid.KeyMapping;
 import cn.org.hentai.tentacle.hid.KeyboardCommand;
 import cn.org.hentai.tentacle.hid.MouseCommand;
 import cn.org.hentai.tentacle.util.Log;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.util.LinkedList;
 
 /**
@@ -94,11 +96,11 @@ public class HIDCommandExecutor extends BaseWorker
             KeyboardCommand keyboard = (KeyboardCommand) cmd;
             if (keyboard.eventType == KeyboardCommand.KEY_PRESS)
             {
-                robot.keyPress(keyboard.keycode);
+                robot.keyPress(KeyMapping.convert(keyboard.keycode));
             }
             else if (keyboard.eventType == KeyboardCommand.KEY_RELEASE)
             {
-                robot.keyRelease(keyboard.keycode);
+                robot.keyRelease(KeyMapping.convert(keyboard.keycode));
             }
         }
     }
