@@ -142,6 +142,14 @@
                 y : e.offsetY,
                 timestamp : parseInt(e.timeStamp)
             });
+            e.preventDefault();
+            return false;
+        });
+
+        $('#screen').contextmenu(function(e)
+        {
+            e.preventDefault();
+            return false;
         });
 
         var lastMousePositionCaptured = 0;
@@ -149,7 +157,7 @@
         {
             if (!remoteControlling) return;
             var now = new Date().getTime();
-            if (mousePressing || (now - lastMousePositionCaptured < 100)) return;
+            if (now - lastMousePositionCaptured < 50) return;
             hidCommands.push({
                 type : 'mouse-move',
                 x : e.offsetX,
@@ -157,6 +165,22 @@
                 timestamp : parseInt(e.timeStamp)
             });
             lastMousePositionCaptured = now;
+            e.preventDefault();
+            return false;
+        });
+
+        $('#screen').mousewheel(function(e)
+        {
+            if (!remoteControlling) return;
+            // 1 向上，2向下
+            var key = 0;
+            hidCommands.push({
+                type : 'mouse-wheel',
+                key : e.deltaY < 0 ? 1 : 2,
+                x : e.offsetX,
+                y : e.offsetY,
+                timestamp : parseInt(e.timeStamp)
+            });
         });
     });
 

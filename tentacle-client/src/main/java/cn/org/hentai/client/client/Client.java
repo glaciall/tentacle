@@ -113,8 +113,8 @@ public class Client extends Thread
         // 键鼠事件处理
         else if (cmd == Command.HID_COMMAND)
         {
-            int hidType = packet.nextByte() & 0x03;
-            int eventType = packet.nextByte() & 0x03;
+            int hidType = packet.nextByte() & 0xff;
+            int eventType = packet.nextByte() & 0xff;
             int key = packet.nextByte() & 0xff;
             short x = packet.nextShort();
             short y = packet.nextShort();

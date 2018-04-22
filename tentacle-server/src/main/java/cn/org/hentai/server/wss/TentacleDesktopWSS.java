@@ -92,6 +92,13 @@ public class TentacleDesktopWSS
                     x = cmd.get("x").getAsShort();
                     y = cmd.get("y").getAsShort();
                 }
+                else if ("mouse-wheel".equals(cmd.get("type").getAsString()))
+                {
+                    hidType = HIDCommand.TYPE_MOUSE;
+                    eventType = 0x04;
+                    x = cmd.get("x").getAsShort();
+                    y = cmd.get("y").getAsShort();
+                }
                 if (cmd.has("key")) key = cmd.get("key").getAsByte();
                 p.addByte(hidType).addByte(eventType).addByte(key).addShort(x).addShort(y).addInt(timestamp);
                 rdSession.addHIDCommand(p);
