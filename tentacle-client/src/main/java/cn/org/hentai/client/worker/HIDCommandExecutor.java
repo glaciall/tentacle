@@ -85,7 +85,7 @@ public class HIDCommandExecutor extends BaseWorker
             else if (mouse.eventType == 4)
             {
                 robot.mouseMove(mouse.x, mouse.y);
-                robot.mouseWheel(mouse.key == 1 ? -100 : 100);
+                robot.mouseWheel(mouse.key == 1 ? -1 : 1);
             }
         }
     }
