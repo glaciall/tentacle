@@ -99,6 +99,16 @@ public class TentacleDesktopWSS
                     x = cmd.get("x").getAsShort();
                     y = cmd.get("y").getAsShort();
                 }
+                else if ("key-press".equals(cmd.get("type").getAsString()))
+                {
+                    hidType = HIDCommand.TYPE_KEYBOARD;
+                    eventType = 0x01;
+                }
+                else if ("key-release".equals(cmd.get("type").getAsString()))
+                {
+                    hidType = HIDCommand.TYPE_KEYBOARD;
+                    eventType = 0x02;
+                }
                 if (cmd.has("key")) key = cmd.get("key").getAsByte();
                 p.addByte(hidType).addByte(eventType).addByte(key).addShort(x).addShort(y).addInt(timestamp);
                 rdSession.addHIDCommand(p);

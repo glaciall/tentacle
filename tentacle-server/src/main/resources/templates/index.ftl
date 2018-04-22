@@ -169,7 +169,8 @@
             return false;
         });
 
-        $('#screen').get(0).onmousewheel = function(e)
+        var screenElement = $('#screen').get(0);
+        screenElement.onmousewheel = function(e)
         {
             if (!remoteControlling) return;
             // 1 向上，2向下
@@ -179,6 +180,25 @@
                 key : e.deltaY < 0 ? 1 : 2,
                 x : e.offsetX,
                 y : e.offsetY,
+                timestamp : parseInt(e.timeStamp)
+            });
+        }
+
+        window.onkeydown = function(e)
+        {
+            if (!remoteControlling) return;
+            hidCommands.push({
+                type : 'key-press',
+                key : e.keyCode,
+                timestamp : parseInt(e.timeStamp)
+            });
+        }
+        window.onkeyup = function(e)
+        {
+            if (!remoteControlling) return;
+            hidCommands.push({
+                type : 'key-release',
+                key : e.keyCode,
                 timestamp : parseInt(e.timeStamp)
             });
         }
