@@ -3,6 +3,7 @@ package cn.org.hentai.client.app;
 import cn.org.hentai.client.client.Client;
 import cn.org.hentai.client.test.ScreenCanvas;
 import cn.org.hentai.tentacle.compress.RLEncoding;
+import cn.org.hentai.tentacle.hid.KeyMapping;
 import cn.org.hentai.tentacle.system.LocalComputer;
 import cn.org.hentai.tentacle.util.Configs;
 
@@ -29,6 +30,8 @@ public class Tentacle
     {
         // 加载配置文件
         Configs.init("/client.properties");
+
+        KeyMapping.init();
 
         // 静态成员初始化
         RLEncoding.init();
