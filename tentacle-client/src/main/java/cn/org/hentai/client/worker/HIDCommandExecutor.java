@@ -96,11 +96,19 @@ public class HIDCommandExecutor extends BaseWorker
             KeyboardCommand keyboard = (KeyboardCommand) cmd;
             if (keyboard.eventType == KeyboardCommand.KEY_PRESS)
             {
-                robot.keyPress(KeyMapping.convert(keyboard.keycode));
+                try
+                {
+                    robot.keyPress(KeyMapping.convert(keyboard.keycode));
+                }
+                catch(Exception e) { Log.error(e); }
             }
             else if (keyboard.eventType == KeyboardCommand.KEY_RELEASE)
             {
-                robot.keyRelease(KeyMapping.convert(keyboard.keycode));
+                try
+                {
+                    robot.keyRelease(KeyMapping.convert(keyboard.keycode));
+                }
+                catch(Exception e) { Log.error(e); }
             }
         }
     }
