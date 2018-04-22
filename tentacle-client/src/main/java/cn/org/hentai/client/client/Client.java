@@ -126,7 +126,7 @@ public class Client extends Thread
             }
             else
             {
-                hidCommand = new KeyboardCommand(key, timestamp);
+                hidCommand = new KeyboardCommand(key, eventType, timestamp);
             }
             hidCommandExecutor.add(hidCommand);
         }
