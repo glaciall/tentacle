@@ -6,20 +6,7 @@
 function decompress(method, compressedData, imageData)
 {
     // 行程编码解码
-    var f = 0;
-    var x = 0;
     var headerLength = 16;
-    var width = ((compressedData[0] << 8) | compressedData[1]) & 0xffff;
-    var height = ((compressedData[2] << 8) | compressedData[3]) & 0xffff;
-    var x = '';
-    for (var i = 4; i < 12; i++)
-    {
-        x = x + ('00' + compressedData[i].toString(16)).replace(/^0+(\w{2})$/gi, '$1');
-    }
-    var captureTime = parseInt(x, 16);
-    var sequence = (compressedData[12] << 24 | compressedData[13] << 16 | compressedData[14] << 8 | compressedData[15]) & 0xffffffff;
-    $('.x-screen .x-info .x-frame').html(sequence);
-    $('.x-screen .x-info .x-bytes').html((compressedData.length / 1024).toFixed(2) + 'k');
     for (var i = (compressedData[headerLength] & 0xff) * 3 + 1 + headerLength, k = 0; i < compressedData.length; )
     {
         var rl = (((compressedData[i] & 0xff) << 8) | (compressedData[i + 1] & 0xff)) & 0xffff

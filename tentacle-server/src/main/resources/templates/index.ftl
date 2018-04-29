@@ -3,78 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <title>Tentacle Desktop</title>
-    <style type="text/css">
-        *
-        {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        #btn-request-control
-        {
-            height: 30px;
-            font-size: 14px;
-            width: 100px;
-        }
-        .x-screen
-        {
-            box-sizing: content-box !important;
-            width: 1280px;
-            height: 720px;
-            position: relative;
-            border: solid 2px #cccccc;
-        }
-        .x-screen canvas
-        {
-            display: block;
-        }
-        .x-screen .x-info
-        {
-            width: 300px;
-            height: 30px;
-            border-bottom-left-radius: 4px;
-            border-bottom-right-radius: 4px;
-            background-color: #f0ad4e;
-            position: absolute;
-            top: 0px;
-            left: 50%;
-            margin-left: -150px;
-            z-index: 100;
-            text-align: center;
-        }
-        .x-screen .x-info .x-frame
-        {
-            float: left;
-            width: 30%;
-            height: 30px;
-            line-height: 30px;
-        }
-        .x-screen .x-info .x-bytes
-        {
-            float: left;
-            width: 70%;
-            height: 30px;
-            line-height: 30px;
-        }
-        body
-        {
-            margin: 0px;
-            padding: 0px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="${web_resource}/tentacle.css" />
+    <link rel="stylesheet" type="text/css" href="http://apps.bdimg.com/libs/animate.css/3.1.0/animate.min.css" />
 </head>
 <body>
 <div class="x-screen">
-    <canvas width="1280" height="720" id="screen"></canvas>
-    <div class="x-info">
-        <div class="x-frame">sequence</div>
-        <div class="x-bytes">package size</div>
+    <canvas id="screen"></canvas>
+</div>
+<div class="x-cmd-bar">
+    <div class="x-icon"></div>
+</div>
+<div class="x-stat-panel">
+    <div class="x-stat" id="x-frames">
+        <h1>1234</h1>
+        <h5>frames</h5>
+    </div>
+    <hr />
+    <div class="x-stat" id="x-bytes">
+        <h1>12.77 mb</h1>
+        <h5>total transfer</h5>
+    </div>
+    <hr />
+</div>
+<div class="x-auth-dialog">
+    <div class="x-title">输入密码开始连接</div>
+    <hr />
+    <div class="x-password"><input id="password" type="text" /></div>
+    <div class="x-message"></div>
+    <div class="x-button">
+        <button id="btn-auth">开始连接</button>
     </div>
 </div>
-
-<input type="button" id="btn-request-control" value="请求控制" />
 <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript">
+    $.fn.extend({
+        animateCss: function(animationName, callback) {
+            var animationEnd = (function(el) {
+                var animations = {
+                    animation: 'animationend',
+                    OAnimation: 'oAnimationEnd',
+                    MozAnimation: 'mozAnimationEnd',
+                    WebkitAnimation: 'webkitAnimationEnd',
+                };
+
+                for (var t in animations) {
+                    if (el.style[t] !== undefined) {
+                        return animations[t];
+                    }
+                }
+            })(document.createElement('div'));
+
+            this.addClass('animated ' + animationName).one(animationEnd, function() {
+                $(this).removeClass('animated ' + animationName);
+
+                if (typeof callback === 'function') callback();
+            });
+
+            return this;
+        },
+    });
+</script>
 <script type="text/javascript" src="${web_resource}/decompress.js"></script>
 <script type="text/javascript">
     var ws = null;
@@ -82,8 +70,15 @@
     var imageData = canvas.createImageData(1280, 720);
     var authenticated = false;
     var remoteControlling = false;
+    var frames = [];
+    var totalTransfered = 0;
+
     $(function()
     {
+        $('.x-auth-dialog').animateCss('bounceIn');
+        $('.x-stat-panel').animateCss('slideInLeft');
+        $('.x-cmd-bar').animateCss('slideInDown');
+
         ws = new WebSocket('ws://' + location.host + '/tentacle/desktop/wss');
         ws.binaryType = "arraybuffer";
 
@@ -96,11 +91,7 @@
         {
             if (!(resp.data instanceof ArrayBuffer)) return console.error('server response: ' + resp.data);
             remoteControlling = true;
-            var time = new Date().getTime();
-            decompress('rle', new Uint8Array(resp.data), imageData);
-            canvas.putImageData(imageData, 0, 0);
-            time = new Date().getTime() - time;
-            if (time > 10) console.log('spend: ' + time);
+            frames.push(new Uint8Array(resp.data));
         }
 
         ws.onclose = function()
@@ -113,12 +104,15 @@
             console.log('websocket error', arguments);
         }
 
-        $('#btn-request-control').click(function(e)
+        $('#btn-auth').click(function(e)
         {
-            var password = prompt('请输入连接密码：', '');
-            if (typeof(password) == 'undefined') return;
+            var password = $('#password').val();
             if ($.trim(password).length == 0) return alert('请输入密码进行连接');
             ws.send('{ \"type\" : "command", \"command\" : \"request-control\", \"password\" : \"' + password + '\" }');
+            $('.x-auth-dialog').animateCss('bounceOut', function()
+            {
+                $('.x-auth-dialog').hide();
+            });
         });
 
         var mousePressing = false;
@@ -135,6 +129,7 @@
                 y : e.offsetY,
                 timestamp : parseInt(e.timeStamp)
             });
+            console.log(e.offsetX, e.offsetY, e);
         });
 
         $('#screen').mouseup(function(e)
@@ -226,6 +221,42 @@
         }
         ws.send(JSON.stringify(packet));
     }, 30);
+
+    function f()
+    {
+        if (!remoteControlling) return setTimeout(f, 50);
+        var compressedData = frames.shift();
+        if (compressedData == undefined) return setTimeout(f, 50);
+
+        var width = ((compressedData[0] << 8) | compressedData[1]) & 0xffff;
+        var height = ((compressedData[2] << 8) | compressedData[3]) & 0xffff;
+        var x = '';
+        for (var i = 4; i < 12; i++)
+        {
+            x = x + ('00' + compressedData[i].toString(16)).replace(/^0+(\w{2})$/gi, '$1');
+        }
+        var captureTime = parseInt(x, 16);
+        var sequence = (compressedData[12] << 24 | compressedData[13] << 16 | compressedData[14] << 8 | compressedData[15]) & 0xffffffff;
+        totalTransfered += (compressedData.length / 1024);
+        var tf = totalTransfered.toFixed(2) + ' kb';
+        if (totalTransfered > 1024) tf = (totalTransfered / 1024).toFixed(2) + ' mb';
+        $('#x-frames h1').html(sequence);
+        $('#x-bytes h1').html(tf);
+        if (imageData.width != width || imageData.height != height)
+        {
+            var screenElement = document.getElementById('screen');
+            screenElement.width = width;
+            screenElement.height = height;
+            screenElement.style.marginLeft = parseInt(0 - width / 2) + 'px';
+            screenElement.style.marginTop = parseInt(0 - height / 2) + 'px';
+            imageData = canvas.createImageData(width, height);
+        }
+        decompress('rle', compressedData, imageData);
+        canvas.putImageData(imageData, 0, 0);
+        setTimeout(f, 50);
+    }
+
+    setTimeout(f, 50);
 
 </script>
 </body>
