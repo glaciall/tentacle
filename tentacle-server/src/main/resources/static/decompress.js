@@ -3,16 +3,12 @@
  * @param method
  * @param compressedData
  */
-var xxoo = false;
 function decompress(method, compressedData, imageData)
 {
     // 行程编码解码
     var f = 0;
     var x = 0;
-    if (xxoo) console.log(compressedData);
-    xxoo = false;
     var headerLength = 16;
-    /*
     var width = ((compressedData[0] << 8) | compressedData[1]) & 0xffff;
     var height = ((compressedData[2] << 8) | compressedData[3]) & 0xffff;
     var x = '';
@@ -21,7 +17,6 @@ function decompress(method, compressedData, imageData)
         x = x + ('00' + compressedData[i].toString(16)).replace(/^0+(\w{2})$/gi, '$1');
     }
     var captureTime = parseInt(x, 16);
-    */
     var sequence = (compressedData[12] << 24 | compressedData[13] << 16 | compressedData[14] << 8 | compressedData[15]) & 0xffffffff;
     $('.x-screen .x-info .x-frame').html(sequence);
     $('.x-screen .x-info .x-bytes').html((compressedData.length / 1024).toFixed(2) + 'k');
