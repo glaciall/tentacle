@@ -24,6 +24,8 @@ public class HIDCommandExecutor extends BaseWorker
     public HIDCommandExecutor() throws AWTException
     {
         robot = new Robot();
+        robot.setAutoDelay(0);
+        robot.setAutoWaitForIdle(false);
         commands = new LinkedList<HIDCommand>();
     }
 
