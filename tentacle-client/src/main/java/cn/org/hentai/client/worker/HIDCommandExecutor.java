@@ -48,7 +48,7 @@ public class HIDCommandExecutor extends BaseWorker
 
     private void execute() throws Exception
     {
-        if (System.currentTimeMillis() < nextExecuteTime) return;
+        // if (System.currentTimeMillis() < nextExecuteTime) return;
         if (null == nextCommand) nextCommand = get();
         if (nextCommand == null) return;
 
