@@ -66,7 +66,7 @@ public class CompressWorker extends BaseWorker
         else bitmap = screenshot.bitmap;
 
         if (lastScreen != null && changedColors == 0) return;
-        Log.debug("Changed colors: " + changedColors);
+        // Log.debug("Changed colors: " + changedColors);
 
         // 2. 压缩
         start = Math.max(start, 0);
@@ -74,8 +74,8 @@ public class CompressWorker extends BaseWorker
         end = bitmap.length;
         byte[] compressedData = CompressUtil.process(this.compressMethod, bitmap, start, end);
 
-        Log.debug("Compress Ratio: " + (screenshot.bitmap.length * 4.0f / compressedData.length));
-        Log.debug("After: " + (compressedData.length / 1024));
+        // Log.debug("Compress Ratio: " + (screenshot.bitmap.length * 4.0f / compressedData.length));
+        // Log.debug("After: " + (compressedData.length / 1024));
 
         // 3. 入队列
         Packet packet = Packet.create(Command.SCREENSHOT, compressedData.length + 16);
