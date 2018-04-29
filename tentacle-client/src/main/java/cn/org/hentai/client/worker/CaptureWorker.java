@@ -21,7 +21,7 @@ public class CaptureWorker extends BaseWorker
             {
                 captureAndStore();
                 // TODO: FPS控制
-                sleep(30);
+                sleep(50);
             }
             catch(Exception e)
             {
