@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="x-screen">
-    <canvas id="screen"></canvas>
+    <canvas id="screen" width="800" height="600"></canvas>
 </div>
 <div class="x-cmd-bar">
     <div class="x-icon"></div>
