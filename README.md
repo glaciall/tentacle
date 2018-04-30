@@ -1,5 +1,5 @@
 ## 基于java和javascript的远程桌面
-目前己完成屏幕与鼠标指令的转发，正在努力中
+<img src="./additional/tentacle.png" />
 
 ## 传输协议
 ### 基础包结构
