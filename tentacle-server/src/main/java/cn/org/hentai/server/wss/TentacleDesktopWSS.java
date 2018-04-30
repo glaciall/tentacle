@@ -46,7 +46,6 @@ public class TentacleDesktopWSS
     {
         JsonObject json = new JsonParser().parse(message).getAsJsonObject();
         String type = json.get("type").getAsString();
-        Log.debug("Receive: " + type);
         if ("command".equals(type))
         {
             String cmd = json.get("command").getAsString();
