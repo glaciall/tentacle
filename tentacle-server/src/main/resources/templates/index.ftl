@@ -67,7 +67,7 @@
 <script type="text/javascript">
     var ws = null;
     var canvas = document.getElementById('screen').getContext('2d');
-    var imageData = canvas.createImageData(1280, 720);
+    var imageData = canvas.createImageData(10, 10);
     var authenticated = false;
     var remoteControlling = false;
     var frames = [];
@@ -129,7 +129,6 @@
                 y : e.offsetY,
                 timestamp : parseInt(e.timeStamp)
             });
-            console.log(e.offsetX, e.offsetY, e);
         });
 
         $('#screen').mouseup(function(e)
@@ -246,7 +245,11 @@
         {
             var screenElement = document.getElementById('screen');
             screenElement.width = width;
+            screenElement.style.width = width;
             screenElement.height = height;
+            screenElement.style.height = height;
+            canvas.width = width;
+            canvas.height = height;
             screenElement.style.marginLeft = parseInt(0 - width / 2) + 'px';
             screenElement.style.marginTop = parseInt(0 - height / 2) + 'px';
             imageData = canvas.createImageData(width, height);
