@@ -18,7 +18,13 @@ window.Tentacle = {
     // 身份验证
     login : function()
     {
-
+        var password = $('#password').val();
+        if ($.trim(password).length == 0) return this.showMessage('请输入密码进行连接');
+        this.send({
+            type : 'command',
+            command : 'request-control',
+            password : password
+        });
     },
     // 断开连接
     disconnect : function()
@@ -34,8 +40,9 @@ window.Tentacle = {
     {
 
     },
-    _connect : function()
+    connect : function()
     {
+        if (this.connection && this.connection.readyState == 1) return;
         this.connection = new WebSocket('ws://' + location.host + '/tentacle/desktop/ws');
         this.connection.onopen = this._onopen;
         this.connection.onmessage = this._onmessage;
@@ -80,25 +87,32 @@ window.Tentacle = {
     _onerror : function() { },
     showMessage : function(text)
     {
-        var timeout = 2000;
-        var greeting = $('<div class="x-message-box">' + text + '</div>');
-        $(document.body).append(greeting);
-        greeting.css({ top : (document.body.scrollTop + window.innerHeight - 100) + 'px' }).show().animateCss('bounceIn', function()
+        var timeout = 4000;
+        var box = $('<div class="x-message-box">' + text + '</div>');
+        $(document.body).append(box);
+        box.css({ top : (document.body.scrollTop + window.innerHeight - 100) + 'px' }).show().animateCss('bounceIn', function()
         {
             setTimeout(function()
             {
-                greeting.remove();
+                box.remove();
             }, timeout);
         });
     },
-    clipboard : {
-        fromRemote : function()
-        {
-
-        },
-        toRemote : function(text)
-        {
-
-        }
+    // 获取远程主机的剪切板内容
+    getRemoteClipboard : function()
+    {
+        this.send({
+            type : 'command',
+            command : 'get-clipboard',
+        });
+    },
+    // 设置远程主机的剪切板内容
+    setRemoteClipboard : function(text)
+    {
+        this.send({
+            type : 'command',
+            command : 'set-clipboard',
+            text : text
+        });
     }
 };
