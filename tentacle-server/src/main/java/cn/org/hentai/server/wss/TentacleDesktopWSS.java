@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import javax.imageio.ImageIO;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 
@@ -53,9 +54,12 @@ public class TentacleDesktopWSS
             {
                 if (!Configs.get("rds.access.password").equals(json.get("password").getAsString()))
                 {
-                    try { this.session.close(); } catch(Exception e) { }
+
+                    // try { this.session.close(); } catch(Exception e) { }
+                    this.sendResponse("login", "密码错误");
                     return;
                 }
+                this.sendResponse("login", "success");
                 requestControl();
             }
         }
@@ -123,8 +127,10 @@ public class TentacleDesktopWSS
             if (null == rdSession)
             {
                 this.session.getBasicRemote().sendText("client is not connected yet");
+                this.sendResponse("request-control", "主机端未连接");
                 return;
             }
+            this.sendResponse("request-control", "success");
             rdSession.bind(this);
         }
         catch(Exception ex)
@@ -138,11 +144,42 @@ public class TentacleDesktopWSS
         try
         {
             if (!this.session.isOpen()) throw new Exception("websocket was closed");
-            this.session.getBasicRemote().sendBinary(ByteBuffer.wrap(screenshot));
+            // this.session.getBasicRemote().sendBinary(ByteBuffer.wrap(screenshot));
+            // sendResponse("", "");
+            sendBinary(screenshot);
         }
         catch(Exception e)
         {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void sendResponse(String action, String result)
+    {
+        sendText("{ \"action\" : \"" + action + "\", \"result\" : \"" + result + "\" }");
+    }
+
+    private void sendText(String text)
+    {
+        try
+        {
+            this.session.getBasicRemote().sendText(text);
+        }
+        catch(IOException e)
+        {
+            try { this.session.close(); } catch(Exception ex) { }
+        }
+    }
+
+    private void sendBinary(byte[] data)
+    {
+        try
+        {
+            this.session.getBasicRemote().sendBinary(ByteBuffer.wrap(data));
+        }
+        catch(IOException e)
+        {
+            try { this.session.close(); } catch(Exception ex) { }
         }
     }
 
