@@ -10,6 +10,11 @@ import cn.org.hentai.tentacle.util.ByteUtils;
 import cn.org.hentai.tentacle.util.Configs;
 import cn.org.hentai.tentacle.util.Log;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -109,6 +114,27 @@ public class Client extends Thread
             (captureWorker = new CaptureWorker()).start();
             (compressWorker = new CompressWorker()).start();
             (hidCommandExecutor = new HIDCommandExecutor()).start();
+        }
+        // 获取剪切板内容
+        else if (cmd == Command.GET_CLIPBOARD)
+        {
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            Transferable content = clipboard.getContents(null);
+            if (content.isDataFlavorSupported(DataFlavor.stringFlavor))
+            {
+                String text = (String) content.getTransferData(DataFlavor.stringFlavor);
+                // 剪切板没有内容就别回应了
+                if (text != null && text.length() > 0) resp = Packet.create(Command.COMMON_RESPONSE, 4 + text.length()).addInt(text.length()).addBytes(text.getBytes());
+            }
+        }
+        // 设置剪切板内容
+        else if (cmd == Command.SET_CLIPBOARD)
+        {
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            int len = packet.nextInt();
+            String text = new String(packet.nextBytes(len));
+            StringSelection selection = new StringSelection(text);
+            clipboard.setContents(selection, null);
         }
         // 键鼠事件处理
         else if (cmd == Command.HID_COMMAND)
