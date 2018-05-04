@@ -21,7 +21,7 @@ public class RDSession extends Thread
     TentacleDesktopWSS websocketService = null;
     LinkedList<Packet> hidCommands = new LinkedList<Packet>();
 
-    boolean startCapture = false;
+    boolean needSendStartCommand = false;
     boolean remoteControlling = false;
     boolean closeControl = false;
 
@@ -36,7 +36,7 @@ public class RDSession extends Thread
     public void bind(TentacleDesktopWSS websocketService)
     {
         this.websocketService = websocketService;
-        this.startCapture = true;
+        this.needSendStartCommand = true;
     }
 
     // 结束会话
@@ -74,7 +74,7 @@ public class RDSession extends Thread
                 lastActiveTime = System.currentTimeMillis();
             }
 
-            if (startCapture)
+            if (needSendStartCommand)
             {
                 outputStream.write(Packet.create(Command.CONTROL_REQUEST, 3).addByte((byte)0x01).addByte((byte)0x00).addByte((byte)0x03).getBytes());
                 outputStream.flush();
@@ -86,7 +86,7 @@ public class RDSession extends Thread
                     if (null != resp) break;
                     sleep(10);
                 }
-                startCapture = false;
+                needSendStartCommand = false;
                 remoteControlling = true;
                 System.out.println("client response: " + ByteUtils.toString(resp.getBytes()));
             }
