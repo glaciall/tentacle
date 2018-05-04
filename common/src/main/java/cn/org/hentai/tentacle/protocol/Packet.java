@@ -162,6 +162,12 @@ public class Packet
         return this;
     }
 
+    public Packet seek(int index)
+    {
+        this.offset = index;
+        return this;
+    }
+
     public byte[] getBytes()
     {
         if (size == maxSize) return this.data;
