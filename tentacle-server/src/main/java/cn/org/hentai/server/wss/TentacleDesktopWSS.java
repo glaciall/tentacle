@@ -32,9 +32,6 @@ public class TentacleDesktopWSS
     Session session;
     RDSession rdSession = null;
 
-    // 上一屏的图像
-    int[] lastBitmap = null;
-
     @OnOpen
     public void onOpen(Session session)
     {
