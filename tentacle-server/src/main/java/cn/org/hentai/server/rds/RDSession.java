@@ -78,7 +78,6 @@ public class RDSession extends Thread
             {
                 outputStream.write(Packet.create(Command.CONTROL_REQUEST, 3).addByte((byte)0x01).addByte((byte)0x00).addByte((byte)0x03).getBytes());
                 outputStream.flush();
-                System.out.println("control command sent");
                 Packet resp = null;
                 while (true)
                 {
@@ -88,7 +87,6 @@ public class RDSession extends Thread
                 }
                 needSendStartCommand = false;
                 remoteControlling = true;
-                System.out.println("client response: " + ByteUtils.toString(resp.getBytes()));
             }
 
             Packet packet = Packet.read(inputStream);
