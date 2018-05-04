@@ -87,6 +87,13 @@ public class RDSession extends Thread
                 }
                 needSendStartCommand = false;
                 remoteControlling = true;
+                resp.seek(11);
+                int compressMethod = resp.nextByte() & 0xff;
+                int bandWidth = resp.nextByte() & 0xff;
+                int colorBits = resp.nextByte() & 0xff;
+                int screenWidth = resp.nextShort() & 0xffff;
+                int screenHeight = resp.nextShort() & 0xffff;
+                this.websocketService.sendControlResponse(compressMethod, bandWidth, colorBits, screenWidth, screenHeight);
             }
 
             Packet packet = Packet.read(inputStream);

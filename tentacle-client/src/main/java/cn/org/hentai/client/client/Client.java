@@ -105,11 +105,13 @@ public class Client extends Thread
             int compressMethod = packet.nextByte() & 0xff;
             int bandWidth = packet.nextByte() & 0xff;
             int colorBits = packet.nextByte() & 0xff;
-
-            resp = Packet.create(Command.CONTROL_RESPONSE, 11)
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            resp = Packet.create(Command.CONTROL_RESPONSE, 15)
                     .addByte((byte)0x01)                            // 压缩方式
                     .addByte((byte)0x00)                            // 带宽
                     .addByte((byte)0x03)                            // 颜色位数
+                    .addShort((short)screenSize.getWidth())         // 屏幕宽度
+                    .addShort((short)screenSize.getHeight())        // 屏幕高度
                     .addLong(System.currentTimeMillis());           // 当前系统时间戳
             (captureWorker = new CaptureWorker()).start();
             (compressWorker = new CompressWorker()).start();

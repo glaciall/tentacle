@@ -127,13 +127,18 @@ public class TentacleDesktopWSS
                 this.sendResponse("request-control", "主机端未连接");
                 return;
             }
-            this.sendResponse("request-control", "success");
             rdSession.bind(this);
+            this.sendResponse("request-control", "success");
         }
         catch(Exception ex)
         {
             ex.printStackTrace();
         }
+    }
+
+    public void sendControlResponse(int compressMethod, int bandWidth, int colorBits, int screenWidth, int screenHeight)
+    {
+        sendText("{ \"action\" : \"setup\", \"compressMethod\" : " + compressMethod + ", \"bandWidth\" : " + bandWidth + ", \"colorBits\" : " + colorBits + ", \"screenWidth\" : " + screenWidth + ", \"screenHeight\" : " + screenHeight + " }");
     }
 
     public void sendScreenshot(byte[] screenshot)
