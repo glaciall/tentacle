@@ -11,16 +11,27 @@
     <canvas id="screen" width="800" height="600"></canvas>
 </div>
 <div class="x-cmd-bar">
+    <div class="x-cmd x-cmd-left x-cmd-color" title="颜色模式"></div>
+    <div class="x-cmd x-cmd-left x-cmd-copy" title="文本复制与粘贴"></div>
+    <div class="x-cmd x-cmd-left x-cmd-keyboard" title="发送组合键"></div>
     <div class="x-icon"></div>
+    <div class="x-cmd x-cmd-right x-cmd-transfer" title="文件传送"></div>
+    <div class="x-cmd x-cmd-right x-cmd-printscreen" title="截屏"></div>
+    <div class="x-cmd x-cmd-right x-cmd-disconnect" title="断开连接"></div>
 </div>
 <div class="x-stat-panel">
     <div class="x-stat" id="x-frames">
-        <h1>1234</h1>
+        <h1>0</h1>
         <h5>frames</h5>
     </div>
     <hr />
+    <div class="x-stat" id="x-last-frame">
+        <h1>0 kb</h1>
+        <h5>last frame</h5>
+    </div>
+    <hr />
     <div class="x-stat" id="x-bytes">
-        <h1>12.77 mb</h1>
+        <h1>0 kb</h1>
         <h5>total transfer</h5>
     </div>
     <hr />

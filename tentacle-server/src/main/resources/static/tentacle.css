@@ -53,7 +53,9 @@ body
     -moz-border-radius: 10px;
     border-radius: 10px;
     background-color: rgba(0, 0, 0, 0.4);
-    padding-top: 10px;
+    padding-top: 30px;
+    padding-right: 20px;
+    padding-left: 20px;
 }
 .x-cmd-bar .x-icon
 {
@@ -68,6 +70,80 @@ body
     background-image: url(./cthulhu.png);
     background-repeat: no-repeat;
     background-position: center 30px;
+}
+.x-cmd-bar .x-cmd
+{
+    width: 40px;
+    height: 40px;
+    background-repeat: no-repeat;
+    background-size: 32px 32px;
+    background-color: transparent;
+    background-position: center;
+    cursor: pointer;
+}
+.x-cmd-bar .x-cmd-right
+{
+    float: right;
+    margin-left: 10px;
+}
+.x-cmd-bar .x-cmd-left
+{
+    float: left;
+    margin-right: 10px;
+}
+.x-cmd-bar .x-cmd-transfer
+{
+    background-image: url(./icon/transfer.png);
+}
+.x-cmd-bar .x-cmd-transfer:hover
+{
+    background-image: url(./icon/transfer-hover.png);
+    background-color: #000000;
+}
+.x-cmd-bar .x-cmd-printscreen
+{
+    background-image: url(./icon/printscreen.png);
+}
+.x-cmd-bar .x-cmd-printscreen:hover
+{
+    background-image: url(./icon/printscreen-hover.png);
+    background-color: #000000;
+}
+.x-cmd-bar .x-cmd-disconnect
+{
+    background-image: url(./icon/disconnect.png);
+}
+.x-cmd-bar .x-cmd-disconnect:hover
+{
+    background-image: url(./icon/disconnect-hover.png);
+    background-color: #000000;
+}
+.x-cmd-bar .x-cmd-color
+{
+    background-image: url(./icon/color.png);
+}
+.x-cmd-bar .x-cmd-color:hover
+{
+    background-image: url(./icon/color-hover.png);
+    background-color: #000000;
+}
+.x-cmd-bar .x-cmd-copy
+{
+    background-image: url(./icon/copy.png);
+}
+.x-cmd-bar .x-cmd-copy:hover
+{
+    background-image: url(./icon/copy-hover.png);
+    background-color: #000000;
+}
+.x-cmd-bar .x-cmd-keyboard
+{
+    background-image: url(./icon/keyboard.png);
+}
+.x-cmd-bar .x-cmd-keyboard:hover
+{
+    background-image: url(./icon/keyboard-hover.png);
+    background-color: #000000;
 }
 .x-stat-panel
 {

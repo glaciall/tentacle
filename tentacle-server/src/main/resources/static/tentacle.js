@@ -65,8 +65,10 @@ window.Tentacle = {
         var captureTime = parseInt(x, 16);
         var sequence = (compressedData[12] << 24 | compressedData[13] << 16 | compressedData[14] << 8 | compressedData[15]) & 0xffffffff;
         this.totalTransfered += (compressedData.length / 1024);
+
         var tf = this.totalTransfered.toFixed(2) + ' kb';
         if (this.totalTransfered > 1024) tf = (this.totalTransfered / 1024).toFixed(2) + ' mb';
+        $('#x-last-frame h1').html((compressedData.length / 1024).toFixed(2) + ' kb');
         $('#x-frames h1').html(sequence);
         $('#x-bytes h1').html(tf);
         if (this.imageData.width != width || this.imageData.height != height)
