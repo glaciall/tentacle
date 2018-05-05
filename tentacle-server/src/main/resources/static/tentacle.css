@@ -18,6 +18,10 @@ body
     min-height: 600px;
     background-color: #333333;
 }
+.disable
+{
+    pointer-events: none;
+}
 .x-screen
 {
     box-sizing: content-box !important;

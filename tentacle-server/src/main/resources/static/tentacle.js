@@ -15,7 +15,7 @@ window.Tentacle = {
     {
         if (this.connection != null) return;
         this._bindEvents();
-        this._connect();
+        this.connect();
         this.showLoginDialog();
         this._startTimer();
 
@@ -26,12 +26,13 @@ window.Tentacle = {
     login : function()
     {
         var password = $('#password').val();
-        if ($.trim(password).length == 0) return this.showMessage('请输入密码进行连接');
-        this.send({
+        if ($.trim(password).length == 0) return $('.x-message').html('请输入密码');
+        this._send({
             type : 'command',
             command : 'request-control',
             password : password
         });
+        $('#btn-auth').addClass('disable');
     },
     // 定时器
     _startTimer : function()
@@ -50,9 +51,9 @@ window.Tentacle = {
     __decompressAndShow : function()
     {
         var self = this;
-        if (this.state != '') return setTimeout(this.__decompressAndShow, 50);
+        if (this.state != 'controlling') return setTimeout(function(){ self.__decompressAndShow(); }, 50);
         var compressedData = this.frames.shift();
-        if (compressedData == undefined) return setTimeout(f, 50);
+        if (compressedData == undefined) return setTimeout(function(){ self.__decompressAndShow(); }, 50);
 
         var width = ((compressedData[0] << 8) | compressedData[1]) & 0xffff;
         var height = ((compressedData[2] << 8) | compressedData[3]) & 0xffff;
@@ -101,49 +102,66 @@ window.Tentacle = {
     },
     connect : function()
     {
+        var self = this;
         if (this.connection && this.connection.readyState == 1) return;
         this.frames = [];
         this.hidCommands = [];
         this.state = 'standby';
-        this.connection = new WebSocket('ws://' + location.host + '/tentacle/desktop/ws');
-        this.connection.onopen = this._onopen;
-        this.connection.onmessage = this._onmessage;
-        this.connection.onclose = this._onclose;
-        this.connection.onerror = this._onerror;
+        this.connection = new WebSocket('ws://' + location.host + '/tentacle/desktop/wss');
+        this.connection.onopen = function()
+        {
+            self._onopen.apply(self, arguments);
+        };
+        this.connection.onmessage = function()
+        {
+            self._onmessage.apply(self, arguments);
+        };
+        this.connection.onclose = function()
+        {
+            self._onclose.apply(self, arguments);
+        };
+        this.connection.onerror = function()
+        {
+            self._onerror.apply(self, arguments);
+        };
         this.connection.binaryType = 'arraybuffer';
     },
     _onopen : function() { this.state = 'connected'; },
     _onmessage : function(resp)
     {
+        var self = this;
         if (resp.data instanceof ArrayBuffer)
         {
             var packet = new Uint8Array(resp.data);
-            this.state = 'connected';
             this.frames.push(packet);
         }
         else
         {
-            var response = eval(resp.data);
-            console.log(response);
-            if ('login' == resp.action)
+            var response = eval('(' + resp.data + ')');
+            console.log('action: ' + response.action);
+            if ('login' == response.action)
             {
                 $('#btn-auth').removeClass('disable');
-                if (resp.result == 'success') $('.x-auth-dialog').animateCss('bounceOut');
-                else $('.x-message').text(resp.result);
+                if (response.result == 'success')
+                {
+                    $('.x-auth-dialog').animateCss('bounceOut', function() { $('.x-auth-dialog').hide(); });
+                    self.showMessage('登陆成功');
+                }
+                else $('.x-message').text(response.result);
             }
-            else if ('request-control' == resp.action)
+            else if ('request-control' == response.action)
             {
-                if (resp.result != 'success') this.showMessage(resp.result);
+                if (response.result != 'success') this.showMessage(response.result);
             }
-            else if ('setup' == resp.action)
+            else if ('setup' == response.action)
             {
                 this.state = 'controlling';
             }
-            else if ('read-clipboard' == resp.action)
+            else if ('read-clipboard' == response.action)
             {
 
             }
-            else if ('write-clipboard' == resp.action)
+            else if ('write-clipboard' == response.action)
             {
 
             }
@@ -173,6 +191,18 @@ window.Tentacle = {
                 timestamp : parseInt(e.timeStamp)
             });
         }
+        screenElement.onmousewheel = function(e)
+        {
+            if (self.state != 'controlling') return;
+            // 1 向上，2向下
+            self.__addHIDEvent({
+                type : 'mouse-wheel',
+                key : e.deltaY < 0 ? 1 : 2,
+                x : e.offsetX,
+                y : e.offsetY,
+                timestamp : parseInt(e.timeStamp)
+            });
+        }
         screenElement.onmouseup = function(e)
         {
             if (self.state != 'controlling') return;
@@ -194,6 +224,7 @@ window.Tentacle = {
         }
         screenElement.onmousemove = function(e)
         {
+            if (self.state != 'controlling') return;
             self.__addHIDEvent({
                 type : 'mouse-move',
                 x : e.offsetX,
@@ -203,14 +234,40 @@ window.Tentacle = {
             if (e.preventDefault) e.preventDefault();
             return false;
         }
+        window.onkeydown = function(e)
+        {
+            if (self.state != 'controlling') return;
+            self.__addHIDEvent({
+                type : 'key-press',
+                key : e.keyCode,
+                timestamp : parseInt(e.timeStamp)
+            });
+            if (e.preventDefault) e.preventDefault();
+            return false;
+        }
+        window.onkeyup = function(e)
+        {
+            if (self.state != 'controlling') return;
+            self.__addHIDEvent({
+                type : 'key-release',
+                key : e.keyCode,
+                timestamp : parseInt(e.timeStamp)
+            });
+            if (e.preventDefault) e.preventDefault();
+            return false;
+        }
         // 释放所有按键
         window.onblur = function(e)
         {
-            for (var i = 0; i < this.keyboard.length; i++)
+            for (var i = 0; i < self.keyboard.length; i++)
             {
-                if (this.keyboard[i]) ;
+                if (self.keyboard[i]) ;
             }
         }
+        $('#btn-auth').click(function()
+        {
+            self.login();
+        });
     },
     __addHIDEvent : function(cmd)
     {
@@ -219,7 +276,7 @@ window.Tentacle = {
     __sendHIDCommands : function()
     {
         var self = this;
-        if (this.hidCommands.length == 0) return;
+        if (this.hidCommands.length == 0) return setTimeout(function(){ self.__sendHIDCommands(); }, 50);
         var packet = { type : "hid", commands : [] };
         for (var i = 0, l = this.hidCommands.length; i < l; i++)
         {
@@ -236,7 +293,7 @@ window.Tentacle = {
     // 获取远程主机的剪切板内容
     getRemoteClipboard : function()
     {
-        this.send({
+        this._send({
             type : 'command',
             command : 'get-clipboard',
         });
@@ -244,7 +301,7 @@ window.Tentacle = {
     // 设置远程主机的剪切板内容
     setRemoteClipboard : function(text)
     {
-        this.send({
+        this._send({
             type : 'command',
             command : 'set-clipboard',
             text : text
