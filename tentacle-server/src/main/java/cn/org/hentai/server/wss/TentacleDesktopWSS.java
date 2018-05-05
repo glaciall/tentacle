@@ -123,7 +123,6 @@ public class TentacleDesktopWSS
             rdSession = RDServer.getCurrentSession();
             if (null == rdSession)
             {
-                this.session.getBasicRemote().sendText("client is not connected yet");
                 this.sendResponse("request-control", "主机端未连接");
                 return;
             }
