@@ -159,13 +159,13 @@ window.Tentacle = {
             {
                 this.state = 'controlling';
             }
-            else if ('read-clipboard' == response.action)
+            else if ('get-clipboard' == response.action)
             {
-
+                $('#clipboard-remote').val(response.result);
             }
-            else if ('write-clipboard' == response.action)
+            else if ('set-clipboard' == response.action)
             {
-
+                self.showMessage('己成功发送到远程主机的剪切板');
             }
         }
     },
@@ -266,9 +266,35 @@ window.Tentacle = {
                 if (self.keyboard[i]) ;
             }
         }
+        $('#clipboard-remote, #clipboard-local').click(function()
+        {
+            $(this).select();
+        });
         $('#btn-auth').click(function()
         {
             self.login();
+        });
+        $('.x-cmd-copy').click(function()
+        {
+            if (self.state != 'controlling') return;
+            $('.x-dialog-clipboard').show().animateCss('bounceIn');
+            $('#clipboard-local').val('');
+            self.getRemoteClipboard();
+        });
+        $('.x-dialog-clipboard button[id=btn-send]').click(function()
+        {
+            var text = $('#clipboard-local').val();
+            if (text.length == 0) return self.showMessage('请输入或粘贴文件到上面的文本输入框内');
+            self._send({
+                type : 'command',
+                command : 'set-clipboard',
+                text : text
+            });
+        });
+        $('.x-dialog .x-close').click(function()
+        {
+            var dialog = null;
+            (dialog = $(this).parents('.x-dialog')).animateCss('bounceOut', function(){ dialog.hide(); });
         });
     },
     __addHIDEvent : function(cmd)

@@ -2,11 +2,7 @@ package cn.org.hentai.server.wss;
 
 import cn.org.hentai.server.rds.RDServer;
 import cn.org.hentai.server.rds.RDSession;
-import cn.org.hentai.server.util.ByteUtils;
 import cn.org.hentai.server.util.Configs;
-import cn.org.hentai.server.util.Log;
-import cn.org.hentai.tentacle.compress.RLEncoding;
-import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
@@ -14,12 +10,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
-import javax.imageio.ImageIO;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 
 /**
@@ -58,6 +53,21 @@ public class TentacleDesktopWSS
                 }
                 this.sendResponse("login", "success");
                 requestControl();
+            }
+            else if ("get-clipboard".equals(cmd))
+            {
+                rdSession.addCommand(Packet.create(Command.GET_CLIPBOARD, 3).addBytes("GET".getBytes()));
+            }
+            else if ("set-clipboard".equals(cmd))
+            {
+                if (!json.has("text"))
+                {
+                    this.sendResponse("set-clipboard", "发送的文本内容不能为空");
+                    return;
+                }
+                String text = json.get("text").getAsString();
+                byte[] data = text.getBytes();
+                rdSession.addCommand(Packet.create(Command.SET_CLIPBOARD, 4 + data.length).addInt(data.length).addBytes(data));
             }
         }
         if ("hid".equals(type))
@@ -111,7 +121,7 @@ public class TentacleDesktopWSS
                 }
                 if (cmd.has("key")) key = cmd.get("key").getAsByte();
                 p.addByte(hidType).addByte(eventType).addByte(key).addShort(x).addShort(y).addInt(timestamp);
-                rdSession.addHIDCommand(p);
+                rdSession.addCommand(p);
             }
         }
     }
@@ -135,11 +145,13 @@ public class TentacleDesktopWSS
         }
     }
 
+    // 下发控制响应
     public void sendControlResponse(int compressMethod, int bandWidth, int colorBits, int screenWidth, int screenHeight)
     {
         sendText("{ \"action\" : \"setup\", \"compressMethod\" : " + compressMethod + ", \"bandWidth\" : " + bandWidth + ", \"colorBits\" : " + colorBits + ", \"screenWidth\" : " + screenWidth + ", \"screenHeight\" : " + screenHeight + " }");
     }
 
+    // 下发屏幕截图
     public void sendScreenshot(byte[] screenshot)
     {
         try
@@ -155,9 +167,18 @@ public class TentacleDesktopWSS
         }
     }
 
-    private void sendResponse(String action, String result)
+    // 下发剪切板内容
+    public void sendClipboardData(String text)
     {
-        sendText("{ \"action\" : \"" + action + "\", \"result\" : \"" + result + "\" }");
+        this.sendResponse("get-clipboard", text);
+    }
+
+    public void sendResponse(String action, String result)
+    {
+        JsonObject resp = new JsonObject();
+        resp.addProperty("action", action);
+        resp.addProperty("result", result);
+        sendText(resp.toString());
     }
 
     private void sendText(String text)

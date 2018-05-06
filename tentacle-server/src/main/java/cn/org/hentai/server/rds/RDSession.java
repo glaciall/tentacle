@@ -1,6 +1,7 @@
 package cn.org.hentai.server.rds;
 
 import cn.org.hentai.server.util.ByteUtils;
+import cn.org.hentai.server.util.Log;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
@@ -19,7 +20,7 @@ public class RDSession extends Thread
     InputStream inputStream = null;
     OutputStream outputStream = null;
     TentacleDesktopWSS websocketService = null;
-    LinkedList<Packet> hidCommands = new LinkedList<Packet>();
+    LinkedList<Packet> commands = new LinkedList<Packet>();
 
     boolean needSendStartCommand = false;
     boolean remoteControlling = false;
@@ -46,11 +47,11 @@ public class RDSession extends Thread
     }
 
     // 保存键鼠控制指令包，准备下发到客户端
-    public void addHIDCommand(Packet hidPacket)
+    public void addCommand(Packet hidPacket)
     {
-        synchronized (hidCommands)
+        synchronized (commands)
         {
-            hidCommands.add(hidPacket);
+            commands.add(hidPacket);
         }
     }
 
@@ -102,10 +103,10 @@ public class RDSession extends Thread
                 process(packet);
                 lastActiveTime = System.currentTimeMillis();
             }
-            // 下发HID控制指令
-            if (hidCommands.size() > 0)
+            // 下发控制指令
+            if (commands.size() > 0)
             {
-                sendHIDCommands();
+                sendCommands();
                 lastActiveTime = System.currentTimeMillis();
             }
             sleep(5);
@@ -123,13 +124,13 @@ public class RDSession extends Thread
     }
 
     // 下发键鼠控制指令
-    private void sendHIDCommands() throws Exception
+    private void sendCommands() throws Exception
     {
-        synchronized (hidCommands)
+        synchronized (commands)
         {
-            while (hidCommands.size() > 0)
+            while (commands.size() > 0)
             {
-                Packet hidPacket = hidCommands.removeFirst();
+                Packet hidPacket = commands.removeFirst();
                 outputStream.write(hidPacket.getBytes());
                 outputStream.flush();
             }
@@ -154,9 +155,19 @@ public class RDSession extends Thread
             packet.skip(11);
             websocketService.sendScreenshot(packet.nextBytes(dataLength));
         }
-        if (cmd == Command.HEARTBEAT)
+        else if (Command.HEARTBEAT == cmd)
         {
             // do nothing here...
+        }
+        else if (Command.SET_CLIPBOARD_RESPONSE == cmd)
+        {
+            websocketService.sendResponse("set-clipboard", "success");
+        }
+        else if (Command.GET_CLIPBOARD_RESPONSE == cmd)
+        {
+            int len = packet.nextInt();
+            String text = new String(packet.nextBytes(len));
+            websocketService.sendClipboardData(text);
         }
 
         if (resp != null)
