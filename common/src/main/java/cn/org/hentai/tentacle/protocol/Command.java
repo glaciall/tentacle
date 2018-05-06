@@ -14,7 +14,9 @@ public final class Command
     public static final byte HID_COMMAND = 0x06;                    // 人机接口指令
     public static final byte SCREENSHOT = 0x07;                     // 屏幕截图
     public static final byte SET_CLIPBOARD = 0x08;                  // 设置剪切板内容
-    public static final byte GET_CLIPBOARD = 0x09;                  // 获取剪切板内容
+    public static final byte SET_CLIPBOARD_RESPONSE = 0x09;         // 设置剪切板内容的应答
+    public static final byte GET_CLIPBOARD = 0x10;                  // 获取剪切板内容
+    public static final byte GET_CLIPBOARD_RESPONSE = 0x11;         // 获取剪切板内容的应答
 
     public static final byte TYPE_MOUSE = 0x01;                     // 类型：鼠标
     public static final byte TYPE_KEYBOARD = 0x02;                  // 类型：键盘
