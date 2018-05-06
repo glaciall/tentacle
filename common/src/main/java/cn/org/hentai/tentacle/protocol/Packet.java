@@ -55,7 +55,7 @@ public class Packet
         if (inputStream.available() < 11) return null;
         byte[] head = new byte[11];
         int len = inputStream.read(head);
-        int dataLength = ByteUtils.getInt(head, 7,4);
+        int dataLength = ByteUtils.getInt(head, 7,4) & 0x7fffff;
         ByteArrayOutputStream baos = new ByteArrayOutputStream(dataLength + 10);
         byte[] buff = new byte[512];
         for (int i = 0; i < dataLength; i += len)
