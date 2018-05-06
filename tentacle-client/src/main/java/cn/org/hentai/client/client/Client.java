@@ -124,9 +124,11 @@ public class Client extends Thread
             Transferable content = clipboard.getContents(null);
             if (content.isDataFlavorSupported(DataFlavor.stringFlavor))
             {
-                String text = (String) content.getTransferData(DataFlavor.stringFlavor);
+                String text = (String)clipboard.getData(DataFlavor.stringFlavor);
                 // 剪切板没有内容就别回应了
-                if (text != null && text.length() > 0) resp = Packet.create(Command.GET_CLIPBOARD_RESPONSE, 4 + text.length()).addInt(text.length()).addBytes(text.getBytes());
+                byte[] bytes = text.getBytes();
+                if (text != null && text.length() > 0)
+                    resp = Packet.create(Command.GET_CLIPBOARD_RESPONSE, 4 + bytes.length).addInt(bytes.length).addBytes(bytes);
             }
         }
         // 设置剪切板内容
@@ -184,7 +186,7 @@ public class Client extends Thread
         if (!working) return;
         Packet p = ScreenImages.getCompressedScreen();
         p.skip(6 + 1 + 4 + 2 + 2 + 8);
-        Log.debug("Sequence: " + p.nextInt());
+        // Log.debug("Sequence: " + p.nextInt());
         outputStream.write(p.getBytes());
         outputStream.flush();
     }
