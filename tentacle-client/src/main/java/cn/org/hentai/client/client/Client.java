@@ -126,7 +126,7 @@ public class Client extends Thread
             {
                 String text = (String) content.getTransferData(DataFlavor.stringFlavor);
                 // 剪切板没有内容就别回应了
-                if (text != null && text.length() > 0) resp = Packet.create(Command.COMMON_RESPONSE, 4 + text.length()).addInt(text.length()).addBytes(text.getBytes());
+                if (text != null && text.length() > 0) resp = Packet.create(Command.GET_CLIPBOARD_RESPONSE, 4 + text.length()).addInt(text.length()).addBytes(text.getBytes());
             }
         }
         // 设置剪切板内容
@@ -137,6 +137,7 @@ public class Client extends Thread
             String text = new String(packet.nextBytes(len));
             StringSelection selection = new StringSelection(text);
             clipboard.setContents(selection, null);
+            resp = Packet.create(Command.SET_CLIPBOARD_RESPONSE, 4).addBytes("OJBK".getBytes());
         }
         // 键鼠事件处理
         else if (cmd == Command.HID_COMMAND)
