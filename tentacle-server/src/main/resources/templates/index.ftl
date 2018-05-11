@@ -56,6 +56,143 @@
         <button class="btn" id="btn-send">发送到远程主机</button>
     </div>
 </div>
+<div class="x-dialog x-dialog-keyboard">
+    <div class="x-title">虚拟键盘<i class="x-close"></i></div>
+    <hr />
+    <div class="x-keyboard">
+        <div class="x-funcs">
+            <b class="x-2b">ESC</b>
+            <i></i>
+            <b>F1</b>
+            <b>F2</b>
+            <b>F3</b>
+            <b>F4</b>
+            <i></i>
+            <b>F5</b>
+            <b>F6</b>
+            <b>F7</b>
+            <b>F8</b>
+            <i></i>
+            <b>F9</b>
+            <b>F10</b>
+            <b>F11</b>
+            <b>F12</b>
+            <div class="clearfix"></div>
+        </div>
+        <div>
+            <div class="x-kb-main">
+                <div>
+                    <b class="x-shiftkey">`<sup>~</sup></b>
+                    <i></i>
+                    <b class="x-shiftkey">1<sup>!</sup></b>
+                    <b class="x-shiftkey">2<sup>@</sup></b>
+                    <b class="x-shiftkey">3<sup>#</sup></b>
+                    <b class="x-shiftkey">4<sup>$</sup></b>
+                    <b class="x-shiftkey">5<sup>%</sup></b>
+                    <b class="x-shiftkey">6<sup>^</sup></b>
+                    <b class="x-shiftkey">7<sup>&</sup></b>
+                    <b class="x-shiftkey">8<sup>*</sup></b>
+                    <b class="x-shiftkey">9<sup>(</sup></b>
+                    <b class="x-shiftkey">0<sup>)</sup></b>
+                    <b class="x-shiftkey">-<sup>_</sup></b>
+                    <b class="x-shiftkey">=<sup>+</sup></b>
+                    <b class="x-2b x-align-right">BACK</b>
+                    <div class="clearfix"></div>
+                </div>
+                <div>
+                    <b class="x-2b x-align-left">TAB</b>
+                    <i></i>
+                    <b>Q</b>
+                    <b>W</b>
+                    <b>E</b>
+                    <b>R</b>
+                    <b>T</b>
+                    <b>Y</b>
+                    <b>U</b>
+                    <b>I</b>
+                    <b>O</b>
+                    <b>P</b>
+                    <b class="x-shiftkey">[<sup>{</sup></b>
+                    <b class="x-shiftkey">]<sup>}</sup></b>
+                    <b class="x-shiftkey">\<sup>|</sup></b>
+                    <div class="clearfix"></div>
+                </div>
+                <div>
+                    <b class="x-2b x-align-left">CAPS</b>
+                    <i></i>
+                    <b>A</b>
+                    <b>S</b>
+                    <b>D</b>
+                    <b>F</b>
+                    <b>G</b>
+                    <b>H</b>
+                    <b>J</b>
+                    <b>K</b>
+                    <b>L</b>
+                    <b class="x-pressed">;<sup>:</sup></b>
+                    <b>'<sup>"</sup></b>
+                    <b class="x-3b x-align-right">ENTER</b>
+                </div>
+                <div>
+                    <b class="x-4b x-align-left">SHIFT</b>
+                    <i></i>
+                    <b>Z</b>
+                    <b>X</b>
+                    <b>C</b>
+                    <b>V</b>
+                    <b>B</b>
+                    <b>N</b>
+                    <b>M</b>
+                    <b>,<sup>&lt;</sup></b>
+                    <b>.<sup>&gt;</sup></b>
+                    <b>/<sup>?</sup></b>
+                    <b class="x-4b x-align-right">SHIFT</b>
+                </div>
+                <div>
+                    <b class="x-2b x-align-left">CTRL</b>
+                    <i></i>
+                    <b class="x-2b">ALT</b>
+                    <i></i>
+                    <b class="x-spacebar">SPACE</b>
+                    <i></i>
+                    <b class="x-2b">ALT</b>
+                    <i></i>
+                    <b class="x-2b x-align-right">CTRL</b>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="x-kb-ctrl">
+                <div>
+                    <b class="x-2b">INS</b>
+                    <b class="x-2b">HOME</b>
+                    <b class="x-2b">PGUP</b>
+                    <div class="clearfix"></div>
+                </div>
+                <div>
+                    <b class="x-2b">DEL</b>
+                    <b class="x-2b">END</b>
+                    <b class="x-2b">PGDN</b>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x-dir">
+                    <s></s>
+                    <b>&blacktriangle;</b>
+                    <s></s>
+                    <div class="clearfix"></div>
+                    <b>&blacktriangleleft;</b>
+                    <b>&blacktriangledown;</b>
+                    <b>&blacktriangleright;</b>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+    <div class="x-actions">
+        <button class="btn">CTRL+ALT+DELETE</button>
+        <button class="btn">发送组合键</button>
+    </div>
+</div>
 <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 
 <script type="text/javascript">

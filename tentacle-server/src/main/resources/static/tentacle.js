@@ -297,13 +297,20 @@ window.Tentacle = {
                 });
             }
         }
-        $('#clipboard-remote, #clipboard-local').click(function()
-        {
-            $(this).select();
-        });
         $('#btn-auth').click(function()
         {
             self.login();
+        });
+        $('.x-dialog .x-close').click(function()
+        {
+            var dialog = null;
+            (dialog = $(this).parents('.x-dialog')).animateCss('bounceOut', function(){ dialog.hide(); });
+            self._controlling();
+        });
+        // 剪切板数据交换
+        $('#clipboard-remote, #clipboard-local').click(function()
+        {
+            $(this).select();
         });
         $('.x-cmd-copy').click(function()
         {
@@ -323,17 +330,19 @@ window.Tentacle = {
                 text : text
             });
         });
-        $('.x-dialog .x-close').click(function()
-        {
-            var dialog = null;
-            (dialog = $(this).parents('.x-dialog')).animateCss('bounceOut', function(){ dialog.hide(); });
-            self._controlling();
-        });
+        // 下载屏幕画面
         $('.x-cmd-printscreen').click(function()
         {
             if (!self._isControlling()) return;
             var link = $(this);
             link.attr('href', screenElement.toDataURL('image/png'));
+        });
+        // 虚拟键盘/发送组合键
+        $('.x-cmd-keyboard').click(function()
+        {
+            if (!self._isControlling()) return;
+            $('.x-dialog-keyboard').show().animateCss('bounceIn');
+            self._exchanging();
         });
     },
     __addHIDEvent : function(cmd)
