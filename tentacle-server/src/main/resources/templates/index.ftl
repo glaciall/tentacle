@@ -16,7 +16,7 @@
     <div class="x-cmd x-cmd-left x-cmd-keyboard" title="发送组合键"></div>
     <div class="x-icon"></div>
     <div class="x-cmd x-cmd-right x-cmd-disconnect" title="断开连接"></div>
-    <div class="x-cmd x-cmd-right x-cmd-printscreen" title="截屏"></div>
+    <a href="javascript:;" download="tentacle.png" class="x-cmd x-cmd-right x-cmd-printscreen" title="截屏另存为"></a>
     <div class="x-cmd x-cmd-right x-cmd-transfer" title="文件传送"></div>
 </div>
 <div class="x-stat-panel">

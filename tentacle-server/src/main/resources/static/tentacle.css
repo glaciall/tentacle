@@ -81,6 +81,7 @@ body
     background-color: transparent;
     background-position: center;
     cursor: pointer;
+    display: block;
 }
 .x-cmd-bar .x-cmd-right
 {

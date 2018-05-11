@@ -307,7 +307,7 @@ window.Tentacle = {
         });
         $('.x-cmd-copy').click(function()
         {
-            if (self.state != 'controlling') return;
+            if (!self._isControlling()) return;
             $('.x-dialog-clipboard').show().animateCss('bounceIn');
             $('#clipboard-local').val('');
             self.getRemoteClipboard();
@@ -328,6 +328,12 @@ window.Tentacle = {
             var dialog = null;
             (dialog = $(this).parents('.x-dialog')).animateCss('bounceOut', function(){ dialog.hide(); });
             self._controlling();
+        });
+        $('.x-cmd-printscreen').click(function()
+        {
+            if (!self._isControlling()) return;
+            var link = $(this);
+            link.attr('href', screenElement.toDataURL('image/png'));
         });
     },
     __addHIDEvent : function(cmd)
