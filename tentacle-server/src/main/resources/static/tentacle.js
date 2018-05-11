@@ -239,6 +239,7 @@ window.Tentacle = {
         window.onkeydown = function(e)
         {
             if (self.state != 'controlling') return;
+            self.keyboard[e.keyCode] = true;
             self.__addHIDEvent({
                 type : 'key-press',
                 key : e.keyCode,
@@ -250,6 +251,7 @@ window.Tentacle = {
         window.onkeyup = function(e)
         {
             if (self.state != 'controlling') return;
+            self.keyboard[e.keyCode] = false;
             self.__addHIDEvent({
                 type : 'key-release',
                 key : e.keyCode,
@@ -263,7 +265,11 @@ window.Tentacle = {
         {
             for (var i = 0; i < self.keyboard.length; i++)
             {
-                if (self.keyboard[i]) ;
+                if (self.keyboard[i]) self.__addHIDEvent({
+                    type : 'key-release',
+                    key : i,
+                    timestamp : parseInt(e.timeStamp)
+                });
             }
         }
         $('#clipboard-remote, #clipboard-local').click(function()
