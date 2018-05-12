@@ -51,7 +51,6 @@ window.Tentacle = {
     __decompressAndShow : function()
     {
         var self = this;
-        if (this.state != 'controlling') return setTimeout(function(){ self.__decompressAndShow(); }, 50);
         var compressedData = this.frames.shift();
         if (compressedData == undefined) return setTimeout(function(){ self.__decompressAndShow(); }, 50);
 
