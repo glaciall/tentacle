@@ -337,11 +337,62 @@ window.Tentacle = {
             link.attr('href', screenElement.toDataURL('image/png'));
         });
         // 虚拟键盘/发送组合键
+        var keys = [];
         $('.x-cmd-keyboard').click(function()
         {
             if (!self._isControlling()) return;
             $('.x-dialog-keyboard').show().animateCss('bounceIn');
             self._exchanging();
+            $('.x-keyboard b').each(function()
+            {
+                $(this).removeClass('x-pressed');
+            });
+            keys = [];
+        });
+        $('.x-keyboard b').click(function()
+        {
+            var btn = $(this);
+            var key = btn.attr('x-key');
+            if (btn.hasClass('x-pressed'))
+            {
+                var newKeyList = [];
+                for (var i = 0; i < keys.length; i++)
+                {
+                    if (keys[i] != key) newKeyList.push(keys[i]);
+                }
+                keys = newKeyList;
+                btn.removeClass('x-pressed');
+            }
+            else
+            {
+                keys.push(key);
+                btn.addClass('x-pressed');
+            }
+        });
+        $('#btn-send-keys').click(function()
+        {
+            if (keys.length == 0) return self.showMessage('请在上面虚拟键盘上依次按下你要发送的按键');
+            for (var i = 0; i < keys.length; i++)
+            {
+                self.__addHIDEvent({
+                    type : 'key-press',
+                    key : keys[i],
+                    timestamp : 0
+                });
+            }
+            for (var i = 0; i < keys.length; i++)
+            {
+                self.__addHIDEvent({
+                    type : 'key-release',
+                    key : keys[i],
+                    timestamp : 0
+                });
+            }
+            keys = [];
+            $('.x-keyboard b').each(function()
+            {
+                $(this).removeClass('x-pressed');
+            });
         });
     },
     __addHIDEvent : function(cmd)
