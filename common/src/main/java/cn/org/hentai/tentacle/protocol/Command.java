@@ -17,6 +17,12 @@ public final class Command
     public static final byte SET_CLIPBOARD_RESPONSE = 0x09;         // 设置剪切板内容的应答
     public static final byte GET_CLIPBOARD = 0x10;                  // 获取剪切板内容
     public static final byte GET_CLIPBOARD_RESPONSE = 0x11;         // 获取剪切板内容的应答
+    public static final byte LIST_FILES = 0x12;                     // 获取文件列表
+    public static final byte LIST_FILES_RESPONSE = 0x13;            // 获取文件列表的应答
+    public static final byte DOWNLOAD_FILE = 0x14;                  // 下载文件
+    public static final byte DOWNLOAD_FILE_RESPONSE = 0x15;         // 下载文件的应答
+    public static final byte UPLOAD_FILE = 0x16;                    // 上传文件
+    public static final byte UPLOAD_FILE_RESPONSE = 0x17;           // 上传文件的应答
 
     public static final byte TYPE_MOUSE = 0x01;                     // 类型：鼠标
     public static final byte TYPE_KEYBOARD = 0x02;                  // 类型：键盘
