@@ -5,11 +5,14 @@ import cn.org.hentai.server.util.Log;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.system.File;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by matrixy on 2018/4/15.
@@ -168,6 +171,22 @@ public class RDSession extends Thread
             int len = packet.nextInt();
             String text = new String(packet.nextBytes(len));
             websocketService.sendClipboardData(text);
+        }
+        else if (Command.LIST_FILES_RESPONSE == cmd)
+        {
+            byte[] data = packet.nextBytes(dataLength);
+            List<File> files = new ArrayList<File>();
+            for (int i = 0; i < data.length; )
+            {
+                boolean isDirectory = data[i] == 1;
+                long length = ByteUtils.getLong(data, i += 1, 8);
+                long mtime = ByteUtils.getLong(data, i += 8, 8);
+                int strlen = ByteUtils.getInt(data, i += 8, 4);
+                String name = new String(data, i += 4, strlen, "UTF-8");
+                i += strlen;
+                files.add(new File(isDirectory, length, mtime, name));
+            }
+            websocketService.sendFiles(files);
         }
 
         if (resp != null)

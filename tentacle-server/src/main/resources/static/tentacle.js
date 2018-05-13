@@ -166,6 +166,10 @@ window.Tentacle = {
             {
                 self.showMessage('己成功发送到远程主机的剪切板');
             }
+            else if ('ls' == response.action)
+            {
+                self._showFiles(response);
+            }
         }
     },
     _onclose : function() { this._disconnected(); },
@@ -394,6 +398,20 @@ window.Tentacle = {
                 $(this).removeClass('x-pressed');
             });
         });
+        // 文件管理
+        var currentPath = "";
+        $('.x-cmd-transfer').click(function()
+        {
+            if (!self._isControlling()) return;
+            currentPath = "c:\\windows\\System32\\";
+            $('.x-dialog-fmanager').show().animateCss('bounceIn');
+            self._exchanging();
+            self._send({
+                type : 'command',
+                command : 'ls',
+                path : currentPath
+            });
+        });
     },
     __addHIDEvent : function(cmd)
     {
@@ -434,6 +452,32 @@ window.Tentacle = {
         });
     },
 
+    // /////////////////////////////////////////////////////////////////////
+    // 文件管理相关
+    _showFiles : function(result)
+    {
+        // TODO: 需要排序，文件夹在前，文件在后，同时按字母排序
+        var shtml = '';
+        for (var i = 0; i < result.files.length; i++)
+        {
+            var f = result.files[i];
+            // TODO: 需要截断超长的文件名
+            // 最大长度：7B296FB0-376B-497e-B012-9C450E-5P-0
+            var name = decodeURIComponent(f.name);
+            var suffix = f.isDirectory ? null : name.indexOf('.') > -1 ? name.substring(name.lastIndexOf('.') + 1) : null;
+            var fileTypeInfo = f.isDirectory ? FileTypes.folder : FileTypes.get(suffix);
+            var fileIcon = fileTypeInfo.icon;
+            var flength = f.length;
+            var mtime = new Date(f.mtime).toLocaleString();
+            shtml += '<tr>';
+            shtml += '  <td><i><img src="../static/ftype/' + fileIcon + '" /></i><a href="javascript:;">' + name + '</a></td>';
+            shtml += '  <td align="center">' + (fileTypeInfo == null ? '-' : fileTypeInfo.name) + '</td>';
+            shtml += '  <td align="right">' + flength + '</td>';
+            shtml += '  <td align="center"><a href="#"><img src="../static/icon/download.png" /></a></td>';
+            shtml += '</tr>';
+        }
+        $('.x-fmanager table tbody').html(shtml);
+    },
 
     // /////////////////////////////////////////////////////////////////////
     // UI相关

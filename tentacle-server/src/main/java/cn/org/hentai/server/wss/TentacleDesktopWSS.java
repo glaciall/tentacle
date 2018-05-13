@@ -6,6 +6,7 @@ import cn.org.hentai.server.util.Configs;
 import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.system.File;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -15,7 +16,9 @@ import org.springframework.util.StringUtils;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 /**
  * Created by matrixy on 2018/4/12.
@@ -68,6 +71,17 @@ public class TentacleDesktopWSS
                 String text = json.get("text").getAsString();
                 byte[] data = text.getBytes();
                 rdSession.addCommand(Packet.create(Command.SET_CLIPBOARD, 4 + data.length).addInt(data.length).addBytes(data));
+            }
+            else if ("ls".equals(cmd))
+            {
+                String path = !json.has("path") ? "" : json.get("path").getAsString();
+                byte[] data = null;
+                try
+                {
+                    data = path.getBytes("UTF-8");
+                }
+                catch(UnsupportedEncodingException e) { }
+                rdSession.addCommand(Packet.create(Command.LIST_FILES, 4 + data.length).addInt(data.length).addBytes(data));
             }
         }
         if ("hid".equals(type))
@@ -149,6 +163,30 @@ public class TentacleDesktopWSS
     public void sendControlResponse(int compressMethod, int bandWidth, int colorBits, int screenWidth, int screenHeight)
     {
         sendText("{ \"action\" : \"setup\", \"compressMethod\" : " + compressMethod + ", \"bandWidth\" : " + bandWidth + ", \"colorBits\" : " + colorBits + ", \"screenWidth\" : " + screenWidth + ", \"screenHeight\" : " + screenHeight + " }");
+    }
+
+    // 下发文件列表
+    public void sendFiles(List<File> files)
+    {
+        StringBuffer buff = new StringBuffer(4096);
+        buff.append("{ \"action\" : \"ls\", \"files\" : [");
+        for (int i = 0, l = files.size(); i < l; i++)
+        {
+            File file = files.get(i);
+            buff.append('{');
+            buff.append("\"isDirectory\" : " + file.isDirectory() + ",");
+            buff.append("\"length\" : " + file.getLength() + ",");
+            buff.append("\"mtime\" : " + file.getLastModifiedTime() + ",");
+            try
+            {
+                buff.append("\"name\" : \"" + java.net.URLEncoder.encode(file.getName(), "UTF-8") + "\"");
+            }
+            catch(UnsupportedEncodingException e) { }
+            buff.append('}');
+            if (i < l - 1) buff.append(',');
+        }
+        buff.append("]}");
+        this.sendText(buff.toString());
     }
 
     // 下发屏幕截图

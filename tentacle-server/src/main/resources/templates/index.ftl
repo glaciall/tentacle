@@ -192,8 +192,30 @@
         <button class="btn" id="btn-send-keys">发送组合键</button>
     </div>
 </div>
+<div class="x-dialog x-dialog-fmanager">
+    <div class="x-title">远程主机文件管理<i class="x-close"></i></div>
+    <hr />
+    <div class="x-fmanager">
+        <div class="x-path"><a href="#">/</a><a href="#">opt/</a><a href="#">software/</a></div>
+        <table cellpadding="4" cellspacing="0" border="1" width="100%">
+            <thead>
+            <tr>
+                <th align="left">文件名</th>
+                <th width="20%" align="center">类型</th>
+                <th width="20%" align="right">大小</th>
+                <th width="10%" align="center">-</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="x-actions">
+        <button class="btn" id="btn-upload">上传本地文件</button>
+    </div>
+</div>
 <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
-
+<script type="text/javascript" src="${web_resource}/fileext.js"></script>
 <script type="text/javascript">
     $.fn.extend({
         animateCss: function(animationName, callback) {
