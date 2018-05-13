@@ -6,7 +6,7 @@ window.Tentacle = {
     mouse : [],
     hidCommands : [],
     connection : null,
-    // 状态：standby,connected,controlling,disconnected
+    // 状态：standby,connected,controlling,exchanging,disconnected
     state : 'standby',
     frames : [],
 
@@ -51,7 +51,6 @@ window.Tentacle = {
     __decompressAndShow : function()
     {
         var self = this;
-        if (this.state != 'controlling') return setTimeout(function(){ self.__decompressAndShow(); }, 50);
         var compressedData = this.frames.shift();
         if (compressedData == undefined) return setTimeout(function(){ self.__decompressAndShow(); }, 50);
 
@@ -108,7 +107,7 @@ window.Tentacle = {
         if (this.connection && this.connection.readyState == 1) return;
         this.frames = [];
         this.hidCommands = [];
-        this.state = 'standby';
+        this._standby();
         this.connection = new WebSocket('ws://' + location.host + '/tentacle/desktop/wss');
         this.connection.onopen = function()
         {
@@ -128,7 +127,7 @@ window.Tentacle = {
         };
         this.connection.binaryType = 'arraybuffer';
     },
-    _onopen : function() { this.state = 'connected'; },
+    _onopen : function() { this._connected(); },
     _onmessage : function(resp)
     {
         var self = this;
@@ -157,7 +156,7 @@ window.Tentacle = {
             }
             else if ('setup' == response.action)
             {
-                this.state = 'controlling';
+                this._controlling();
             }
             else if ('get-clipboard' == response.action)
             {
@@ -169,9 +168,34 @@ window.Tentacle = {
             }
         }
     },
-    _onclose : function() { this.state = 'disconnected'; },
+    _onclose : function() { this._disconnected(); },
     _onerror : function() { },
 
+    // 状态变更
+    _exchanging : function()
+    {
+        this.state = 'exchanging';
+    },
+    _controlling : function()
+    {
+        this.state = 'controlling';
+    },
+    _connected : function()
+    {
+        this.state = 'connected';
+    },
+    _standby : function()
+    {
+        this.state = 'standby';
+    },
+    _disconnected : function()
+    {
+        this.state = 'disconnected';
+    },
+    _isControlling : function()
+    {
+        return this.state == 'controlling';
+    },
 
     // /////////////////////////////////////////////////////////////////////
     // 事件绑定
@@ -182,7 +206,7 @@ window.Tentacle = {
         // 鼠标按下
         screenElement.onmousedown = function(e)
         {
-            if (self.state != 'controlling') return;
+            if (!self._isControlling()) return;
             // 1 左键，2 中键，3 右键
             var key = e.which;
             self.__addHIDEvent({
@@ -195,7 +219,7 @@ window.Tentacle = {
         }
         screenElement.onmousewheel = function(e)
         {
-            if (self.state != 'controlling') return;
+            if (!self._isControlling()) return;
             // 1 向上，2向下
             self.__addHIDEvent({
                 type : 'mouse-wheel',
@@ -207,7 +231,7 @@ window.Tentacle = {
         }
         screenElement.onmouseup = function(e)
         {
-            if (self.state != 'controlling') return;
+            if (!self._isControlling()) return;
             var key = e.which;
             self.__addHIDEvent({
                 type : 'mouse-up',
@@ -226,7 +250,7 @@ window.Tentacle = {
         }
         screenElement.onmousemove = function(e)
         {
-            if (self.state != 'controlling') return;
+            if (!self._isControlling()) return;
             self.__addHIDEvent({
                 type : 'mouse-move',
                 x : e.offsetX,
@@ -238,7 +262,8 @@ window.Tentacle = {
         }
         window.onkeydown = function(e)
         {
-            if (self.state != 'controlling') return;
+            if (!self._isControlling()) return;
+            self.keyboard[e.keyCode] = true;
             self.__addHIDEvent({
                 type : 'key-press',
                 key : e.keyCode,
@@ -249,7 +274,8 @@ window.Tentacle = {
         }
         window.onkeyup = function(e)
         {
-            if (self.state != 'controlling') return;
+            if (!self._isControlling()) return;
+            self.keyboard[e.keyCode] = false;
             self.__addHIDEvent({
                 type : 'key-release',
                 key : e.keyCode,
@@ -263,23 +289,35 @@ window.Tentacle = {
         {
             for (var i = 0; i < self.keyboard.length; i++)
             {
-                if (self.keyboard[i]) ;
+                if (self.keyboard[i]) self.__addHIDEvent({
+                    type : 'key-release',
+                    key : i,
+                    timestamp : parseInt(e.timeStamp)
+                });
             }
         }
-        $('#clipboard-remote, #clipboard-local').click(function()
-        {
-            $(this).select();
-        });
         $('#btn-auth').click(function()
         {
             self.login();
         });
+        $('.x-dialog .x-close').click(function()
+        {
+            var dialog = null;
+            (dialog = $(this).parents('.x-dialog')).animateCss('bounceOut', function(){ dialog.hide(); });
+            self._controlling();
+        });
+        // 剪切板数据交换
+        $('#clipboard-remote, #clipboard-local').click(function()
+        {
+            $(this).select();
+        });
         $('.x-cmd-copy').click(function()
         {
-            if (self.state != 'controlling') return;
+            if (!self._isControlling()) return;
             $('.x-dialog-clipboard').show().animateCss('bounceIn');
             $('#clipboard-local').val('');
             self.getRemoteClipboard();
+            self._exchanging();
         });
         $('.x-dialog-clipboard button[id=btn-send]').click(function()
         {
@@ -291,10 +329,70 @@ window.Tentacle = {
                 text : text
             });
         });
-        $('.x-dialog .x-close').click(function()
+        // 下载屏幕画面
+        $('.x-cmd-printscreen').click(function()
         {
-            var dialog = null;
-            (dialog = $(this).parents('.x-dialog')).animateCss('bounceOut', function(){ dialog.hide(); });
+            if (!self._isControlling()) return;
+            var link = $(this);
+            link.attr('href', screenElement.toDataURL('image/png'));
+        });
+        // 虚拟键盘/发送组合键
+        var keys = [];
+        $('.x-cmd-keyboard').click(function()
+        {
+            if (!self._isControlling()) return;
+            $('.x-dialog-keyboard').show().animateCss('bounceIn');
+            self._exchanging();
+            $('.x-keyboard b').each(function()
+            {
+                $(this).removeClass('x-pressed');
+            });
+            keys = [];
+        });
+        $('.x-keyboard b').click(function()
+        {
+            var btn = $(this);
+            var key = btn.attr('x-key');
+            if (btn.hasClass('x-pressed'))
+            {
+                var newKeyList = [];
+                for (var i = 0; i < keys.length; i++)
+                {
+                    if (keys[i] != key) newKeyList.push(keys[i]);
+                }
+                keys = newKeyList;
+                btn.removeClass('x-pressed');
+            }
+            else
+            {
+                keys.push(key);
+                btn.addClass('x-pressed');
+            }
+        });
+        $('#btn-send-keys').click(function()
+        {
+            if (keys.length == 0) return self.showMessage('请在上面虚拟键盘上依次按下你要发送的按键');
+            for (var i = 0; i < keys.length; i++)
+            {
+                self.__addHIDEvent({
+                    type : 'key-press',
+                    key : keys[i],
+                    timestamp : 0
+                });
+            }
+            for (var i = 0; i < keys.length; i++)
+            {
+                self.__addHIDEvent({
+                    type : 'key-release',
+                    key : keys[i],
+                    timestamp : 0
+                });
+            }
+            keys = [];
+            $('.x-keyboard b').each(function()
+            {
+                $(this).removeClass('x-pressed');
+            });
         });
     },
     __addHIDEvent : function(cmd)
