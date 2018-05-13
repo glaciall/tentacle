@@ -6,6 +6,7 @@ import cn.org.hentai.tentacle.hid.KeyboardCommand;
 import cn.org.hentai.tentacle.hid.MouseCommand;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.system.FileSystem;
 import cn.org.hentai.tentacle.util.ByteUtils;
 import cn.org.hentai.tentacle.util.Configs;
 import cn.org.hentai.tentacle.util.Log;
@@ -15,6 +16,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -170,6 +173,26 @@ public class Client extends Thread
             compressWorker.terminate();
             hidCommandExecutor.terminate();
             ScreenImages.clear();
+        }
+        // 列出文件列表
+        else if (cmd == Command.LIST_FILES)
+        {
+            int len = packet.nextInt();
+            String path = new String(packet.nextBytes(len), "UTF-8");
+            File[] files = FileSystem.list(path);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(40960);
+            for (int i = 0; i < files.length; i++)
+            {
+                File file = files[i];
+                // 是否目录，长度，权限
+                byte[] fbytes = file.getName().getBytes("UTF-8");
+                baos.write(file.isDirectory() ? 1 : 0);
+                baos.write(ByteUtils.toBytes(file.length()));
+                baos.write(ByteUtils.toBytes(file.lastModified()));
+                baos.write(ByteUtils.toBytes(fbytes.length));
+                baos.write(fbytes);
+            }
+            resp = Packet.create(Command.LIST_FILES_RESPONSE, baos.size()).addBytes(baos.toByteArray());
         }
 
         // 发送响应至服务器端

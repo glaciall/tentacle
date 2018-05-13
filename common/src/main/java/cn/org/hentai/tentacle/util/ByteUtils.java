@@ -65,6 +65,16 @@ public final class ByteUtils
         return bytes;
     }
 
+    public static byte[] toBytes(long val)
+    {
+        byte[] bytes = new byte[8];
+        for (int i = 0; i < 8; i++)
+        {
+            bytes[i] = (byte)(val >> ((7 - i) * 8) & 0xff);
+        }
+        return bytes;
+    }
+
     public static int getInt(byte[] data, int offset, int length)
     {
         int val = 0;
