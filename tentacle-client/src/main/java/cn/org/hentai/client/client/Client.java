@@ -181,7 +181,7 @@ public class Client extends Thread
             String path = new String(packet.nextBytes(len), "UTF-8");
             File[] files = FileSystem.list(path);
             ByteArrayOutputStream baos = new ByteArrayOutputStream(40960);
-            for (int i = 0; i < files.length; i++)
+            for (int i = 0; files != null && i < files.length; i++)
             {
                 File file = files[i];
                 // 是否目录，长度，权限
