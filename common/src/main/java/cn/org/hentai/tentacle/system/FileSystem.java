@@ -14,6 +14,11 @@ public final class FileSystem
      */
     public static File[] list(String path)
     {
-        return "".equals(path) ? File.listRoots() : new File(path).listFiles();
+        try
+        {
+            return "".equals(path) ? File.listRoots() : new File(path).listFiles();
+        }
+        catch(Exception e) { }
+        return new File[0];
     }
 }
