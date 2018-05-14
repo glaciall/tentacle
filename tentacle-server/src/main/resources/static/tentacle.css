@@ -537,6 +537,10 @@ body
     height: 400px;
     color: #efefef;
     font-size: 14px;
+}
+.x-fmanager .x-filelist
+{
+    height: 360px;
     overflow: auto;
 }
 .x-fmanager table tbody tr:hover
@@ -547,11 +551,22 @@ body
 {
     height: 30px;
     line-height: 30px;
+    margin-bottom: 10px;
+    overflow: hidden;
 }
-.x-fmanager a, .x-fmanager a:visited
+.x-fmanager a
 {
-    color: #efefef;
+    color: #dedede;
     text-decoration: none;
+}
+.x-fmanager .x-path a
+{
+    margin-right: 3px;
+    float: left;
+}
+.x-fmanager .x-path a:hover
+{
+    color: #999;
 }
 .x-fmanager tbody td i
 {
@@ -559,10 +574,6 @@ body
     width: 20px;
     height: 20px;
     text-align: center;
-}
-.x-fmanager .x-path a:hover
-{
-    color: #999;
 }
 .x-fmanager table tbody td img
 {

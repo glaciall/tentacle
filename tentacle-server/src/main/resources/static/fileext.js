@@ -50,7 +50,6 @@ var FileTypes = {
         {
             var type = this.types[j];
             if (typeof(type.name) == 'undefined') continue;
-            console.log(type);
             var exts = type.suffix.split(',');
             for (var i = 0; i < exts.length; i++)
             {
