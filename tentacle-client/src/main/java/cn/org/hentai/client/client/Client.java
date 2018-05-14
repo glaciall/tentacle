@@ -185,7 +185,9 @@ public class Client extends Thread
             {
                 File file = files[i];
                 // 是否目录，长度，权限
-                byte[] fbytes = file.getName().getBytes("UTF-8");
+                String name = file.getName();
+                if ("".equals(name)) name = file.getAbsolutePath();
+                byte[] fbytes = name.getBytes("UTF-8");
                 baos.write(file.isDirectory() ? 1 : 0);
                 baos.write(ByteUtils.toBytes(file.length()));
                 baos.write(ByteUtils.toBytes(file.lastModified()));
