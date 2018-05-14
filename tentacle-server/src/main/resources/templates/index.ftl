@@ -196,19 +196,21 @@
     <div class="x-title">远程主机文件管理<i class="x-close"></i></div>
     <hr />
     <div class="x-fmanager">
-        <div class="x-path"><a href="#">/</a><a href="#">opt/</a><a href="#">software/</a></div>
-        <table cellpadding="4" cellspacing="0" border="1" width="100%">
-            <thead>
-            <tr>
-                <th align="left">文件名</th>
-                <th width="20%" align="center">类型</th>
-                <th width="20%" align="right">大小</th>
-                <th width="10%" align="center">-</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <div class="x-path"></div>
+        <div class="x-filelist">
+            <table cellpadding="4" cellspacing="0" border="1" width="100%">
+                <thead>
+                <tr>
+                    <th align="left">文件名</th>
+                    <th width="16%" align="center">类型</th>
+                    <th width="10%" align="right">大小</th>
+                    <th width="6%" align="center">-</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
     </div>
     <div class="x-actions">
         <button class="btn" id="btn-upload">上传本地文件</button>
@@ -247,6 +249,7 @@
 <script type="text/javascript" src="${web_resource}/decompress.js"></script>
 <script type="text/javascript" src="${web_resource}/tentacle.js"></script>
 <script type="text/javascript">
+    var ROOT_PATH = '${web_resource}';
     $(document).ready(function()
     {
         Tentacle.init();

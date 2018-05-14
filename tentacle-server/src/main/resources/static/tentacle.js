@@ -403,15 +403,51 @@ window.Tentacle = {
         $('.x-cmd-transfer').click(function()
         {
             if (!self._isControlling()) return;
-            currentPath = "c:\\windows\\System32\\";
             $('.x-dialog-fmanager').show().animateCss('bounceIn');
+            showPath(currentPath = "");
+        });
+        $(document).on('click', '.x-fmanager .x-filelist .x-dir', function()
+        {
+            var dir = unescape($(this).attr('x-name'));
+            var seperator = '\\';
+            if (dir.indexOf('/') > -1) seperator = '/';
+            if (dir.charAt(dir.length - 1) != seperator) dir += seperator;
+            showPath(currentPath += dir);
+        });
+        $(document).on('click', '.x-fmanager .x-path a', function()
+        {
+            var dir = unescape($(this).attr('x-dir'));
+            showPath(currentPath = dir);
+        });
+        $(document).on('click', '.x-fmanager a[id=x-download-file]', function()
+        {
+            var fname = $(this).attr('x-fname');
+            $(this).attr('href', '/download?path=' + encodeURIComponent(currentPath) + '&name=' + fname);
+        });
+        function showPath(dir)
+        {
             self._exchanging();
             self._send({
                 type : 'command',
                 command : 'ls',
                 path : currentPath
             });
-        });
+            var path = '<a href="javascript:;" x-dir=""><img src="' + ROOT_PATH + '/icon/pc.png" width="16" height="16" /></a>';
+            var part = '';
+            var xpath = '';
+            for (var i = 0; i < dir.length; i++)
+            {
+                var chr = dir.charAt(i);
+                if (chr == '/' || chr == '\\')
+                {
+                    xpath += part + chr;
+                    path = path + '<a href="javascript:;" x-dir="' + escape(xpath) + '">' + part + chr + '</a>';
+                    part = '';
+                }
+                else part = part + chr;
+            }
+            $('.x-fmanager .x-path').html(path);
+        }
     },
     __addHIDEvent : function(cmd)
     {
@@ -456,27 +492,44 @@ window.Tentacle = {
     // 文件管理相关
     _showFiles : function(result)
     {
-        // TODO: 需要排序，文件夹在前，文件在后，同时按字母排序
         var shtml = '';
         for (var i = 0; i < result.files.length; i++)
         {
             var f = result.files[i];
-            // TODO: 需要截断超长的文件名
-            // 最大长度：7B296FB0-376B-497e-B012-9C450E-5P-0
-            var name = decodeURIComponent(f.name);
+            var name = f.name;
+            var sname = '';
+            for (var d = 0, s = 0; d < name.length; d++)
+            {
+                var chr = name.charAt(d);
+                sname += chr;
+                s += chr > 0x7f ? 2 : 1;
+                if (s > 30)
+                {
+                    sname += '..';
+                    break;
+                }
+            }
             var suffix = f.isDirectory ? null : name.indexOf('.') > -1 ? name.substring(name.lastIndexOf('.') + 1) : null;
             var fileTypeInfo = f.isDirectory ? FileTypes.folder : FileTypes.get(suffix);
             var fileIcon = fileTypeInfo.icon;
             var flength = f.length;
+            if (flength > 1024 * 1024 * 1024) flength = (flength / 1024 / 1024 / 1024).toFixed(2) + 'G';
+            else if (flength > 1024 * 1024) flength = (flength / 1024 / 1024).toFixed(2) + 'M';
+            else if (flength > 1024) flength = (flength / 1024).toFixed(2) + 'k';
+            else flength = flength + 'b';
             var mtime = new Date(f.mtime).toLocaleString();
             shtml += '<tr>';
-            shtml += '  <td><i><img src="../static/ftype/' + fileIcon + '" /></i><a href="javascript:;">' + name + '</a></td>';
+            shtml += '  <td><i><img src="../static/ftype/' + fileIcon + '" /></i><' + (f.isDirectory ? 'a href="javascript:;"' : 'span') + ' x-name="' + escape(f.name) + '" ' + (f.isDirectory ? 'class="x-dir"' : '') + '>' + sname + '</' + (f.isDirectory ? 'a' : 'span') + '></td>';
             shtml += '  <td align="center">' + (fileTypeInfo == null ? '-' : fileTypeInfo.name) + '</td>';
             shtml += '  <td align="right">' + flength + '</td>';
-            shtml += '  <td align="center"><a href="#"><img src="../static/icon/download.png" /></a></td>';
+            shtml += '  <td align="center">' + (f.isDirectory ? '' : '<a href="javascript:;" id="x-download-file" x-fname="' + encodeURIComponent(f.name) + '"><img src="../static/icon/download.png" /></a>') + '</td>';
             shtml += '</tr>';
         }
         $('.x-fmanager table tbody').html(shtml);
+        setTimeout(function()
+        {
+            $('.x-fmanager .x-filelist').get(0).scrollTop = '0px';
+        }, 0);
     },
 
     // /////////////////////////////////////////////////////////////////////

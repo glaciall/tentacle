@@ -168,25 +168,23 @@ public class TentacleDesktopWSS
     // 下发文件列表
     public void sendFiles(List<File> files)
     {
-        StringBuffer buff = new StringBuffer(4096);
-        buff.append("{ \"action\" : \"ls\", \"files\" : [");
-        for (int i = 0, l = files.size(); i < l; i++)
+        JsonArray fileList = new JsonArray();
+        for (int i = 0; i < files.size(); i++)
         {
-            File file = files.get(i);
-            buff.append('{');
-            buff.append("\"isDirectory\" : " + file.isDirectory() + ",");
-            buff.append("\"length\" : " + file.getLength() + ",");
-            buff.append("\"mtime\" : " + file.getLastModifiedTime() + ",");
-            try
-            {
-                buff.append("\"name\" : \"" + java.net.URLEncoder.encode(file.getName(), "UTF-8") + "\"");
-            }
-            catch(UnsupportedEncodingException e) { }
-            buff.append('}');
-            if (i < l - 1) buff.append(',');
+            File f = files.get(i);
+            JsonObject file = new JsonObject();
+            file.addProperty("isDirectory", f.isDirectory());
+            file.addProperty("length", f.getLength());
+            file.addProperty("mtime", f.getLastModifiedTime());
+            file.addProperty("name", f.getName());
+            fileList.add(file);
         }
-        buff.append("]}");
-        this.sendText(buff.toString());
+
+        JsonObject result = new JsonObject();
+        result.addProperty("action", "ls");
+        result.add("files", fileList);
+
+        this.sendText(result.toString());
     }
 
     // 下发屏幕截图
