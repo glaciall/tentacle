@@ -424,6 +424,8 @@ body
     font-size: 9px;
     font-weight: normal;
     display: block;
+    box-shadow: 1px 1px 1px #000;
+    border-radius: 3px;
 }
 .x-keyboard .x-pressed
 {
