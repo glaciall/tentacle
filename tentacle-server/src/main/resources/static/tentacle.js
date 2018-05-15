@@ -523,7 +523,7 @@ window.Tentacle = {
             shtml += '  <td><i><img src="../static/ftype/' + fileIcon + '" /></i><' + (f.isDirectory ? 'a href="javascript:;"' : 'span') + ' x-name="' + escape(f.name) + '" ' + (f.isDirectory ? 'class="x-dir"' : '') + '>' + sname + '</' + (f.isDirectory ? 'a' : 'span') + '></td>';
             shtml += '  <td align="center">' + (fileTypeInfo == null ? '-' : fileTypeInfo.name) + '</td>';
             shtml += '  <td align="right">' + flength + '</td>';
-            shtml += '  <td align="center">' + (f.isDirectory ? '' : '<a href="javascript:;" id="x-download-file" x-fname="' + encodeURIComponent(f.name) + '"><img src="../static/icon/download.png" /></a>') + '</td>';
+            shtml += '  <td align="center">' + (f.isDirectory ? '' : '<a target="_blank" href="javascript:;" id="x-download-file" x-fname="' + encodeURIComponent(f.name) + '"><img src="../static/icon/download.png" /></a>') + '</td>';
             shtml += '</tr>';
         }
         $('.x-fmanager table tbody').html(shtml);
