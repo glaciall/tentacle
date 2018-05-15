@@ -342,9 +342,9 @@ body
 }
 .x-dialog-fmanager
 {
-    width: 600px;
+    width: 800px;
     height: 600px;
-    margin-left: -300px;
+    margin-left: -400px;
     margin-top: -300px;
     display: none;
 }
@@ -554,6 +554,10 @@ body
     margin-bottom: 10px;
     overflow: hidden;
 }
+.x-fmanager .x-path img
+{
+    vertical-align: text-top;
+}
 .x-fmanager a
 {
     color: #dedede;
@@ -580,4 +584,8 @@ body
     width: 16px;
     height: 16px;
     vertical-align: bottom;
+}
+.x-fmanager table tbody td a:hover
+{
+    color: #0099ff;
 }
