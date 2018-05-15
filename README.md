@@ -1,5 +1,7 @@
 ## 基于java和javascript的远程桌面
 <img src="./additional/tentacle.png" />
+<img src="./additional/keyboard.png" />
+<img src="./additional/fmanager.png" />
 
 ## 使用
 1. 修改配置文件的相应项目，比如监听端口，以及`${rds.access.password}`远程控制访问密码
