@@ -410,7 +410,7 @@ window.Tentacle = {
         {
             var dir = unescape($(this).attr('x-name'));
             var seperator = '\\';
-            if (dir.indexOf('/') > -1) seperator = '/';
+            if (dir.indexOf('/') > -1 || currentPath.indexOf('/') > -1) seperator = '/';
             if (dir.charAt(dir.length - 1) != seperator) dir += seperator;
             showPath(currentPath += dir);
         });
@@ -503,12 +503,13 @@ window.Tentacle = {
                 var chr = name.charAt(d);
                 sname += chr;
                 s += chr > 0x7f ? 2 : 1;
-                if (s > 30)
+                if (s > 40)
                 {
                     sname += '..';
                     break;
                 }
             }
+            sname = name;
             var suffix = f.isDirectory ? null : name.indexOf('.') > -1 ? name.substring(name.lastIndexOf('.') + 1) : null;
             var fileTypeInfo = f.isDirectory ? FileTypes.folder : FileTypes.get(suffix);
             var fileIcon = fileTypeInfo.icon;
