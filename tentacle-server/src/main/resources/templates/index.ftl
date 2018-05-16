@@ -5,6 +5,7 @@
     <title>Tentacle Desktop</title>
     <link rel="stylesheet" type="text/css" href="${web_resource}/tentacle.css" />
     <link rel="stylesheet" type="text/css" href="http://apps.bdimg.com/libs/animate.css/3.1.0/animate.min.css" />
+    <script type="text/javascript" src="${web_resource}/timer.js"></script>
 </head>
 <body>
 <div class="x-screen">
