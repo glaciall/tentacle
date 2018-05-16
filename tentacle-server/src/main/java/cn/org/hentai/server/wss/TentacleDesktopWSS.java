@@ -149,17 +149,12 @@ public class TentacleDesktopWSS
         try
         {
             rdSession = RDServer.getCurrentSession();
-            if (null == rdSession)
-            {
-                this.sendResponse("request-control", "主机端未连接");
-                return;
-            }
             rdSession.bind(this);
             this.sendResponse("request-control", "success");
         }
         catch(Exception ex)
         {
-            ex.printStackTrace();
+            this.sendResponse("request-control", ex.getMessage());
         }
     }
 

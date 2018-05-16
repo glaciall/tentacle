@@ -145,7 +145,7 @@ window.Tentacle = {
                 $('#btn-auth').removeClass('disable');
                 if (response.result == 'success')
                 {
-                    self.showMessage('登陆成功');
+                    $('.x-message').text('密码校验通过');
                 }
                 else $('.x-message').text(response.result);
             }

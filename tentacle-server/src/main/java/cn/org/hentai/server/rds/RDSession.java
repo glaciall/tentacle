@@ -252,6 +252,5 @@ public class RDSession extends Thread
         {
             release();
         }
-        RDServer.sessionTerminated(this);
     }
 }

@@ -34,12 +34,14 @@ public class RDServer extends Thread
 
     public static RDSession getCurrentSession()
     {
+        if (instance.currentSession == null) throw new RuntimeException("远程主机尚未连接到服务器");
+        Thread.State state = instance.currentSession.getState();
+        if (state == State.TERMINATED)
+        {
+            instance.currentSession = null;
+            throw new RuntimeException("远程主机尚未连接到服务器");
+        }
         return instance.currentSession;
-    }
-
-    public static void sessionTerminated(RDSession session)
-    {
-        instance.currentSession = null;
     }
 
     public void run()
