@@ -39,7 +39,7 @@
 <div class="x-auth-dialog">
     <div class="x-title">输入密码开始连接</div>
     <hr />
-    <div class="x-password"><input id="password" type="text" /></div>
+    <div class="x-password"><input id="password" type="password" /></div>
     <div class="x-message"></div>
     <div class="x-button">
         <button id="btn-auth">开始连接</button>

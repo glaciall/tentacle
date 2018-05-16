@@ -145,7 +145,6 @@ window.Tentacle = {
                 $('#btn-auth').removeClass('disable');
                 if (response.result == 'success')
                 {
-                    $('.x-auth-dialog').animateCss('bounceOut', function() { $('.x-auth-dialog').hide(); });
                     self.showMessage('登陆成功');
                 }
                 else $('.x-message').text(response.result);
@@ -153,6 +152,7 @@ window.Tentacle = {
             else if ('request-control' == response.action)
             {
                 if (response.result != 'success') this.showMessage(response.result);
+                else $('.x-auth-dialog').animateCss('bounceOut', function() { $('.x-auth-dialog').hide(); });
             }
             else if ('setup' == response.action)
             {
