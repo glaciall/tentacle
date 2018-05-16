@@ -44,7 +44,6 @@ public class MainController
                          HttpServletResponse response)
     {
         // 当前会话验证
-        /*
         if (session.getAttribute("isLogin") == null || ((Boolean)session.getAttribute("isLogin") != true))
         {
             PrintWriter out = null;
@@ -58,7 +57,7 @@ public class MainController
             out.close();
             return;
         }
-        */
+
         blocks.clear();
 
         // 请求文件传送

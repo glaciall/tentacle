@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -40,5 +41,16 @@ public class ServerApp
         SQLiteDataSource dataSource = new SQLiteDataSource();
         dataSource.setUrl(env.getProperty("spring.datasource.url"));
         return dataSource;
+    }
+
+    @Autowired
+    private RequestListener requestListener;
+
+    @Bean
+    public ServletListenerRegistrationBean<RequestListener> servletListenerRegistrationBean()
+    {
+        ServletListenerRegistrationBean<RequestListener> servletListenerRegistrationBean = new ServletListenerRegistrationBean<RequestListener>();
+        servletListenerRegistrationBean.setListener(requestListener);
+        return servletListenerRegistrationBean;
     }
 }

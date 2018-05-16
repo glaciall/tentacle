@@ -1,5 +1,6 @@
 package cn.org.hentai.server.wss;
 
+import cn.org.hentai.server.app.GetHttpSessionConfigurator;
 import cn.org.hentai.server.rds.RDServer;
 import cn.org.hentai.server.rds.RDSession;
 import cn.org.hentai.server.util.Configs;
@@ -24,17 +25,19 @@ import java.util.List;
  * Created by matrixy on 2018/4/12.
  */
 @Component
-@ServerEndpoint(value = "/tentacle/desktop/wss")
+@ServerEndpoint(value = "/tentacle/desktop/wss", configurator = GetHttpSessionConfigurator.class)
 public class TentacleDesktopWSS
 {
     Session session;
     RDSession rdSession = null;
+    HttpSession httpSession = null;
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig config)
     {
         System.out.println("websocket opened: " + session);
         this.session = session;
+        this.httpSession = (HttpSession) config.getUserProperties().get(HttpSession.class.getName());
     }
 
     @OnMessage
@@ -54,6 +57,7 @@ public class TentacleDesktopWSS
                     this.sendResponse("login", "密码错误");
                     return;
                 }
+                this.httpSession.setAttribute("isLogin", true);
                 this.sendResponse("login", "success");
                 requestControl();
             }
@@ -245,6 +249,7 @@ public class TentacleDesktopWSS
     public void onClose()
     {
         System.out.println("websocket closed...");
+        this.httpSession.removeAttribute("isLogin");
         if (null == rdSession) return;
         rdSession.closeControl();
     }
