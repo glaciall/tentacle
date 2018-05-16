@@ -37,6 +37,11 @@ public class RDServer extends Thread
         return instance.currentSession;
     }
 
+    public static void sessionTerminated(RDSession session)
+    {
+        instance.currentSession = null;
+    }
+
     public void run()
     {
         while (!Thread.interrupted())
