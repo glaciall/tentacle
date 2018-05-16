@@ -16,10 +16,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -196,13 +193,27 @@ public class Client extends Thread
             }
             resp = Packet.create(Command.LIST_FILES_RESPONSE, baos.size()).addBytes(baos.toByteArray());
         }
+        // 传送文件到服务器端
+        else if (cmd == Command.DOWNLOAD_FILE)
+        {
+            int pLength = packet.nextInt();
+            String path = new String(packet.nextBytes(pLength), "UTF-8");
+            int nLength = packet.nextInt();
+            String name = new String(packet.nextBytes(nLength), "UTF-8");
+            new FileTransferWorker(this, new File(new File(path), name)).start();
+        }
 
         // 发送响应至服务器端
         if (resp != null)
         {
-            outputStream.write(resp.getBytes());
-            outputStream.flush();
+            send(resp);
         }
+    }
+
+    public synchronized void send(Packet packet) throws IOException
+    {
+        outputStream.write(packet.getBytes());
+        outputStream.flush();
     }
 
     // 发送压缩后的屏幕截图
@@ -211,9 +222,7 @@ public class Client extends Thread
         if (!working) return;
         Packet p = ScreenImages.getCompressedScreen();
         p.skip(6 + 1 + 4 + 2 + 2 + 8);
-        // Log.debug("Sequence: " + p.nextInt());
-        outputStream.write(p.getBytes());
-        outputStream.flush();
+        send(p);
     }
 
     // 关闭连接，中断工作线程
