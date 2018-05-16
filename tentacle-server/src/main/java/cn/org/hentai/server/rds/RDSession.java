@@ -1,5 +1,6 @@
 package cn.org.hentai.server.rds;
 
+import cn.org.hentai.server.controller.MainController;
 import cn.org.hentai.server.util.ByteUtils;
 import cn.org.hentai.server.util.Log;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
@@ -9,6 +10,7 @@ import cn.org.hentai.tentacle.system.File;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -30,6 +32,8 @@ public class RDSession extends Thread
     boolean closeControl = false;
 
     long lastActiveTime = 0;
+
+    MainController controller = null;
 
     public RDSession(Socket conn)
     {
@@ -56,6 +60,21 @@ public class RDSession extends Thread
         {
             commands.add(hidPacket);
         }
+    }
+
+    // 请求文件传送
+    public synchronized void requestFile(String path, String name, MainController controller)
+    {
+        if (this.controller != null) throw new RuntimeException("同一时间只能传送一个文件");
+        byte[] bPath = null, bName = null;
+        try
+        {
+            bPath = path.getBytes("UTF-8");
+            bName = name.getBytes("UTF-8");
+        }
+        catch(UnsupportedEncodingException ex) { }
+        addCommand(Packet.create(Command.DOWNLOAD_FILE, 8 + bPath.length + bName.length).addInt(bPath.length).addBytes(bPath).addInt(bName.length).addBytes(bName));
+        this.controller = controller;
     }
 
     private void converse() throws Exception
@@ -187,6 +206,13 @@ public class RDSession extends Thread
                 files.add(new File(isDirectory, length, mtime, name));
             }
             websocketService.sendFiles(files);
+        }
+        else if (Command.DOWNLOAD_FILE_RESPONSE == cmd)
+        {
+            int blockLength = packet.nextInt();
+            byte[] part = packet.nextBytes(blockLength);
+            controller.receivePart(part);
+            if (part.length == 0) controller = null;
         }
 
         if (resp != null)

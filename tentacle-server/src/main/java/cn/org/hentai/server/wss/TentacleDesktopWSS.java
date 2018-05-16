@@ -11,7 +11,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpSession;
 import javax.websocket.*;
@@ -25,18 +24,16 @@ import java.util.List;
  * Created by matrixy on 2018/4/12.
  */
 @Component
-@ServerEndpoint("/tentacle/desktop/wss")
+@ServerEndpoint(value = "/tentacle/desktop/wss")
 public class TentacleDesktopWSS
 {
     Session session;
     RDSession rdSession = null;
-    HttpSession httpSession = null;
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig config)
     {
         System.out.println("websocket opened: " + session);
-        httpSession = (HttpSession) config.getUserProperties().get(HttpSession.class.getName());
         this.session = session;
     }
 
@@ -57,7 +54,6 @@ public class TentacleDesktopWSS
                     this.sendResponse("login", "密码错误");
                     return;
                 }
-                httpSession.setAttribute("isLogin", true);
                 this.sendResponse("login", "success");
                 requestControl();
             }
@@ -249,7 +245,6 @@ public class TentacleDesktopWSS
     public void onClose()
     {
         System.out.println("websocket closed...");
-        httpSession.removeAttribute("isLogin");
         if (null == rdSession) return;
         rdSession.closeControl();
     }
