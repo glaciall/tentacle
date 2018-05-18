@@ -126,7 +126,7 @@ public class Client extends Thread
             {
                 String text = (String)clipboard.getData(DataFlavor.stringFlavor);
                 // 剪切板没有内容就别回应了
-                byte[] bytes = text.getBytes();
+                byte[] bytes = text.getBytes("UTF-8");
                 if (text != null && text.length() > 0)
                     resp = Packet.create(Command.GET_CLIPBOARD_RESPONSE, 4 + bytes.length).addInt(bytes.length).addBytes(bytes);
             }
@@ -136,7 +136,7 @@ public class Client extends Thread
         {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             int len = packet.nextInt();
-            String text = new String(packet.nextBytes(len));
+            String text = new String(packet.nextBytes(len), "UTF-8");
             StringSelection selection = new StringSelection(text);
             clipboard.setContents(selection, null);
             resp = Packet.create(Command.SET_CLIPBOARD_RESPONSE, 4).addBytes("OJBK".getBytes());
