@@ -497,7 +497,7 @@ window.Tentacle = {
         {
             if (a.isDirectory && b.isDirectory == false) return -1;
             else if (a.isDirectory == false && b.isDirectory) return 1;
-            else return a.name > b.name;
+            else return a.name > b.name ? 1 : -1;
         });
 
         var shtml = '';
@@ -518,6 +518,7 @@ window.Tentacle = {
                 }
             }
             sname = name;
+            console.log(i + '\t' + f.name);
             var suffix = f.isDirectory ? null : name.indexOf('.') > -1 ? name.substring(name.lastIndexOf('.') + 1) : null;
             var fileTypeInfo = f.isDirectory ? FileTypes.folder : FileTypes.get(suffix);
             var fileIcon = fileTypeInfo.icon;
