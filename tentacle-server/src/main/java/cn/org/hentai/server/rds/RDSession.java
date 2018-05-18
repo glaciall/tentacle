@@ -188,7 +188,7 @@ public class RDSession extends Thread
         else if (Command.GET_CLIPBOARD_RESPONSE == cmd)
         {
             int len = packet.nextInt();
-            String text = new String(packet.nextBytes(len));
+            String text = new String(packet.nextBytes(len), "UTF-8");
             websocketService.sendClipboardData(text);
         }
         else if (Command.LIST_FILES_RESPONSE == cmd)

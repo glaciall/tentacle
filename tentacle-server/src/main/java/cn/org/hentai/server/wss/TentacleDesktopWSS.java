@@ -73,8 +73,12 @@ public class TentacleDesktopWSS
                     return;
                 }
                 String text = json.get("text").getAsString();
-                byte[] data = text.getBytes();
-                rdSession.addCommand(Packet.create(Command.SET_CLIPBOARD, 4 + data.length).addInt(data.length).addBytes(data));
+                try
+                {
+                    byte[] data = text.getBytes("UTF-8");
+                    rdSession.addCommand(Packet.create(Command.SET_CLIPBOARD, 4 + data.length).addInt(data.length).addBytes(data));
+                }
+                catch(UnsupportedEncodingException e) { }
             }
             else if ("ls".equals(cmd))
             {
