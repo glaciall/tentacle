@@ -1,10 +1,12 @@
 package cn.org.hentai.server.controller;
 
+import cn.org.hentai.server.model.Result;
 import cn.org.hentai.server.rds.RDServer;
 import cn.org.hentai.server.rds.RDSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -22,8 +24,9 @@ import java.util.LinkedList;
 public class MainController
 {
     @RequestMapping("/")
-    public String index()
+    public String index(HttpSession session)
     {
+        session.setMaxInactiveInterval(60);
         return "index";
     }
 
@@ -104,6 +107,14 @@ public class MainController
             writer.flush();
         }
         catch(IOException e) { }
+    }
+
+    @RequestMapping("/keepalive")
+    @ResponseBody
+    public Result keepalive()
+    {
+        // 什么都不做，只是为了保持会话
+        return new Result();
     }
 
     private void sleep(int ms)

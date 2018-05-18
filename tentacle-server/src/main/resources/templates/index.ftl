@@ -250,7 +250,8 @@
 <script type="text/javascript" src="${web_resource}/decompress.js"></script>
 <script type="text/javascript" src="${web_resource}/tentacle.js"></script>
 <script type="text/javascript">
-    var ROOT_PATH = '${web_resource}';
+    var ROOT_PATH = '${context}';
+    var RES_PATH = '${web_resource}';
     $(document).ready(function()
     {
         Tentacle.init();

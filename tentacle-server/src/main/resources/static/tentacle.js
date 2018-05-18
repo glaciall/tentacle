@@ -46,6 +46,10 @@ window.Tentacle = {
         {
             self.__sendHIDCommands();
         }, 50);
+        setTimeout(function()
+        {
+            self.__keepalive();
+        }, 5000);
     },
     // 图像解压并显示
     __decompressAndShow : function()
@@ -422,7 +426,7 @@ window.Tentacle = {
         $(document).on('click', '.x-fmanager a[id=x-download-file]', function()
         {
             var fname = $(this).attr('x-fname');
-            $(this).attr('href', '/download?path=' + encodeURIComponent(currentPath) + '&name=' + fname);
+            $(this).attr('href', ROOT_PATH + '/download?path=' + encodeURIComponent(currentPath) + '&name=' + fname);
         });
         function showPath(dir)
         {
@@ -432,7 +436,7 @@ window.Tentacle = {
                 command : 'ls',
                 path : currentPath
             });
-            var path = '<a href="javascript:;" x-dir=""><img src="' + ROOT_PATH + '/icon/pc.png" width="16" height="16" /></a>';
+            var path = '<a href="javascript:;" x-dir=""><img src="' + RES_PATH + '/icon/pc.png" width="16" height="16" /></a>';
             var part = '';
             var xpath = '';
             for (var i = 0; i < dir.length; i++)
@@ -529,7 +533,7 @@ window.Tentacle = {
             else flength = flength + 'b';
             var mtime = new Date(f.mtime).toLocaleString();
             shtml += '<tr>';
-            shtml += '  <td><i><img src="../static/ftype/' + fileIcon + '" /></i><' + (f.isDirectory ? 'a href="javascript:;"' : 'span') + ' x-name="' + escape(f.name) + '" ' + (f.isDirectory ? 'class="x-dir"' : '') + '>' + sname + '</' + (f.isDirectory ? 'a' : 'span') + '></td>';
+            shtml += '  <td><i><img src="' + RES_PATH + '/ftype/' + fileIcon + '" /></i><' + (f.isDirectory ? 'a href="javascript:;"' : 'span') + ' x-name="' + escape(f.name) + '" ' + (f.isDirectory ? 'class="x-dir"' : '') + '>' + sname + '</' + (f.isDirectory ? 'a' : 'span') + '></td>';
             shtml += '  <td align="center">' + (fileTypeInfo == null ? '-' : fileTypeInfo.name) + '</td>';
             shtml += '  <td align="right">' + flength + '</td>';
             shtml += '  <td align="center">' + (f.isDirectory ? '' : '<a target="_blank" href="javascript:;" id="x-download-file" x-fname="' + encodeURIComponent(f.name) + '"><img src="../static/icon/download.png" /></a>') + '</td>';
@@ -561,4 +565,18 @@ window.Tentacle = {
             }, timeout);
         });
     },
+
+    // /////////////////////////////////////////////////////////////////////
+    // 杂项
+
+    // 每5秒发送一个HTTP请求，以保持会话
+    __keepalive : function()
+    {
+        var self = this;
+        $.post(ROOT_PATH + '/keepalive', null, null);
+        setTimeout(function()
+        {
+            self.__keepalive();
+        }, 20000);
+    }
 };
