@@ -492,6 +492,14 @@ window.Tentacle = {
     // 文件管理相关
     _showFiles : function(result)
     {
+        // 文件名排序
+        result.files.sort(function(a, b)
+        {
+            if (a.isDirectory && b.isDirectory == false) return -1;
+            else if (a.isDirectory == false && b.isDirectory) return 1;
+            else return a.name > b.name;
+        });
+
         var shtml = '';
         for (var i = 0; i < result.files.length; i++)
         {
