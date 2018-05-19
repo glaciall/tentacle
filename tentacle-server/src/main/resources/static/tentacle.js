@@ -574,6 +574,10 @@ window.Tentacle = {
     {
         var self = this;
         $.post(ROOT_PATH + '/keepalive', null, null);
+        this._send({
+            type : 'command',
+            command : 'keepalive',
+        });
         setTimeout(function()
         {
             self.__keepalive();
