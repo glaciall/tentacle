@@ -45,7 +45,7 @@
 ## 系统使用指南
 ### windows平台
 在windows平台上，实际上有两个desktop，一个是正常使用时的desktop，就叫它`workbench desktop`吧，我们的程序可以与之交互，另外一个是专用于登陆/验证的desktop，这个就叫它`logon desktop`吧。
-当系统处于未登陆、锁定中或是UAC提示时，`logon desktop`将切换到前台来，在这个情况下，我们的程序是无法进行截屏的，也无法发送按钮，控制鼠标等。针对于这个问题，目前己经测试过如下方案：
+当系统处于未登陆、锁定中或是UAC提示时，`logon desktop`将切换到前台来，在这个情况下，我们的程序是无法进行截屏的，也无法发送按键，控制鼠标等。针对于这个问题，目前己经测试过如下方案：
 1. 命令行自动登陆/解锁
     1. [Logon](http://www.softtreetech.com/24x7/archive/51.htm)，只支持windows 7以前的操作系统。
     2. [Logon Expert](https://www.logonexpert.com/)，可以完成自动登陆解锁，但是是收费的。
