@@ -1,4 +1,6 @@
 ## 基于Java AWT、SpringBoot、websocket、canvas的跨平台远程桌面实现
+> 基于C#版的客户端正在开发中，在windows平台上会有更好的体验，仓库地址：https://gitee.com/matrixy/tentacle-client-win
+
 <img src="./additional/tentacle.png" />
 <img src="./additional/keyboard.png" />
 <img src="./additional/fmanager.png" />
@@ -7,6 +9,7 @@
 1. common 公共开发库
 2. tentacle-server 服务器端，主入口：`cn.org.hentai.server.app.ServerApp`。
 3. tentacle-client 远程主机端（受控端），主入口：`cn.org.hentai.client.app.Tentacle`。
+
 ## 使用
 1. 修改配置文件的相应项目，比如监听端口，以及`${rds.access.password}`远程控制访问密码
 2. 使用`mvn package`编绎打包，服务器端使用`original-tentacle-server-1.5.9.RELEASE.jar`，被控制的主机端使用`tentacle-client-1.0-SNAPSHOT.jar`。
