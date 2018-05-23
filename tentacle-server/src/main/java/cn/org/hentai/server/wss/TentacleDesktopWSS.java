@@ -248,14 +248,20 @@ public class TentacleDesktopWSS
     public void onClose()
     {
         System.out.println("websocket closed...");
-        this.httpSession.removeAttribute("isLogin");
-        if (null == rdSession) return;
-        rdSession.closeControl();
+        release();
     }
 
     @OnError
     public void onError(Session session, Throwable ex)
     {
+        release();
         ex.printStackTrace();
+    }
+
+    private void release()
+    {
+        try { this.httpSession.invalidate(); } catch(Exception e) { }
+        if (null == rdSession) return;
+        rdSession.closeControl();
     }
 }
