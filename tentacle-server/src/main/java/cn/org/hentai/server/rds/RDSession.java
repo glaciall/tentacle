@@ -2,7 +2,6 @@ package cn.org.hentai.server.rds;
 
 import cn.org.hentai.server.controller.MainController;
 import cn.org.hentai.server.util.ByteUtils;
-import cn.org.hentai.server.util.Log;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
@@ -179,7 +178,7 @@ public class RDSession extends Thread
         }
         else if (Command.HEARTBEAT == cmd)
         {
-            // do nothing here...
+            resp = Packet.create(Command.COMMON_RESPONSE, 4).addBytes("OJBK".getBytes());
         }
         else if (Command.SET_CLIPBOARD_RESPONSE == cmd)
         {
