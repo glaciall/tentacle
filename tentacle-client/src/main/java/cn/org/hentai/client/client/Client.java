@@ -1,6 +1,7 @@
 package cn.org.hentai.client.client;
 
 import cn.org.hentai.client.worker.*;
+import cn.org.hentai.tentacle.encrypt.MD5;
 import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.hid.KeyboardCommand;
 import cn.org.hentai.tentacle.hid.MouseCommand;
@@ -10,6 +11,7 @@ import cn.org.hentai.tentacle.system.FileSystem;
 import cn.org.hentai.tentacle.util.ByteUtils;
 import cn.org.hentai.tentacle.util.Configs;
 import cn.org.hentai.tentacle.util.Log;
+import cn.org.hentai.tentacle.util.Nonce;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -26,6 +28,8 @@ public class Client extends Thread
 {
     // 是否正在发送截图
     boolean working = false;
+
+    boolean authenticated = false;
 
     BaseWorker captureWorker;
     BaseWorker compressWorker;
@@ -49,12 +53,24 @@ public class Client extends Thread
         lastActiveTime = System.currentTimeMillis();
         Log.info("Connected to server...");
 
-        // TODO 1. 身份验证
+        // 1. 身份验证
+        String clientName = Configs.get("client.name", "unknown");
+        byte clientNameBytes[] = clientName.getBytes("UTF-8");
+        if (clientName.length() > 20) throw new RuntimeException("受控端名称不能超过20个字符");
+        Packet packet = Packet.create(Command.AUTHENTICATE, 64 + clientNameBytes.length + 4);
+        packet.addInt(clientNameBytes.length);
+        packet.addBytes(clientNameBytes);
+        String nonce = Nonce.generate(32);
+        packet.addBytes(nonce.getBytes());
+        packet.addBytes(MD5.encode(nonce + ":::" + Configs.get("client.key")).getBytes());
+
+        send(packet);
+
         while (true)
         {
             if (System.currentTimeMillis() - lastActiveTime > 30000) break;
             // 有无下发下来的数据包
-            Packet packet = Packet.read(inputStream);
+            packet = Packet.read(inputStream);
             if (packet != null)
             {
                 lastActiveTime = System.currentTimeMillis();
@@ -90,8 +106,18 @@ public class Client extends Thread
         int cmd = packet.nextByte();
         int length = packet.nextInt();
         Packet resp = null;
+        if (cmd != Command.AUTHENTICATE_RESPONSE && authenticated == false) return;
+        if (cmd == Command.AUTHENTICATE_RESPONSE)
+        {
+            if (packet.nextByte() == 0x00) authenticated = true;
+            else
+            {
+                Log.info("会话认证失败");
+                System.exit(1);
+            }
+        }
         // 心跳
-        if (cmd == Command.HEARTBEAT)
+        else if (cmd == Command.HEARTBEAT)
         {
             resp = Packet.create(Command.COMMON_RESPONSE, 4).addByte((byte)'O').addByte((byte)'J').addByte((byte)'B').addByte((byte)'K');
         }

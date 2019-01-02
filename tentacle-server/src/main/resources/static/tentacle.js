@@ -29,7 +29,7 @@ window.Tentacle = {
         if ($.trim(password).length == 0) return $('.x-message').html('请输入密码');
         this._send({
             type : 'command',
-            command : 'request-control',
+            command : 'login',
             password : password
         });
         $('#btn-auth').addClass('disable');
@@ -150,13 +150,18 @@ window.Tentacle = {
                 if (response.result == 'success')
                 {
                     $('.x-message').text('密码校验通过');
+                    $('.x-auth-dialog').animateCss('bounceOut', function() { $('.x-auth-dialog').hide(); });
+                    this._send({ type : 'command', command : 'sessions' });
                 }
                 else $('.x-message').text(response.result);
+            }
+            else if ('sessions' == response.action)
+            {
+                console.log(response);
             }
             else if ('request-control' == response.action)
             {
                 if (response.result != 'success') this.showMessage(response.result);
-                else $('.x-auth-dialog').animateCss('bounceOut', function() { $('.x-auth-dialog').hide(); });
             }
             else if ('setup' == response.action)
             {

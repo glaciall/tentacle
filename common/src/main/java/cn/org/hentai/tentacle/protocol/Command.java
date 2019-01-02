@@ -23,6 +23,8 @@ public final class Command
     public static final byte DOWNLOAD_FILE_RESPONSE = 0x15;         // 下载文件的应答
     public static final byte UPLOAD_FILE = 0x16;                    // 上传文件
     public static final byte UPLOAD_FILE_RESPONSE = 0x17;           // 上传文件的应答
+    public static final byte AUTHENTICATE = 0x18;                   // 客户端认证
+    public static final byte AUTHENTICATE_RESPONSE = 0x19;          // 客户端认证应答
 
     public static final byte TYPE_MOUSE = 0x01;                     // 类型：鼠标
     public static final byte TYPE_KEYBOARD = 0x02;                  // 类型：键盘

@@ -2,6 +2,8 @@ package cn.org.hentai.server.rds;
 
 import cn.org.hentai.server.controller.MainController;
 import cn.org.hentai.server.util.ByteUtils;
+import cn.org.hentai.server.util.Configs;
+import cn.org.hentai.server.util.MD5;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
@@ -19,13 +21,17 @@ import java.util.List;
 /**
  * Created by matrixy on 2018/4/15.
  */
-public class RDSession extends Thread
+public class RemoteDesktopSession extends Thread
 {
     Socket connection = null;
     InputStream inputStream = null;
     OutputStream outputStream = null;
     TentacleDesktopWSS websocketService = null;
     LinkedList<Packet> commands = new LinkedList<Packet>();
+
+    long id;
+    String name;
+    boolean authenticated = false;
 
     boolean needSendStartCommand = false;
     boolean remoteControlling = false;
@@ -35,7 +41,7 @@ public class RDSession extends Thread
 
     MainController controller = null;
 
-    public RDSession(Socket conn)
+    public RemoteDesktopSession(Socket conn)
     {
         this.connection = conn;
     }
@@ -43,6 +49,7 @@ public class RDSession extends Thread
     // 与WebSocket会话绑定，并且通知客户端开始转发截图
     public void bind(TentacleDesktopWSS websocketService)
     {
+        if (this.websocketService != null) throw new RuntimeException("目标主机正处于远程控制之中");
         this.websocketService = websocketService;
         this.needSendStartCommand = true;
     }
@@ -51,6 +58,7 @@ public class RDSession extends Thread
     public void closeControl()
     {
         this.closeControl = true;
+        this.websocketService = null;
     }
 
     // 保存键鼠控制指令包，准备下发到客户端
@@ -133,6 +141,7 @@ public class RDSession extends Thread
             }
             sleep(5);
         }
+        Log.info("会话已结束");
     }
 
     // 下发关闭控制指令
@@ -165,7 +174,24 @@ public class RDSession extends Thread
         byte cmd = packet.nextByte();
         int dataLength = packet.nextInt();
         Packet resp = null;
-        if (cmd == Command.SCREENSHOT)
+        if (cmd != Command.AUTHENTICATE && authenticated == false)
+            throw new RuntimeException("未验证的连接会话");
+
+        if (cmd == Command.AUTHENTICATE)
+        {
+            int len = packet.nextInt();
+            this.name = new String(packet.nextBytes(len), "UTF-8");
+            String nonce = new String(packet.nextBytes(32));
+            String signature = new String(packet.nextBytes(32));
+            if (!signature.equals(MD5.encode(nonce + ":::" + Configs.get("client.key"))))
+            {
+                resp = Packet.create(Command.AUTHENTICATE_RESPONSE, 1).addByte((byte)1);
+                Thread.currentThread().interrupt();
+            }
+            authenticated = true;
+            resp = Packet.create(Command.AUTHENTICATE_RESPONSE, 1).addByte((byte)0);
+        }
+        else if (cmd == Command.SCREENSHOT)
         {
             // 宽，高，时间，压缩数据
             int width = packet.nextShort();
@@ -251,5 +277,21 @@ public class RDSession extends Thread
         {
             release();
         }
+    }
+
+    @Override
+    public long getId()
+    {
+        return id;
+    }
+
+    public void setId(long id)
+    {
+        this.id = id;
+    }
+
+    public boolean isControlling()
+    {
+        return this.websocketService != null;
     }
 }

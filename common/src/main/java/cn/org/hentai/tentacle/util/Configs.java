@@ -29,10 +29,16 @@ public final class Configs
         else return String.valueOf(val).trim();
     }
 
+    public static String get(String key, String defaultVal)
+    {
+        Object val = properties.get(key);
+        if (null == val) return defaultVal;
+        else return String.valueOf(val).trim();
+    }
+
     public static int getInt(String key, int defaultVal)
     {
-        String val = get(key);
-        if (null == val) return defaultVal;
-        else return Integer.parseInt(val);
+        String val = get(key, String.valueOf(defaultVal));
+        return Integer.parseInt(val);
     }
 }

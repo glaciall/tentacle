@@ -1,8 +1,8 @@
 package cn.org.hentai.server.wss;
 
 import cn.org.hentai.server.app.GetHttpSessionConfigurator;
-import cn.org.hentai.server.rds.RDServer;
-import cn.org.hentai.server.rds.RDSession;
+import cn.org.hentai.server.rds.RemoteDesktopServer;
+import cn.org.hentai.server.rds.RemoteDesktopSession;
 import cn.org.hentai.server.util.Configs;
 import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.protocol.Command;
@@ -30,7 +30,7 @@ import java.util.List;
 public class TentacleDesktopWSS
 {
     Session session;
-    RDSession rdSession = null;
+    RemoteDesktopSession remoteDesktopSession = null;
     HttpSession httpSession = null;
 
     @OnOpen
@@ -49,7 +49,7 @@ public class TentacleDesktopWSS
         if ("command".equals(type))
         {
             String cmd = json.get("command").getAsString();
-            if ("request-control".equals(cmd))
+            if ("login".equals(cmd))
             {
                 if (!Configs.get("rds.access.password").equals(json.get("password").getAsString()))
                 {
@@ -60,11 +60,31 @@ public class TentacleDesktopWSS
                 }
                 this.httpSession.setAttribute("isLogin", true);
                 this.sendResponse("login", "success");
-                requestControl();
+            }
+            else if ("sessions".equals(cmd))
+            {
+                JsonObject resp = new JsonObject();
+                resp.addProperty("action", "sessions");
+                JsonArray rds = new JsonArray();
+                for (RemoteDesktopSession se : RemoteDesktopServer.activeSessions())
+                {
+                    JsonObject seJson = new JsonObject();
+                    seJson.addProperty("id", se.getId());
+                    seJson.addProperty("name", se.getName());
+                    seJson.addProperty("controlling", se.isControlling());
+                    rds.add(seJson);
+                }
+                resp.add("sessions", rds);
+                this.sendText(resp.toString());
+            }
+            else if ("request-control".equals(cmd))
+            {
+                Long sessionId = json.get("sessionId").getAsLong();
+                requestControl(sessionId);
             }
             else if ("get-clipboard".equals(cmd))
             {
-                rdSession.addCommand(Packet.create(Command.GET_CLIPBOARD, 3).addBytes("GET".getBytes()));
+                remoteDesktopSession.addCommand(Packet.create(Command.GET_CLIPBOARD, 3).addBytes("GET".getBytes()));
             }
             else if ("set-clipboard".equals(cmd))
             {
@@ -77,7 +97,7 @@ public class TentacleDesktopWSS
                 try
                 {
                     byte[] data = text.getBytes("UTF-8");
-                    rdSession.addCommand(Packet.create(Command.SET_CLIPBOARD, 4 + data.length).addInt(data.length).addBytes(data));
+                    remoteDesktopSession.addCommand(Packet.create(Command.SET_CLIPBOARD, 4 + data.length).addInt(data.length).addBytes(data));
                 }
                 catch(UnsupportedEncodingException e) { }
             }
@@ -90,12 +110,12 @@ public class TentacleDesktopWSS
                     data = path.getBytes("UTF-8");
                 }
                 catch(UnsupportedEncodingException e) { }
-                rdSession.addCommand(Packet.create(Command.LIST_FILES, 4 + data.length).addInt(data.length).addBytes(data));
+                remoteDesktopSession.addCommand(Packet.create(Command.LIST_FILES, 4 + data.length).addInt(data.length).addBytes(data));
             }
         }
         if ("hid".equals(type))
         {
-            if (rdSession == null) return;
+            if (remoteDesktopSession == null) return;
             JsonArray actions = json.get("commands").getAsJsonArray();
             for (int i = 0; i < actions.size(); i++)
             {
@@ -144,17 +164,17 @@ public class TentacleDesktopWSS
                 }
                 if (cmd.has("key")) key = cmd.get("key").getAsByte();
                 p.addByte(hidType).addByte(eventType).addByte(key).addShort(x).addShort(y).addInt(timestamp);
-                rdSession.addCommand(p);
+                remoteDesktopSession.addCommand(p);
             }
         }
     }
 
-    private void requestControl()
+    private void requestControl(long sessionId)
     {
         try
         {
-            rdSession = RDServer.getCurrentSession();
-            rdSession.bind(this);
+            remoteDesktopSession = RemoteDesktopServer.getSession(sessionId);
+            remoteDesktopSession.bind(this);
             this.sendResponse("request-control", "success");
         }
         catch(Exception ex)
@@ -263,7 +283,7 @@ public class TentacleDesktopWSS
     private void release()
     {
         try { this.httpSession.invalidate(); } catch(Exception e) { }
-        if (null == rdSession) return;
-        rdSession.closeControl();
+        if (null == remoteDesktopSession) return;
+        remoteDesktopSession.closeControl();
     }
 }

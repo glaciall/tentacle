@@ -1,8 +1,7 @@
 package cn.org.hentai.server.controller;
 
 import cn.org.hentai.server.model.Result;
-import cn.org.hentai.server.rds.RDServer;
-import cn.org.hentai.server.rds.RDSession;
+import cn.org.hentai.server.rds.RemoteDesktopServer;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -64,7 +63,7 @@ public class MainController
         blocks.clear();
 
         // 请求文件传送
-        RDServer.getCurrentSession().requestFile(path, name, this);
+        RemoteDesktopServer.getCurrentSession().requestFile(path, name, this);
 
         response.addHeader("Content-Type", "application/octet-stream");
         try
