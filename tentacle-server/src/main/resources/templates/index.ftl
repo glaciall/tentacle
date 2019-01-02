@@ -46,7 +46,8 @@
         <button id="btn-auth">开始连接</button>
     </div>
 </div>
-<div class="x-dialog x-dialog-clipboard">
+
+<div class="x-dialog x-command-dialog x-dialog-clipboard">
     <div class="x-title">文本复制与粘贴<i class="x-close"></i></div>
     <hr />
     <div>远程剪切板</div>
@@ -57,7 +58,7 @@
         <button class="btn" id="btn-send">发送到远程主机</button>
     </div>
 </div>
-<div class="x-dialog x-dialog-keyboard">
+<div class="x-dialog x-command-dialog x-dialog-keyboard">
     <div class="x-title">虚拟键盘<i class="x-close"></i></div>
     <hr />
     <div class="x-keyboard">
@@ -193,7 +194,7 @@
         <button class="btn" id="btn-send-keys">发送组合键</button>
     </div>
 </div>
-<div class="x-dialog x-dialog-fmanager">
+<div class="x-dialog x-command-dialog x-dialog-fmanager">
     <div class="x-title">远程主机文件管理<i class="x-close"></i></div>
     <hr />
     <div class="x-fmanager">
@@ -216,6 +217,11 @@
     <div class="x-actions">
         <button class="btn" id="btn-upload">上传本地文件</button>
     </div>
+</div>
+<div class="x-dialog x-dialog-sessions">
+    <div class="x-title">远程主机<i class="x-refresh"></i></div>
+    <hr />
+    <div class="x-sessions"></div>
 </div>
 <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript" src="${web_resource}/fileext.js"></script>

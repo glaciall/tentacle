@@ -30,7 +30,7 @@ public class RemoteDesktopSession extends Thread
     LinkedList<Packet> commands = new LinkedList<Packet>();
 
     long id;
-    String name;
+    String clientName;
     boolean authenticated = false;
 
     boolean needSendStartCommand = false;
@@ -180,7 +180,7 @@ public class RemoteDesktopSession extends Thread
         if (cmd == Command.AUTHENTICATE)
         {
             int len = packet.nextInt();
-            this.name = new String(packet.nextBytes(len), "UTF-8");
+            this.clientName = new String(packet.nextBytes(len), "UTF-8");
             String nonce = new String(packet.nextBytes(32));
             String signature = new String(packet.nextBytes(32));
             if (!signature.equals(MD5.encode(nonce + ":::" + Configs.get("client.key"))))
@@ -261,6 +261,7 @@ public class RemoteDesktopSession extends Thread
         try { inputStream.close(); } catch(Exception e) { }
         try { outputStream.close(); } catch(Exception e) { }
         try { connection.close(); } catch(Exception e) { }
+        try { RemoteDesktopServer.removeSession(this); } catch(Exception e) { }
     }
 
     public void run()
@@ -288,6 +289,11 @@ public class RemoteDesktopSession extends Thread
     public void setId(long id)
     {
         this.id = id;
+    }
+
+    public String getClientName()
+    {
+        return this.clientName;
     }
 
     public boolean isControlling()

@@ -51,7 +51,12 @@ public class RemoteDesktopServer extends Thread
 
     public static RemoteDesktopSession[] activeSessions()
     {
-        return (RemoteDesktopSession[]) sessions.toArray();
+        return sessions.toArray(new RemoteDesktopSession[0]);
+    }
+
+    public static void removeSession(RemoteDesktopSession session)
+    {
+        sessions.remove(session);
     }
 
     public void run()

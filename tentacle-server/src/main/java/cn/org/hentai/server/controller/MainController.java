@@ -41,7 +41,9 @@ public class MainController
     }
 
     @RequestMapping("/download")
-    public void download(@RequestParam String path, @RequestParam String name,
+    public void download(@RequestParam String path,
+                         @RequestParam String name,
+                         @RequestParam Long rdsId,
                          HttpSession session,
                          HttpServletResponse response)
     {
@@ -63,7 +65,8 @@ public class MainController
         blocks.clear();
 
         // 请求文件传送
-        RemoteDesktopServer.getCurrentSession().requestFile(path, name, this);
+        // TODO：应该将每一台受控端分开进行控制验证
+        RemoteDesktopServer.getSession(rdsId).requestFile(path, name, this);
 
         response.addHeader("Content-Type", "application/octet-stream");
         try
@@ -99,7 +102,7 @@ public class MainController
             {
                 writer.write(block);
             }
-            catch(Exception e) { e.printStackTrace(); }
+            catch(Exception e) { throw new RuntimeException(e); }
         }
         try
         {

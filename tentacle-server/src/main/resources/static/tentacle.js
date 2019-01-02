@@ -8,6 +8,7 @@ window.Tentacle = {
     connection : null,
     // 状态：standby,connected,controlling,exchanging,disconnected
     state : 'standby',
+    remoteDesktopSessionId : null,
     frames : [],
 
     // 初始化
@@ -33,6 +34,16 @@ window.Tentacle = {
             password : password
         });
         $('#btn-auth').addClass('disable');
+    },
+    // 查询主机会话列表
+    querySessions : function()
+    {
+        this._send({ type : 'command', command : 'sessions' });
+    },
+    // 请求控制
+    requestControl : function(sessionId)
+    {
+        this._send({ type : 'command', command : 'request-control', sessionId : sessionId });
     },
     // 定时器
     _startTimer : function()
@@ -151,13 +162,27 @@ window.Tentacle = {
                 {
                     $('.x-message').text('密码校验通过');
                     $('.x-auth-dialog').animateCss('bounceOut', function() { $('.x-auth-dialog').hide(); });
-                    this._send({ type : 'command', command : 'sessions' });
+                    this.querySessions();
                 }
                 else $('.x-message').text(response.result);
             }
             else if ('sessions' == response.action)
             {
-                console.log(response);
+                // remoteDesktopSessionId
+                var shtml = '';
+                for (var i = 0; response.sessions && i < response.sessions.length; i++)
+                {
+                    var session = response.sessions[i];
+                    shtml += '<div class="x-row">';
+                    shtml += '  <div class="x-col-1 text-center">' + session.id + '</div>';
+                    shtml += '  <div class="x-col-7"><a href="javascript:;" x-session-id="' + (session.controlling ? '' : session.id) + '" id="rds-name">' + session.name + '</a></div>';
+                    shtml += '  <div class="x-col-2 text-center ' + (session.controlling ? 'orange' : 'green') + '">' + (session.controlling ? '忙碌' : '空闲') + '</div>';
+                    shtml += '  <div class="x-clearfix"></div>';
+                    shtml += '</div>';
+                }
+                $('.x-sessions').html(shtml);
+                var dialog = $('.x-dialog-sessions');
+                if (dialog.is(':visible') == false) $('.x-dialog-sessions').show().animateCss('bounceIn');
             }
             else if ('request-control' == response.action)
             {
@@ -313,7 +338,14 @@ window.Tentacle = {
         {
             self.login();
         });
-        $('.x-dialog .x-close').click(function()
+        $('#password').keyup(function(e)
+        {
+            if (e.keyCode == 10 || e.keyCode == 13)
+            {
+                self.login();
+            }
+        });
+        $('.x-command-dialog .x-close').click(function()
         {
             var dialog = null;
             (dialog = $(this).parents('.x-dialog')).animateCss('bounceOut', function(){ dialog.hide(); });
@@ -341,6 +373,22 @@ window.Tentacle = {
                 command : 'set-clipboard',
                 text : text
             });
+        });
+        // 重新获取会话列表
+        $('.x-dialog-sessions .x-refresh').click(function()
+        {
+            self.querySessions();
+        });
+        $(document).on('click', '.x-sessions a[id=rds-name]', function()
+        {
+            var link = $(this);
+            var sid = link.attr('x-session-id');
+            if (!sid) return;
+            self.remoteDesktopSessionId = sid;
+            self.requestControl(sid);
+            // TODO: 显示等待提示
+            var dialog = $('.x-dialog-sessions');
+            dialog.animateCss('bounceOut', function() { dialog.hide(); });
         });
         // 下载屏幕画面
         $('.x-cmd-printscreen').click(function()
@@ -431,7 +479,7 @@ window.Tentacle = {
         $(document).on('click', '.x-fmanager a[id=x-download-file]', function()
         {
             var fname = $(this).attr('x-fname');
-            $(this).attr('href', ROOT_PATH + '/download?path=' + encodeURIComponent(currentPath) + '&name=' + fname);
+            $(this).attr('href', ROOT_PATH + '/download?rdsId=' + self.remoteDesktopSessionId + '&path=' + encodeURIComponent(currentPath) + '&name=' + fname);
         });
         function showPath(dir)
         {

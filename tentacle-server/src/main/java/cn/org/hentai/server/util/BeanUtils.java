@@ -1,6 +1,7 @@
 package cn.org.hentai.server.util;
 
 
+import cn.org.hentai.tentacle.util.Log;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 

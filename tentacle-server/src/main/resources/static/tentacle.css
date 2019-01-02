@@ -324,6 +324,15 @@ body
     height: 60px;
     line-height: 60px;
 }
+.x-dialog-sessions
+{
+    width: 500px;
+    height: 350px;
+    margin-left: -250px;
+    margin-top: -175px;
+    background-color: rgba(90, 90, 90, 0.4);
+    display: none;
+}
 .x-dialog-clipboard
 {
     width: 800px;
@@ -401,6 +410,18 @@ body
     height: 16px;
     display: block;
     background-image: url(./icon/close.png);
+    cursor: pointer;
+    margin-top: 22px;
+}
+.x-dialog .x-title .x-refresh
+{
+    color: #dedede;
+    font-size: 10px;
+    float: right;
+    width: 16px;
+    height: 16px;
+    display: block;
+    background-image: url(./icon/refresh.png);
     cursor: pointer;
     margin-top: 22px;
 }
@@ -526,10 +547,32 @@ body
     display: inline-block;
     margin: 0px 2px 2px 0px;
 }
-.clearfix
+.clearfix, .x-clearfix
 {
     clear: both;
 }
+.x-row
+{
+    margin-left: -5px;
+    margin-right: -5px;
+}
+.x-row > .x-col-1,.x-row > .x-col-2,.x-row > .x-col-3,.x-row > .x-col-4,.x-row > .x-col-5,.x-row > .x-col-6,.x-row > .x-col-7,.x-row > .x-col-8,.x-row > .x-col-9,.x-row > .x-col-10
+{
+    padding-left: 5px;
+    padding-right: 5px;
+    float: left;
+    box-sizing: border-box;
+}
+.x-row > .x-col-1 { width: 10%; }
+.x-row > .x-col-2 { width: 20%; }
+.x-row > .x-col-3 { width: 30%; }
+.x-row > .x-col-4 { width: 40%; }
+.x-row > .x-col-5 { width: 50%; }
+.x-row > .x-col-6 { width: 60%; }
+.x-row > .x-col-7 { width: 70%; }
+.x-row > .x-col-8 { width: 80%; }
+.x-row > .x-col-9 { width: 90%; }
+.x-row > .x-col-10 { width: 100%; }
 
 /* ********************************************** 文件管理 ********************************************** */
 
@@ -590,4 +633,21 @@ body
 .x-fmanager table tbody td a:hover
 {
     color: #0099ff;
+}
+.text-center
+{
+    text-align: center;
+}
+.green { color: #00aa00; }
+.orange { color: #ff6600; }
+.blue { color: #0099ff; }
+
+.x-sessions a, .x-sessions a:visited
+{
+    color: #efefef;
+    text-decoration: none;
+}
+.x-sessions a:hover
+{
+    color: #ffffff;
 }

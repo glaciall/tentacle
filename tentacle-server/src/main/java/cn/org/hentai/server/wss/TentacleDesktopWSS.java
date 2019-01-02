@@ -70,7 +70,7 @@ public class TentacleDesktopWSS
                 {
                     JsonObject seJson = new JsonObject();
                     seJson.addProperty("id", se.getId());
-                    seJson.addProperty("name", se.getName());
+                    seJson.addProperty("name", se.getClientName());
                     seJson.addProperty("controlling", se.isControlling());
                     rds.add(seJson);
                 }
