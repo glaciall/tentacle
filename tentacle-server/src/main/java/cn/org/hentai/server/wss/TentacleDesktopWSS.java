@@ -8,6 +8,7 @@ import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
 import cn.org.hentai.tentacle.system.File;
+import cn.org.hentai.tentacle.util.Log;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -202,7 +203,8 @@ public class TentacleDesktopWSS
         }
         catch(Exception e)
         {
-            throw new RuntimeException(e);
+            Log.error(e);
+            // throw new RuntimeException(e);
         }
     }
 

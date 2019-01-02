@@ -1,7 +1,7 @@
 package cn.org.hentai.server.rds;
 
 import cn.org.hentai.server.util.Configs;
-import cn.org.hentai.server.util.Log;
+import cn.org.hentai.tentacle.util.Log;
 
 import java.net.InetAddress;
 import java.net.ServerSocket;

@@ -6,6 +6,7 @@ import cn.org.hentai.server.wss.TentacleDesktopWSS;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
 import cn.org.hentai.tentacle.system.File;
+import cn.org.hentai.tentacle.util.Log;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -141,7 +142,6 @@ public class RDSession extends Thread
         p.addBytes("CLOSE".getBytes());
         outputStream.write(p.getBytes());
         outputStream.flush();
-        while (Packet.read(inputStream) == null) sleep(5);
     }
 
     // 下发键鼠控制指令
