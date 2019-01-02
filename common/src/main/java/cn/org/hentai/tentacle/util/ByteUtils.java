@@ -13,6 +13,38 @@ public final class ByteUtils
         return data;
     }
 
+    public static void dump(byte[] data)
+    {
+        for (int i = 0, l = data.length; i < l; )
+        {
+            String ascii = "";
+            int k = 0, f = 0;
+            for (; k < 16; k++)
+            {
+                if (k + i < l)
+                {
+                    f++;
+                    byte d = data[i + k];
+                    String hex = Integer.toHexString(d & 0xff).toUpperCase();
+                    if (hex.length() == 1) hex = "0" + hex;
+                    if (d >= 0x20 && d < 127) ascii += (char)d;
+                    else ascii += '.';
+                    System.out.print(hex);
+                }
+                else
+                {
+                    System.out.print(' ');
+                    System.out.print(' ');
+                }
+
+                if (k % 4 == 3) System.out.print("   ");
+                else System.out.print(' ');
+            }
+            i += f;
+            System.out.println(ascii);
+        }
+    }
+
     public static String toString(byte[] data)
     {
         return toString(data, data.length);
