@@ -175,8 +175,9 @@ window.Tentacle = {
                     var session = response.sessions[i];
                     shtml += '<div class="x-row">';
                     shtml += '  <div class="x-col-1 text-center">' + session.id + '</div>';
-                    shtml += '  <div class="x-col-7"><a href="javascript:;" x-session-id="' + (session.controlling ? '' : session.id) + '" id="rds-name">' + session.name + '</a></div>';
-                    shtml += '  <div class="x-col-2 text-center ' + (session.controlling ? 'orange' : 'green') + '">' + (session.controlling ? '忙碌' : '空闲') + '</div>';
+                    shtml += '  <div class="x-col-4"><a href="javascript:;" x-session-id="' + (session.controlling ? '' : session.id) + '" id="rds-name">' + session.name + '</a></div>';
+                    shtml += '  <div class="x-col-4">' + session.address + '</div>';
+                    shtml += '  <div class="x-col-1 text-center ' + (session.controlling ? 'orange' : 'green') + '">' + (session.controlling ? '忙碌' : '空闲') + '</div>';
                     shtml += '  <div class="x-clearfix"></div>';
                     shtml += '</div>';
                 }
@@ -377,6 +378,7 @@ window.Tentacle = {
         // 重新获取会话列表
         $('.x-dialog-sessions .x-refresh').click(function()
         {
+            $(this).animateCss('rotateIn');
             self.querySessions();
         });
         $(document).on('click', '.x-sessions a[id=rds-name]', function()

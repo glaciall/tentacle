@@ -45,6 +45,24 @@ public class Packet
         return p;
     }
 
+    public static Packet create(int length)
+    {
+        Packet p = new Packet();
+        p.data = new byte[length];
+        p.size = 0;
+        p.maxSize = length;
+        return p;
+    }
+
+    public static Packet create(byte[] data)
+    {
+        Packet p = new Packet();
+        p.data = data;
+        p.size = data.length;
+        p.maxSize = data.length;
+        return p;
+    }
+
     /**
      * 从流中读取并建立一个数据包
      * @param inputStream
@@ -71,6 +89,11 @@ public class Packet
         p.addBytes(head);
         p.addBytes(baos.toByteArray());
         return p;
+    }
+
+    public int size()
+    {
+        return this.size;
     }
 
     public Packet addByte(byte b)

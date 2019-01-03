@@ -315,6 +315,7 @@ body
     border-radius: 10px;
     color: #ccc;
     padding: 20px;
+    box-sizing: border-box;
 }
 .x-dialog .x-title
 {
@@ -326,9 +327,9 @@ body
 }
 .x-dialog-sessions
 {
-    width: 500px;
+    width: 750px;
     height: 350px;
-    margin-left: -250px;
+    margin-left: -375px;
     margin-top: -175px;
     background-color: rgba(90, 90, 90, 0.4);
     display: none;

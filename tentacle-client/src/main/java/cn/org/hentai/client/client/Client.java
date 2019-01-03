@@ -119,7 +119,7 @@ public class Client extends Thread
         // 心跳
         else if (cmd == Command.HEARTBEAT)
         {
-            resp = Packet.create(Command.COMMON_RESPONSE, 4).addByte((byte)'O').addByte((byte)'J').addByte((byte)'B').addByte((byte)'K');
+            System.out.println("收到服务器反馈的心跳包");
         }
         // 开始远程控制
         else if (cmd == Command.CONTROL_REQUEST)
