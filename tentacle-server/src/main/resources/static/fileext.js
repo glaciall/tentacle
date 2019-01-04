@@ -8,7 +8,7 @@ var FileTypes = {
         'config' : { name : '', icon : 'config.ico', suffix : 'css,properties,conf,config,ini' },
         'dll' : { name : '动态链接库', icon : 'config.ico', suffix : 'dll,so' },
         'exe' : { name : '可执行程序', icon : 'exe.ico', suffix : 'exe,com' },
-        'link' : { name : '快捷方式', icon : '', suffix : 'lnk,desktop' },
+        'link' : { name : '快捷方式', icon : 'shell32_255.ico', suffix : 'lnk,desktop' },
         'font' : { name : '字体文件', icon : 'font.ico', suffix : 'ttf,otf,ttc' },
         'html' : { name : 'HTML网页', icon : 'html.ico', suffix : 'html,htm,hta,xhtml,shtml,shtm' },
         'image' : { name : '光盘映像文件', icon : 'image.ico', suffix : 'iso,img,bin,nrg,vcd,cif,fcd,ccd,c2d,dfi,tao,dao,cue' },
