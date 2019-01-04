@@ -9,6 +9,18 @@ import cn.org.hentai.tentacle.protocol.Message;
  */
 public abstract class BaseMessageController
 {
+    private boolean disconnect = false;
+
+    public final void replyAndDisconnect()
+    {
+        disconnect = true;
+    }
+
+    public boolean disconnectAfterConverse()
+    {
+        return disconnect;
+    }
+
     /**
      * 指示当前指令是否需要认证
      * @return

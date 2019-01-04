@@ -1,6 +1,7 @@
 package cn.org.hentai.server.app;
 
 import cn.org.hentai.server.rds.RemoteDesktopServer;
+import cn.org.hentai.server.util.BeanUtils;
 import cn.org.hentai.tentacle.util.Configs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -29,6 +30,7 @@ public class ServerApp
     public static void main(String[] args) throws Exception
     {
         ApplicationContext context = SpringApplication.run(ServerApp.class, args);
+        BeanUtils.init(context);
         Configs.init("/application.properties");
         new RemoteDesktopApp().startup();
         // new Thread(new RemoteDesktopServer()).start();

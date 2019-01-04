@@ -29,6 +29,8 @@ public class AuthenticateController extends BaseMessageController
 
         String nonce = new String(body.nextBytes(32));
         String signature = new String(body.nextBytes(32));
+
+        // TODO: 可在这里通过cn.org.hentai.server.util.BeanUtils.createBean()来创建Spring Bean进行数据库查询认证
         if (signature.equals(MD5.encode(nonce + ":::" + Configs.get("client.key"))) == false)
         {
             throw new RuntimeException(String.format("unauth connection: %s", handler.getRemoteAddress()));
