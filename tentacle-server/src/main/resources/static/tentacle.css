@@ -344,9 +344,9 @@ body
 }
 .x-dialog-keyboard
 {
-    width: 656px;
-    height: 400px;
-    margin-left: -328px;
+    width: 696px;
+    height: 420px;
+    margin-left: -348px;
     margin-top: -200px;
     display: none;
 }
@@ -396,7 +396,7 @@ body
     border-radius: 4px;
     background-color: transparent;
     width: 100%;
-    height: 180px;
+    height: 160px;
     color: #ccc;
     font-size: 14px;
     resize: none;
