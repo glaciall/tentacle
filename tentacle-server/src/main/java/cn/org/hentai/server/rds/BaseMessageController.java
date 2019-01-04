@@ -1,4 +1,4 @@
-package cn.org.hentai.server.rds.controller;
+package cn.org.hentai.server.rds;
 
 import cn.org.hentai.server.rds.TentacleDesktopHandler;
 import cn.org.hentai.tentacle.protocol.Message;
@@ -11,12 +11,12 @@ public abstract class BaseMessageController
 {
     private boolean disconnect = false;
 
-    public final void replyAndDisconnect()
+    protected final void replyAndDisconnect()
     {
         disconnect = true;
     }
 
-    public boolean disconnectAfterConverse()
+    public boolean shouldDisconnectAfterConverse()
     {
         return disconnect;
     }

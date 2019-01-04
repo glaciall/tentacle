@@ -1,5 +1,6 @@
 package cn.org.hentai.server.rds.controller;
 
+import cn.org.hentai.server.rds.BaseMessageController;
 import cn.org.hentai.server.rds.TentacleDesktopHandler;
 import cn.org.hentai.tentacle.protocol.Message;
 

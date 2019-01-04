@@ -1,5 +1,6 @@
 package cn.org.hentai.server.rds.controller;
 
+import cn.org.hentai.server.rds.BaseMessageController;
 import cn.org.hentai.server.rds.Client;
 import cn.org.hentai.server.rds.SessionManager;
 import cn.org.hentai.server.rds.TentacleDesktopHandler;
@@ -8,7 +9,7 @@ import cn.org.hentai.server.util.MD5;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Message;
 import cn.org.hentai.tentacle.protocol.Packet;
-import cn.org.hentai.tentacle.util.ByteUtils;
+import cn.org.hentai.tentacle.util.Log;
 
 /**
  * Created by matrixy on 2019/1/3.
@@ -33,7 +34,10 @@ public class AuthenticateController extends BaseMessageController
         // TODO: 可在这里通过cn.org.hentai.server.util.BeanUtils.createBean()来创建Spring Bean进行数据库查询认证
         if (signature.equals(MD5.encode(nonce + ":::" + Configs.get("client.key"))) == false)
         {
-            throw new RuntimeException(String.format("unauth connection: %s", handler.getRemoteAddress()));
+            this.replyAndDisconnect();
+            Log.error(String.format("unauth connection: %s", handler.getRemoteAddress()));
+            Message resp = new Message().withCommand(Command.AUTHENTICATE_RESPONSE).withBody(Packet.create(1).addByte((byte)0x01));
+            return resp;
         }
 
         System.out.println("Authenticated: " + name);

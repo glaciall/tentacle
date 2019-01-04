@@ -1,7 +1,6 @@
 package cn.org.hentai.server.rds;
 
 import cn.org.hentai.server.rds.controller.AuthenticateController;
-import cn.org.hentai.server.rds.controller.BaseMessageController;
 import cn.org.hentai.server.rds.controller.ControlRequestController;
 import cn.org.hentai.server.rds.controller.HeartbeatController;
 import cn.org.hentai.tentacle.protocol.Command;
@@ -11,7 +10,6 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import cn.org.hentai.tentacle.protocol.Message;
 
-import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -103,6 +101,11 @@ public class TentacleDesktopHandler extends SimpleChannelInboundHandler<Message>
         catch(Exception ex)
         {
             ex.printStackTrace();
+        }
+
+        if (controller.shouldDisconnectAfterConverse())
+        {
+            context.disconnect();
         }
     }
 
