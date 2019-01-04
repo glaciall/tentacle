@@ -1,9 +1,5 @@
 package cn.org.hentai.server.rds;
 
-import cn.org.hentai.server.rds.controller.AuthenticateController;
-import cn.org.hentai.server.rds.controller.ControlRequestController;
-import cn.org.hentai.server.rds.controller.HeartbeatController;
-import cn.org.hentai.tentacle.protocol.Command;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.Attribute;
@@ -17,7 +13,7 @@ import java.util.Map;
 /**
  * Created by matrixy on 2019/1/3.
  */
-public class TentacleDesktopHandler extends SimpleChannelInboundHandler<Message>
+public abstract class TentacleDesktopHandler extends SimpleChannelInboundHandler<Message>
 {
     private static final AttributeKey<Client> SESSION_KEY = AttributeKey.valueOf("session-key");
     private ChannelHandlerContext context;
@@ -63,7 +59,7 @@ public class TentacleDesktopHandler extends SimpleChannelInboundHandler<Message>
         // do nothing here...
     }
 
-    public SocketAddress getRemoteAddress()
+    public final SocketAddress getRemoteAddress()
     {
         return this.context.channel().remoteAddress();
     }
@@ -85,7 +81,7 @@ public class TentacleDesktopHandler extends SimpleChannelInboundHandler<Message>
         context.writeAndFlush(msg);
     }
 
-    protected void handle(Message msg)
+    protected final void handle(Message msg)
     {
         BaseMessageController controller = getController(msg.getCommand());
         if (null == controller)
@@ -95,7 +91,7 @@ public class TentacleDesktopHandler extends SimpleChannelInboundHandler<Message>
 
         try
         {
-            Message resp = controller.service(this, msg);
+            Message resp = controller.service((TentacleDesktopSessionHandler) this, msg);
             if (resp != null) this.send(resp);
         }
         catch(Exception ex)
@@ -109,16 +105,12 @@ public class TentacleDesktopHandler extends SimpleChannelInboundHandler<Message>
         }
     }
 
-    // 注册消息指令处理器
-    // 每增加一个新的指令，必须在此添加相应的消息指令控制器
-    static
+    protected static final void registerController(byte command, Class<? extends BaseMessageController> controllerClass)
     {
-        controllers.put(Command.AUTHENTICATE, AuthenticateController.class);
-        controllers.put(Command.CONTROL_REQUEST, ControlRequestController.class);
-        controllers.put(Command.HEARTBEAT, HeartbeatController.class);
+        controllers.put(command, controllerClass);
     }
 
-    private static BaseMessageController getController(byte command)
+    private static final BaseMessageController getController(byte command)
     {
         Class cls = controllers.get(command);
         try

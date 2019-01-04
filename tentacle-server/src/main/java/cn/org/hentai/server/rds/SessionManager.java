@@ -9,25 +9,24 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class SessionManager
 {
-    private static RemoteDesktopServer instance = null;
-    private static final ConcurrentHashMap<Long, TentacleDesktopHandler> sessions = new ConcurrentHashMap<Long, TentacleDesktopHandler>();
+    private static final ConcurrentHashMap<Long, TentacleDesktopSessionHandler> sessions = new ConcurrentHashMap<Long, TentacleDesktopSessionHandler>();
     private static AtomicLong sequence = new AtomicLong(1);
 
-    public static void register(TentacleDesktopHandler handler)
+    public static void register(TentacleDesktopSessionHandler handler)
     {
         long nid = sequence.getAndAdd(1);
         handler.getClient().setId(nid);
         sessions.put(nid, handler);
     }
 
-    public static TentacleDesktopHandler getSession(long sessionId)
+    public static TentacleDesktopSessionHandler getSession(long sessionId)
     {
         return sessions.get(sessionId);
     }
 
-    public static TentacleDesktopHandler[] activeSessions()
+    public static TentacleDesktopSessionHandler[] activeSessions()
     {
-        return sessions.values().toArray(new TentacleDesktopHandler[0]);
+        return sessions.values().toArray(new TentacleDesktopSessionHandler[0]);
     }
 
     public static void removeSession(TentacleDesktopHandler handler)

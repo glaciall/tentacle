@@ -11,17 +11,19 @@ import io.netty.handler.codec.MessageToByteEncoder;
  */
 public class MessageEncoder extends MessageToByteEncoder<Message>
 {
+    static final byte[] HEADER = "HENTAI".getBytes();
+
     @Override
     protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) throws Exception
     {
         // 协议头
-        out.writeBytes("HENTAI".getBytes());
+        out.writeBytes(HEADER);
         // Command
         out.writeByte(msg.getCommand());
         // 消息体长度
-        out.writeInt(msg.getBody().size());
+        byte[] body = msg.getBodyBytes();
+        out.writeInt(body.length);
         // 消息体
-        if (msg.getBody().size() > 0)
-            out.writeBytes(msg.getBody().getBytes());
+        if (body.length > 0) out.writeBytes(body);
     }
 }

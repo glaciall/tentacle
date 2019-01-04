@@ -7,6 +7,7 @@ public class Message
 {
     byte command;
     Packet body;
+    byte[] bodyBytes;
 
     public byte getCommand() {
         return command;
@@ -37,5 +38,17 @@ public class Message
     {
         setBody(body);
         return this;
+    }
+
+    public Message withBody(byte[] body)
+    {
+        this.bodyBytes = body;
+        return this;
+    }
+
+    public byte[] getBodyBytes()
+    {
+        if (bodyBytes != null) return bodyBytes;
+        else return body.getBytes();
     }
 }

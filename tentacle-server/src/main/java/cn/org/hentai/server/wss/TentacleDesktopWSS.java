@@ -1,11 +1,11 @@
 package cn.org.hentai.server.wss;
 
 import cn.org.hentai.server.app.GetHttpSessionConfigurator;
-import cn.org.hentai.server.rds.RemoteDesktopServer;
-import cn.org.hentai.server.rds.RemoteDesktopSession;
+import cn.org.hentai.server.rds.*;
 import cn.org.hentai.server.util.Configs;
 import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.protocol.Command;
+import cn.org.hentai.tentacle.protocol.Message;
 import cn.org.hentai.tentacle.protocol.Packet;
 import cn.org.hentai.tentacle.system.File;
 import cn.org.hentai.tentacle.util.Log;
@@ -30,7 +30,7 @@ import java.util.List;
 public class TentacleDesktopWSS
 {
     Session session;
-    RemoteDesktopSession remoteDesktopSession = null;
+    TentacleDesktopSessionHandler remoteDesktopSession = null;
     HttpSession httpSession = null;
 
     @OnOpen
@@ -53,7 +53,6 @@ public class TentacleDesktopWSS
             {
                 if (!Configs.get("rds.access.password").equals(json.get("password").getAsString()))
                 {
-
                     // try { this.session.close(); } catch(Exception e) { }
                     this.sendResponse("login", "密码错误");
                     return;
@@ -66,12 +65,15 @@ public class TentacleDesktopWSS
                 JsonObject resp = new JsonObject();
                 resp.addProperty("action", "sessions");
                 JsonArray rds = new JsonArray();
-                for (RemoteDesktopSession se : RemoteDesktopServer.activeSessions())
+                for (TentacleDesktopSessionHandler se : SessionManager.activeSessions())
                 {
+                    Client info = se.getClient();
+                    if (null == info) continue;
                     JsonObject seJson = new JsonObject();
-                    seJson.addProperty("id", se.getId());
-                    seJson.addProperty("name", se.getClientName());
-                    seJson.addProperty("controlling", se.isControlling());
+                    seJson.addProperty("id", info.getId());
+                    seJson.addProperty("name", info.getName());
+                    seJson.addProperty("address", info.getAddress().toString());
+                    seJson.addProperty("controlling", info.isControlling());
                     rds.add(seJson);
                 }
                 resp.add("sessions", rds);
@@ -84,7 +86,7 @@ public class TentacleDesktopWSS
             }
             else if ("get-clipboard".equals(cmd))
             {
-                remoteDesktopSession.addCommand(Packet.create(Command.GET_CLIPBOARD, 3).addBytes("GET".getBytes()));
+                remoteDesktopSession.getClipboardData();
             }
             else if ("set-clipboard".equals(cmd))
             {
@@ -94,23 +96,12 @@ public class TentacleDesktopWSS
                     return;
                 }
                 String text = json.get("text").getAsString();
-                try
-                {
-                    byte[] data = text.getBytes("UTF-8");
-                    remoteDesktopSession.addCommand(Packet.create(Command.SET_CLIPBOARD, 4 + data.length).addInt(data.length).addBytes(data));
-                }
-                catch(UnsupportedEncodingException e) { }
+                remoteDesktopSession.setClipboardData(text);
             }
             else if ("ls".equals(cmd))
             {
                 String path = !json.has("path") ? "" : json.get("path").getAsString();
-                byte[] data = null;
-                try
-                {
-                    data = path.getBytes("UTF-8");
-                }
-                catch(UnsupportedEncodingException e) { }
-                remoteDesktopSession.addCommand(Packet.create(Command.LIST_FILES, 4 + data.length).addInt(data.length).addBytes(data));
+                remoteDesktopSession.listFiles(path);
             }
         }
         if ("hid".equals(type))
@@ -120,7 +111,6 @@ public class TentacleDesktopWSS
             for (int i = 0; i < actions.size(); i++)
             {
                 JsonObject cmd = actions.get(i).getAsJsonObject();
-                Packet p = Packet.create(Command.HID_COMMAND, 11);
                 byte hidType = 0x00, eventType = 0x00, key = 0x00;
                 short x = 0, y = 0;
                 int timestamp = cmd.get("timestamp").getAsInt();
@@ -162,9 +152,9 @@ public class TentacleDesktopWSS
                     hidType = HIDCommand.TYPE_KEYBOARD;
                     eventType = 0x02;
                 }
-                if (cmd.has("key")) key = cmd.get("key").getAsByte();
-                p.addByte(hidType).addByte(eventType).addByte(key).addShort(x).addShort(y).addInt(timestamp);
-                remoteDesktopSession.addCommand(p);
+                if (cmd.has("key")) key = (byte)(cmd.get("key").getAsInt() & 0xff);
+
+                remoteDesktopSession.sendHIDCommand(hidType, eventType, key, x, y, timestamp);
             }
         }
     }
@@ -173,7 +163,7 @@ public class TentacleDesktopWSS
     {
         try
         {
-            remoteDesktopSession = RemoteDesktopServer.getSession(sessionId);
+            remoteDesktopSession = SessionManager.getSession(sessionId);
             remoteDesktopSession.bind(this);
             this.sendResponse("request-control", "success");
         }
@@ -284,6 +274,6 @@ public class TentacleDesktopWSS
     {
         try { this.httpSession.invalidate(); } catch(Exception e) { }
         if (null == remoteDesktopSession) return;
-        remoteDesktopSession.closeControl();
+        remoteDesktopSession.unbind();
     }
 }

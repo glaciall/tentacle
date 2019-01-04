@@ -1,9 +1,6 @@
 package cn.org.hentai.server.rds.controller;
 
-import cn.org.hentai.server.rds.BaseMessageController;
-import cn.org.hentai.server.rds.Client;
-import cn.org.hentai.server.rds.SessionManager;
-import cn.org.hentai.server.rds.TentacleDesktopHandler;
+import cn.org.hentai.server.rds.*;
 import cn.org.hentai.server.util.Configs;
 import cn.org.hentai.server.util.MD5;
 import cn.org.hentai.tentacle.protocol.Command;
@@ -13,6 +10,7 @@ import cn.org.hentai.tentacle.util.Log;
 
 /**
  * Created by matrixy on 2019/1/3.
+ * 受控端连接发起时的会话认证处理
  */
 public class AuthenticateController extends BaseMessageController
 {
@@ -23,7 +21,7 @@ public class AuthenticateController extends BaseMessageController
     }
 
     @Override
-    public Message service(TentacleDesktopHandler handler, Message msg) throws Exception
+    public Message service(TentacleDesktopSessionHandler session, Message msg) throws Exception
     {
         Packet body = msg.getBody();
         String name = new String(body.nextBytes(body.nextInt()), "UTF-8");
@@ -35,7 +33,7 @@ public class AuthenticateController extends BaseMessageController
         if (signature.equals(MD5.encode(nonce + ":::" + Configs.get("client.key"))) == false)
         {
             this.replyAndDisconnect();
-            Log.error(String.format("unauth connection: %s", handler.getRemoteAddress()));
+            Log.error(String.format("unauth connection: %s", session.getRemoteAddress()));
             Message resp = new Message().withCommand(Command.AUTHENTICATE_RESPONSE).withBody(Packet.create(1).addByte((byte)0x01));
             return resp;
         }
@@ -45,10 +43,10 @@ public class AuthenticateController extends BaseMessageController
         Client info = new Client();
         info.setName(name);
         info.setControlling(false);
-        info.setAddress(handler.getRemoteAddress());
+        info.setAddress(session.getRemoteAddress());
 
-        handler.setClient(info);
-        SessionManager.register(handler);
+        session.setClient(info);
+        SessionManager.register(session);
 
         Message resp = new Message().withCommand(Command.AUTHENTICATE_RESPONSE).withBody(Packet.create(1).addByte((byte)0x00));
         return resp;

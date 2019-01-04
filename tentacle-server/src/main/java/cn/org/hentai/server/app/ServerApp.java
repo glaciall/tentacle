@@ -1,6 +1,5 @@
 package cn.org.hentai.server.app;
 
-import cn.org.hentai.server.rds.RemoteDesktopServer;
 import cn.org.hentai.server.util.BeanUtils;
 import cn.org.hentai.tentacle.util.Configs;
 import org.springframework.beans.factory.annotation.Autowired;

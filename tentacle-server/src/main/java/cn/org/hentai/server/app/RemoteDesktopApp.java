@@ -1,6 +1,7 @@
 package cn.org.hentai.server.app;
 
 import cn.org.hentai.server.rds.TentacleDesktopHandler;
+import cn.org.hentai.server.rds.TentacleDesktopSessionHandler;
 import cn.org.hentai.server.rds.coder.MessageDecoder;
 import cn.org.hentai.server.rds.coder.MessageEncoder;
 import cn.org.hentai.tentacle.util.Configs;
@@ -34,7 +35,7 @@ public class RemoteDesktopApp
                         ChannelPipeline p = channel.pipeline();
                         p.addLast(new MessageDecoder());
                         p.addLast(new MessageEncoder());
-                        p.addLast(new TentacleDesktopHandler());
+                        p.addLast(new TentacleDesktopSessionHandler());
                     }
                 });
 
