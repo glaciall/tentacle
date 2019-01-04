@@ -104,6 +104,7 @@ body
     background-position: center;
     cursor: pointer;
     display: block;
+    border-radius: 5px;
 }
 .x-cmd-bar .x-cmd-right
 {
