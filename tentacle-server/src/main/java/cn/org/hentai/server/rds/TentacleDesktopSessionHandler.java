@@ -27,6 +27,7 @@ public class TentacleDesktopSessionHandler extends TentacleDesktopHandler
         registerController(Command.GET_CLIPBOARD_RESPONSE, GetClipboardResponseController.class);
         registerController(Command.SET_CLIPBOARD_RESPONSE, SetClipboardResponseController.class);
         registerController(Command.CONTROL_RESPONSE, RemoteControlResponseController.class);
+        registerController(Command.CLOSE_RESPONSE, RemoteControlCloseResponseController.class);
         registerController(Command.COMMON_RESPONSE, CommonResponseController.class);
     }
 
