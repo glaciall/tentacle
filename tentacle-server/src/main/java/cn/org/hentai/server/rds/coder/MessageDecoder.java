@@ -1,8 +1,8 @@
 package cn.org.hentai.server.rds.coder;
 
-import cn.org.hentai.server.util.ByteUtils;
 import cn.org.hentai.tentacle.protocol.Message;
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.util.ByteUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.buffer.UnpooledDirectByteBuf;

@@ -2,9 +2,9 @@ package cn.org.hentai.server.rds.controller;
 
 import cn.org.hentai.server.rds.BaseMessageController;
 import cn.org.hentai.server.rds.TentacleDesktopSessionHandler;
-import cn.org.hentai.server.util.ByteUtils;
 import cn.org.hentai.tentacle.protocol.Message;
 import cn.org.hentai.tentacle.system.File;
+import cn.org.hentai.tentacle.util.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.List;
