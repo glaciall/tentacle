@@ -90,8 +90,7 @@ public class Client extends Thread
             {
                 Packet p = Packet.create(Command.HEARTBEAT, 5);
                 p.addBytes("HELLO".getBytes());
-                outputStream.write(p.getBytes());
-                outputStream.flush();
+                send(p);
                 lastActiveTime = System.currentTimeMillis();
             }
             sleep(5);
@@ -152,9 +151,12 @@ public class Client extends Thread
             {
                 String text = (String)clipboard.getData(DataFlavor.stringFlavor);
                 // 剪切板没有内容就别回应了
-                byte[] bytes = text.getBytes("UTF-8");
+
                 if (text != null && text.length() > 0)
+                {
+                    byte[] bytes = text.getBytes("UTF-8");
                     resp = Packet.create(Command.GET_CLIPBOARD_RESPONSE, 4 + bytes.length).addInt(bytes.length).addBytes(bytes);
+                }
             }
         }
         // 设置剪切板内容
@@ -204,6 +206,7 @@ public class Client extends Thread
             String path = new String(packet.nextBytes(len), "UTF-8");
             File[] files = FileSystem.list(path);
             ByteArrayOutputStream baos = new ByteArrayOutputStream(40960);
+            baos.reset();
             for (int i = 0; files != null && i < files.length; i++)
             {
                 File file = files[i];
@@ -217,7 +220,9 @@ public class Client extends Thread
                 baos.write(ByteUtils.toBytes(fbytes.length));
                 baos.write(fbytes);
             }
-            resp = Packet.create(Command.LIST_FILES_RESPONSE, baos.size()).addBytes(baos.toByteArray());
+            // if (baos.size() == 0) throw new RuntimeException("fuck!!!");
+            resp = Packet.create(Command.LIST_FILES_RESPONSE, baos.size());
+            if (baos.size() > 0) resp.addBytes(baos.toByteArray());
         }
         // 传送文件到服务器端
         else if (cmd == Command.DOWNLOAD_FILE)
@@ -236,9 +241,16 @@ public class Client extends Thread
         }
     }
 
+    private static final byte[] TAIL = new byte[] { (byte)0xfa, (byte)0xfa, (byte)0xfa };
     public synchronized void send(Packet packet) throws IOException
     {
+        byte cmd = packet.rewind().seek(6).nextByte();
+        if (cmd != Command.SCREENSHOT)
+        {
+            System.out.println(String.format("Send: %2x, Length: %5d", cmd, packet.size()));
+        }
         outputStream.write(packet.getBytes());
+        outputStream.write(TAIL);
         outputStream.flush();
     }
 
@@ -247,7 +259,7 @@ public class Client extends Thread
     {
         if (!working) return;
         Packet p = ScreenImages.getCompressedScreen();
-        p.skip(6 + 1 + 4 + 2 + 2 + 8);
+        // p.skip(6 + 1 + 4 + 2 + 2 + 8);
         send(p);
     }
 
