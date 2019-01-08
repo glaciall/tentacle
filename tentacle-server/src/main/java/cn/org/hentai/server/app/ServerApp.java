@@ -31,7 +31,7 @@ public class ServerApp
         ApplicationContext context = SpringApplication.run(ServerApp.class, args);
         BeanUtils.init(context);
         Configs.init("/application.properties");
-        new RemoteDesktopApp().startup();
+        RemoteDesktopApp.init();
         // new Thread(new RemoteDesktopServer()).start();
     }
 

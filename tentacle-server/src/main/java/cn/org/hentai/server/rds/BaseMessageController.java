@@ -1,6 +1,5 @@
 package cn.org.hentai.server.rds;
 
-import cn.org.hentai.server.rds.TentacleDesktopHandler;
 import cn.org.hentai.tentacle.protocol.Message;
 
 /**
@@ -45,5 +44,5 @@ public abstract class BaseMessageController
      * @return 如果返回null，则不回应客户端
      * @throws Exception
      */
-    public abstract Message service(TentacleDesktopSessionHandler session, Message msg) throws Exception;
+    public abstract Message service(TentacleDesktopSession session, Message msg) throws Exception;
 }

@@ -9,28 +9,28 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class SessionManager
 {
-    private static final ConcurrentHashMap<Long, TentacleDesktopSessionHandler> sessions = new ConcurrentHashMap<Long, TentacleDesktopSessionHandler>();
+    private static final ConcurrentHashMap<Long, TentacleDesktopSession> sessions = new ConcurrentHashMap<Long, TentacleDesktopSession>();
     private static AtomicLong sequence = new AtomicLong(1);
 
-    public static void register(TentacleDesktopSessionHandler handler)
+    public static void register(TentacleDesktopSession session)
     {
         long nid = sequence.getAndAdd(1);
-        handler.getClient().setId(nid);
-        sessions.put(nid, handler);
+        session.getClient().setId(nid);
+        sessions.put(nid, session);
     }
 
-    public static TentacleDesktopSessionHandler getSession(long sessionId)
+    public static TentacleDesktopSession getSession(long sessionId)
     {
         return sessions.get(sessionId);
     }
 
-    public static TentacleDesktopSessionHandler[] activeSessions()
+    public static TentacleDesktopSession[] activeSessions()
     {
-        return sessions.values().toArray(new TentacleDesktopSessionHandler[0]);
+        return sessions.values().toArray(new TentacleDesktopSession[0]);
     }
 
-    public static void removeSession(TentacleDesktopHandler handler)
+    public static void removeSession(TentacleDesktopSession session)
     {
-        sessions.remove(handler);
+        sessions.remove(session);
     }
 }

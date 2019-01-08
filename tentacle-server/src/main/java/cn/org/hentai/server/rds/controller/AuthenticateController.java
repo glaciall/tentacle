@@ -1,11 +1,11 @@
 package cn.org.hentai.server.rds.controller;
 
 import cn.org.hentai.server.rds.*;
-import cn.org.hentai.server.util.Configs;
 import cn.org.hentai.server.util.MD5;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Message;
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.util.Configs;
 import cn.org.hentai.tentacle.util.Log;
 
 /**
@@ -21,7 +21,7 @@ public class AuthenticateController extends BaseMessageController
     }
 
     @Override
-    public Message service(TentacleDesktopSessionHandler session, Message msg) throws Exception
+    public Message service(TentacleDesktopSession session, Message msg) throws Exception
     {
         Packet body = msg.getBody();
         String name = new String(body.nextBytes(body.nextInt()), "UTF-8");
