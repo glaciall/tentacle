@@ -1,8 +1,10 @@
 package cn.org.hentai.server.rds.coder;
 
-import cn.org.hentai.server.util.ByteUtils;
+import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Message;
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.util.ByteUtils;
+import cn.org.hentai.tentacle.util.Log;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.buffer.UnpooledDirectByteBuf;
@@ -10,6 +12,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,7 +39,9 @@ public class MessageDecoder extends ByteToMessageDecoder
         byte[] header = new byte[6];
         in.getBytes(0, header);
         if ("HENTAI".equals(new String(header)) == false)
+        {
             throw new RuntimeException("wrong protocol header: " + ByteUtils.toString(header));
+        }
 
         byte command = in.getByte(6);
         int length = in.getInt(7);
@@ -44,7 +49,14 @@ public class MessageDecoder extends ByteToMessageDecoder
 
         byte[] body = new byte[length];
         in.readBytes(6 + 1 + 4);
-        in.readBytes(body);
+        if (length > 0) in.readBytes(body);
+
+        if (command == Command.SCREENSHOT || command == Command.HEARTBEAT) ;
+        else
+        {
+            System.out.println(String.format("Command: %2x, Length: %5d", command, length));
+            ByteUtils.dump(body);
+        }
 
         out.add(new Message().withCommand(command).withBody(Packet.create(body)));
     }

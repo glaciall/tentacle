@@ -1,6 +1,6 @@
 package cn.org.hentai.server.util;
 
-import cn.org.hentai.server.util.ByteUtils;
+import cn.org.hentai.tentacle.util.ByteUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
