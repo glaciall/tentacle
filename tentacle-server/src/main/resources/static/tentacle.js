@@ -188,6 +188,8 @@ window.Tentacle = {
             else if ('request-control' == response.action)
             {
                 if (response.result != 'success') this.showMessage(response.result);
+                $('.x-cmd-bar').animate({ top : '-70px' }, 300);
+                $('.x-stat-panel').animate({ left : '-140px' }, 500, function() { $(this).find('.x-trigger').removeClass('x-trigger-left').addClass('x-trigger-right'); });
             }
             else if ('setup' == response.action)
             {
@@ -507,6 +509,38 @@ window.Tentacle = {
             }
             $('.x-fmanager .x-path').html(path);
         }
+
+        var cmdBarTimeout = null;
+        $('.x-cmd-bar .x-icon').click(function()
+        {
+            var bar = $(this).parents('.x-cmd-bar');
+            var top = 0;
+            if (bar.offset().top == -10) top = -70;
+            if (bar.offset().top == -70) top = -10;
+            if (top == 0) return;
+            bar.animate({ top : top + 'px' }, 300);
+        });
+
+        $('.x-cmd-bar').mouseleave(function()
+        {
+            var bar = $(this);
+            if (cmdBarTimeout) window.clearTimeout(cmdBarTimeout);
+            cmdBarTimeout = setTimeout(function()
+            {
+                bar.animate({ top : '-70px' }, 300);
+            }, 2000);
+        });
+
+        $('.x-stat-panel .x-trigger').click(function()
+        {
+            var trigger = $(this);
+            var visible = trigger.hasClass('x-trigger-left');
+            var left = visible ? '-140px' : '-10px';
+            trigger.parents('.x-stat-panel').animate({ left : left }, 500, function()
+            {
+                trigger.removeClass('x-trigger-' + (left == '-10px' ? 'right' : 'left')).addClass('x-trigger-' + (left == '-10px' ? 'left' : 'right'));
+            });
+        });
     },
     __addHIDEvent : function(cmd)
     {

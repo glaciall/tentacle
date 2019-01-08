@@ -21,6 +21,7 @@
     <div class="x-cmd x-cmd-right x-cmd-transfer" title="文件传送"></div>
 </div>
 <div class="x-stat-panel">
+    <span class="x-trigger x-trigger-left"></span>
     <div class="x-stat" id="x-frames">
         <h1>0</h1>
         <h5>frames</h5>
