@@ -44,12 +44,13 @@ public class TentacleDesktopSession extends Thread
             ByteHolder buffer = new ByteHolder(1024 * 1024 * 10);
             byte[] block = new byte[512];
 
-
+            long lastActiveTime = System.currentTimeMillis();
             while (!this.isClosed())
             {
                 int readableBytes = inputStream.available();
                 if (readableBytes > 0)
                 {
+                    lastActiveTime = System.currentTimeMillis();
                     for (int i = 0, l = (int)Math.ceil(readableBytes / 512f); i < l; i++)
                     {
                         int len = inputStream.read(block, 0, i == l - 1 ? 512 : readableBytes % 512);
@@ -66,6 +67,11 @@ public class TentacleDesktopSession extends Thread
                     continue;
                 }
 
+                if (System.currentTimeMillis() - lastActiveTime > 1000 * 30)
+                {
+                    Log.debug(String.format("Client Timeout: %s", this.getRemoteAddress().toString()));
+                    break;
+                }
                 Thread.sleep(10);
             }
         }
