@@ -44,24 +44,29 @@ public class TentacleDesktopSession extends Thread
             ByteHolder buffer = new ByteHolder(1024 * 1024 * 10);
             byte[] block = new byte[512];
 
+
             while (!this.isClosed())
             {
                 int readableBytes = inputStream.available();
-                if (readableBytes <= 0) continue;
-
-                for (int i = 0, l = (int)Math.ceil(readableBytes / 512f); i < l; i++)
+                if (readableBytes > 0)
                 {
-                    int len = inputStream.read(block, 0, i == l - 1 ? 512 : readableBytes % 512);
-                    if (len > 0) buffer.write(block, 0, len);
+                    for (int i = 0, l = (int)Math.ceil(readableBytes / 512f); i < l; i++)
+                    {
+                        int len = inputStream.read(block, 0, i == l - 1 ? 512 : readableBytes % 512);
+                        if (len > 0) buffer.write(block, 0, len);
+                    }
+
+                    while (true)
+                    {
+                        Message msg = TentacleMessageDecoder.read(buffer);
+                        if (null == msg) break;
+
+                        handle(msg);
+                    }
+                    continue;
                 }
 
-                while (true)
-                {
-                    Message msg = TentacleMessageDecoder.read(buffer);
-                    if (null == msg) break;
-
-                    handle(msg);
-                }
+                Thread.sleep(10);
             }
         }
         catch(Exception e)
