@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 
 /**
  * Created by matrixy on 2019/1/8.
@@ -67,7 +68,8 @@ public class TentacleDesktopSession extends Thread
                     continue;
                 }
 
-                if (System.currentTimeMillis() - lastActiveTime > 1000 * 30)
+                long idleTime = System.currentTimeMillis() - lastActiveTime;
+                if (idleTime > 5000)
                 {
                     Log.debug(String.format("Client Timeout: %s", this.getRemoteAddress().toString()));
                     break;
@@ -265,7 +267,12 @@ public class TentacleDesktopSession extends Thread
         }
         catch(Exception ex)
         {
-            throw new RuntimeException(ex);
+            if (ex instanceof SocketException || ex instanceof IOException)
+            {
+                Log.error(ex);
+                this.close();
+            }
+            else throw new RuntimeException(ex);
         }
     }
 
