@@ -84,6 +84,7 @@ public class CompressWorker extends BaseWorker
                 .addLong(screenshot.captureTime)
                 .addInt(sequence++);
         packet.addBytes(compressedData);
+        // Log.debug(String.format("screenshot: %d", packet.size()));
         ScreenImages.addCompressedScreen(packet);
 
         lastScreen = screenshot;
@@ -96,7 +97,7 @@ public class CompressWorker extends BaseWorker
             try
             {
                 compress();
-                sleep(5);
+                sleep(100);
             }
             catch(Exception e)
             {
