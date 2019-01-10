@@ -84,15 +84,16 @@ body
 {
     width: 70px;
     height: 100px;
-    border-radius: 80px;
+    border-radius: 0px 0px 80px 80px;
     background-color: #000;
     position: absolute;
-    top: -20px;
+    top: -5px;
     left: 50%;
     margin-left: -35px;
     background-image: url(./cthulhu.png);
     background-repeat: no-repeat;
     background-position: center 30px;
+    cursor: pointer;
 }
 .x-cmd-bar .x-cmd
 {
@@ -182,8 +183,31 @@ body
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.9);
     padding: 10px 10px 10px 20px;
+}
+.x-stat-panel .x-trigger
+{
+    position: absolute;
+    display: block;
+    width: 30px;
+    height: 80px;
+    top: 50%;
+    right: -30px;
+    margin-top: -40px;
+    border-radius: 0px 5px 5px 0px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: rgba(0, 0, 0, 0.9);
+    cursor: pointer;
+}
+.x-stat-panel .x-trigger-left
+{
+    background-image: url(./icon/arrow-left.png);
+}
+.x-stat-panel .x-trigger-right
+{
+    background-image: url(./icon/arrow-right.png);
 }
 .x-stat-panel .x-stat h1
 {

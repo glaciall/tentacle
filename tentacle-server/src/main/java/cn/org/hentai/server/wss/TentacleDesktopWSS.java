@@ -30,7 +30,7 @@ import java.util.List;
 public class TentacleDesktopWSS
 {
     Session session;
-    TentacleDesktopSessionHandler remoteDesktopSession = null;
+    TentacleDesktopSession remoteDesktopSession = null;
     HttpSession httpSession = null;
 
     @OnOpen
@@ -65,7 +65,7 @@ public class TentacleDesktopWSS
                 JsonObject resp = new JsonObject();
                 resp.addProperty("action", "sessions");
                 JsonArray rds = new JsonArray();
-                for (TentacleDesktopSessionHandler se : SessionManager.activeSessions())
+                for (TentacleDesktopSession se : SessionManager.activeSessions())
                 {
                     Client info = se.getClient();
                     if (null == info) continue;

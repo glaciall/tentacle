@@ -1,6 +1,7 @@
 package cn.org.hentai.server.rds.controller;
 
 import cn.org.hentai.server.rds.BaseMessageController;
+import cn.org.hentai.server.rds.TentacleDesktopSession;
 import cn.org.hentai.server.rds.TentacleDesktopSessionHandler;
 import cn.org.hentai.tentacle.protocol.Message;
 import cn.org.hentai.tentacle.protocol.Packet;
@@ -18,7 +19,7 @@ public class RemoteControlResponseController extends BaseMessageController
     }
 
     @Override
-    public Message service(TentacleDesktopSessionHandler session, Message msg) throws Exception
+    public Message service(TentacleDesktopSession session, Message msg) throws Exception
     {
         Packet resp = msg.getBody();
         int compressMethod = resp.nextByte() & 0xff;

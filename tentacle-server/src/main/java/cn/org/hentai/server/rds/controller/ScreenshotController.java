@@ -1,6 +1,7 @@
 package cn.org.hentai.server.rds.controller;
 
 import cn.org.hentai.server.rds.BaseMessageController;
+import cn.org.hentai.server.rds.TentacleDesktopSession;
 import cn.org.hentai.server.rds.TentacleDesktopSessionHandler;
 import cn.org.hentai.tentacle.protocol.Message;
 import cn.org.hentai.tentacle.protocol.Packet;
@@ -18,14 +19,14 @@ public class ScreenshotController extends BaseMessageController
     }
 
     @Override
-    public Message service(TentacleDesktopSessionHandler handler, Message msg) throws Exception
+    public Message service(TentacleDesktopSession session, Message msg) throws Exception
     {
         Packet packet = msg.getBody();
         int width = packet.nextShort();
         int height = packet.nextShort();
         long captureTime = packet.nextLong();
         int sequence = packet.nextInt();
-        handler.getWebsocketContext().sendScreenshot(packet.getBytes());
+        session.getWebsocketContext().sendScreenshot(packet.getBytes());
         return null;
     }
 }

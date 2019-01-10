@@ -1,6 +1,7 @@
 package cn.org.hentai.server.rds.controller;
 
 import cn.org.hentai.server.rds.BaseMessageController;
+import cn.org.hentai.server.rds.TentacleDesktopSession;
 import cn.org.hentai.server.rds.TentacleDesktopSessionHandler;
 import cn.org.hentai.tentacle.protocol.Message;
 
@@ -17,7 +18,7 @@ public class SetClipboardResponseController extends BaseMessageController
     }
 
     @Override
-    public Message service(TentacleDesktopSessionHandler session, Message msg) throws Exception
+    public Message service(TentacleDesktopSession session, Message msg) throws Exception
     {
         session.getWebsocketContext().sendResponse("set-clipboard", "success");
 
