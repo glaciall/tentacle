@@ -47,6 +47,7 @@ public class Client extends Thread
         working = false;
         conn = new Socket(Configs.get("server.addr"), Configs.getInt("server.port", 1986));
         conn.setSoTimeout(30000);
+        conn.setKeepAlive(true);
         inputStream = conn.getInputStream();
         outputStream = conn.getOutputStream();
 
@@ -86,7 +87,7 @@ public class Client extends Thread
                 continue;
             }
             // 如果闲置超过20秒，则发送一个心跳包
-            if (System.currentTimeMillis() - lastActiveTime > 20000)
+            if (System.currentTimeMillis() - lastActiveTime > 3000)
             {
                 Packet p = Packet.create(Command.HEARTBEAT, 5);
                 p.addBytes("HELLO".getBytes());
@@ -118,7 +119,7 @@ public class Client extends Thread
         // 心跳
         else if (cmd == Command.HEARTBEAT)
         {
-            System.out.println("收到服务器反馈的心跳包");
+            // ..
         }
         // 开始远程控制
         else if (cmd == Command.CONTROL_REQUEST)
@@ -245,10 +246,6 @@ public class Client extends Thread
     public synchronized void send(Packet packet) throws IOException
     {
         byte cmd = packet.rewind().seek(6).nextByte();
-        if (cmd != Command.SCREENSHOT)
-        {
-            System.out.println(String.format("Send: %2x, Length: %5d", cmd, packet.size()));
-        }
         outputStream.write(packet.getBytes());
         outputStream.write(TAIL);
         outputStream.flush();
