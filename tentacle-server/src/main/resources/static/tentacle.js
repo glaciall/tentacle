@@ -541,6 +541,36 @@ window.Tentacle = {
                 trigger.removeClass('x-trigger-' + (left == '-10px' ? 'right' : 'left')).addClass('x-trigger-' + (left == '-10px' ? 'left' : 'right'));
             });
         });
+
+        $('#btn-upload input[type=file]').change(function(e)
+        {
+            if (self.__uploading_file) return greeting('请等待前一个文件上传完毕');
+            var file = e.currentTarget.files[0];
+            self._send({
+                type : 'command',
+                command : 'upload',
+                fileName : file.name,
+                fileSize : file.size,
+                fileType : file.type,
+                fileId : SESSION_ID + '-' + new Date().getTime()
+            });
+            self.__uploading_file = file;
+        });
+    },
+
+    __uploading_file : null,
+    __uploadPartial : function(offset, length)
+    {
+        var self = this;
+        var block = this.__uploading_file.slice(offset, offset + length);
+        var reader = new FileReader();
+        reader.onload = function(e)
+        {
+            console.log(e);
+            self.connection.send(e.target.result);
+            // 等待服务器的响应，继续发送下一段，每块最大100k
+        }
+        reader.readAsArrayBuffer(block);
     },
     __addHIDEvent : function(cmd)
     {
