@@ -16,12 +16,12 @@ import java.util.concurrent.atomic.AtomicLong;
 @Controller
 public class MainController
 {
-    static final AtomicLong sessionId = new AtomicLong(0);
+    static final AtomicLong httpSessionId = new AtomicLong(0);
 
     @RequestMapping("/")
     public String index(HttpSession session, Model model)
     {
-        model.addAttribute("sessionId", sessionId.addAndGet(1));
+        model.addAttribute("httpSessionId", httpSessionId.addAndGet(1));
         session.setMaxInactiveInterval(60);
         return "index";
     }

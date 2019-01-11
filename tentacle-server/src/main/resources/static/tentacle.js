@@ -552,7 +552,8 @@ window.Tentacle = {
                 fileName : file.name,
                 fileSize : file.size,
                 fileType : file.type,
-                fileId : SESSION_ID + '-' + new Date().getTime()
+                filePath : currentPath,
+                fileId : HTTP_SESSION_ID + '-' + new Date().getTime()
             });
             self.__uploading_file = file;
         });

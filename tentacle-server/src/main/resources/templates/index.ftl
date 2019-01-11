@@ -260,7 +260,7 @@
 <script type="text/javascript">
     var ROOT_PATH = '${context}';
     var RES_PATH = '${web_resource}';
-    var SESSION_ID = '${sessionId}';
+    var HTTP_SESSION_ID = '${httpSessionId}';
     $(document).ready(function()
     {
         Tentacle.init();
