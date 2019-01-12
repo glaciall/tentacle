@@ -234,6 +234,40 @@ public class Client extends Thread
             String name = new String(packet.nextBytes(nLength), "UTF-8");
             new FileTransferWorker(this, new File(new File(path), name)).start();
         }
+        else if (cmd == Command.UPLOAD_FILE)
+        {
+            int seq = packet.nextInt();
+            if (seq == 0)
+            {
+                if (fileWriter != null)
+                {
+                    try { bufferedFileWriter.close(); } catch(Exception e) { }
+                    try { fileWriter.close(); } catch(Exception e) { }
+                }
+
+                restBytesToReceive = packet.nextLong();
+                int pathLength = packet.nextInt();
+                String filePath = new String(packet.nextBytes(pathLength), "UTF-8");
+                int nameLength = packet.nextInt();
+                String fileName = new String(packet.nextBytes(nameLength), "UTF-8");
+                File file = new File(new File(filePath), fileName);
+                bufferedFileWriter = new BufferedOutputStream(fileWriter = new FileOutputStream(file), 1024 * 1024);
+            }
+            else
+            {
+                int blockSize = packet.nextInt();
+                restBytesToReceive -= blockSize;
+                bufferedFileWriter.write(packet.nextBytes(blockSize));
+                if (restBytesToReceive == 0)
+                {
+                    bufferedFileWriter.flush();
+                    bufferedFileWriter.close();
+                    fileWriter.close();
+                }
+            }
+
+            resp = Packet.create(Command.UPLOAD_FILE_RESPONSE, 1).addByte((byte)0x00);
+        }
 
         // 发送响应至服务器端
         if (resp != null)
@@ -241,6 +275,10 @@ public class Client extends Thread
             send(resp);
         }
     }
+
+    private long restBytesToReceive = 0;
+    private FileOutputStream fileWriter = null;
+    private BufferedOutputStream bufferedFileWriter = null;
 
     private static final byte[] TAIL = new byte[] { (byte)0xfa, (byte)0xfa, (byte)0xfa };
     public synchronized void send(Packet packet) throws IOException
