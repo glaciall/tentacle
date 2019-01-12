@@ -12,11 +12,14 @@ import cn.org.hentai.tentacle.util.Log;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -26,12 +29,14 @@ import java.util.List;
  * Created by matrixy on 2018/4/12.
  */
 @Component
+@Scope("prototype")
 @ServerEndpoint(value = "/tentacle/desktop/wss", configurator = GetHttpSessionConfigurator.class)
 public class TentacleDesktopWSS
 {
     Session session;
     TentacleDesktopSession remoteDesktopSession = null;
     HttpSession httpSession = null;
+    UploadingFile uploadingFile = null;
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig config)
@@ -159,12 +164,6 @@ public class TentacleDesktopWSS
         }
     }
 
-    @OnMessage
-    public void onBinaryMessage(ByteBuffer buffer, Session session)
-    {
-
-    }
-
     private void requestControl(long sessionId)
     {
         try
@@ -272,8 +271,8 @@ public class TentacleDesktopWSS
     @OnError
     public void onError(Session session, Throwable ex)
     {
-        release();
         ex.printStackTrace();
+        release();
     }
 
     private void release()

@@ -138,6 +138,13 @@ public class Packet
         return this;
     }
 
+    public Packet addBytes(byte[] b, int offset, int length)
+    {
+        System.arraycopy(b, offset, this.data, size, length);
+        size += length;
+        return this;
+    }
+
     public Packet reset()
     {
         this.offset = 0;

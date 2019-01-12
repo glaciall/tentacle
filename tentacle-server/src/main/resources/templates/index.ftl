@@ -45,7 +45,6 @@
     <div class="x-message"></div>
     <div class="x-button">
         <button id="btn-auth">开始连接</button>
-        <button id="btn-upload">上传文件<input type="file" name="file" id="file" /></button>
     </div>
 </div>
 
@@ -216,8 +215,12 @@
             </table>
         </div>
     </div>
+    <div class="x-progress">
+        <div>正在上传，请稍候...</div>
+        <canvas width="300" height="300" id="x-upload-progress"></canvas>
+    </div>
     <div class="x-actions">
-        <button class="btn" id="btn-upload">上传本地文件</button>
+        <button id="btn-upload" class="btn">上传文件<input data-url="${context}/file/upload" type="file" name="file" id="file" /></button>
     </div>
 </div>
 <div class="x-dialog x-dialog-sessions">
@@ -225,8 +228,10 @@
     <hr />
     <div class="x-sessions"></div>
 </div>
-<script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" src="//apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script type="text/javascript" src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 <script type="text/javascript" src="${web_resource}/fileext.js"></script>
+<script type="text/javascript" src="${web_resource}/jquery-file-upload/jquery.fileupload.js"></script>
 <script type="text/javascript">
     $.fn.extend({
         animateCss: function(animationName, callback) {
@@ -254,6 +259,27 @@
             return this;
         },
     });
+    function greeting(text, timeout, style)
+    {
+        timeout = timeout || 4000;
+        var greeting = $('<div class="x-greeting ' + (style ? 'x-greeting-' + style : '') + '">' + text + '</div>');
+        $(document.body).append(greeting);
+        greeting.show().animateCss('bounceInRight', function()
+        {
+            setTimeout(function()
+            {
+                greeting.animateCss('bounceOutRight', function()
+                {
+                    greeting.remove();
+                });
+            }, timeout);
+        });
+    }
+
+    function warning(text, timeout, style)
+    {
+        greeting(text, timeout, 'warning');
+    }
 </script>
 <script type="text/javascript" src="${web_resource}/decompress.js"></script>
 <script type="text/javascript" src="${web_resource}/tentacle.js"></script>
@@ -261,6 +287,7 @@
     var ROOT_PATH = '${context}';
     var RES_PATH = '${web_resource}';
     var HTTP_SESSION_ID = '${httpSessionId}';
+    var MAX_UPLOAD_SIZE = ${maxUploadSize};
     $(document).ready(function()
     {
         Tentacle.init();
