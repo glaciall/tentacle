@@ -159,6 +159,12 @@ public class TentacleDesktopWSS
         }
     }
 
+    @OnMessage
+    public void onBinaryMessage(ByteBuffer buffer, Session session)
+    {
+
+    }
+
     private void requestControl(long sessionId)
     {
         try

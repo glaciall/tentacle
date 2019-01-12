@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 
 /**
  * Created by matrixy on 2019/1/8.
@@ -44,24 +45,36 @@ public class TentacleDesktopSession extends Thread
             ByteHolder buffer = new ByteHolder(1024 * 1024 * 10);
             byte[] block = new byte[512];
 
+            long lastActiveTime = System.currentTimeMillis();
             while (!this.isClosed())
             {
                 int readableBytes = inputStream.available();
-                if (readableBytes <= 0) continue;
-
-                for (int i = 0, l = (int)Math.ceil(readableBytes / 512f); i < l; i++)
+                if (readableBytes > 0)
                 {
-                    int len = inputStream.read(block, 0, i == l - 1 ? 512 : readableBytes % 512);
-                    if (len > 0) buffer.write(block, 0, len);
+                    lastActiveTime = System.currentTimeMillis();
+                    for (int i = 0, l = (int)Math.ceil(readableBytes / 512f); i < l; i++)
+                    {
+                        int len = inputStream.read(block, 0, i == l - 1 ? 512 : readableBytes % 512);
+                        if (len > 0) buffer.write(block, 0, len);
+                    }
+
+                    while (true)
+                    {
+                        Message msg = TentacleMessageDecoder.read(buffer);
+                        if (null == msg) break;
+
+                        handle(msg);
+                    }
+                    continue;
                 }
 
-                while (true)
+                long idleTime = System.currentTimeMillis() - lastActiveTime;
+                if (idleTime > 5000)
                 {
-                    Message msg = TentacleMessageDecoder.read(buffer);
-                    if (null == msg) break;
-
-                    handle(msg);
+                    Log.debug(String.format("Client Timeout: %s", this.getRemoteAddress().toString()));
+                    break;
                 }
+                Thread.sleep(10);
             }
         }
         catch(Exception e)
@@ -254,7 +267,12 @@ public class TentacleDesktopSession extends Thread
         }
         catch(Exception ex)
         {
-            throw new RuntimeException(ex);
+            if (ex instanceof SocketException || ex instanceof IOException)
+            {
+                Log.error(ex);
+                this.close();
+            }
+            else throw new RuntimeException(ex);
         }
     }
 

@@ -45,6 +45,7 @@
     <div class="x-message"></div>
     <div class="x-button">
         <button id="btn-auth">开始连接</button>
+        <button id="btn-upload">上传文件<input type="file" name="file" id="file" /></button>
     </div>
 </div>
 
@@ -259,6 +260,7 @@
 <script type="text/javascript">
     var ROOT_PATH = '${context}';
     var RES_PATH = '${web_resource}';
+    var SESSION_ID = '${sessionId}';
     $(document).ready(function()
     {
         Tentacle.init();
