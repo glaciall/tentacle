@@ -138,6 +138,13 @@ public class Packet
         return this;
     }
 
+    public Packet reset()
+    {
+        this.offset = 0;
+        this.size = 0;
+        return this;
+    }
+
     public Packet rewind()
     {
         this.offset = 0;
