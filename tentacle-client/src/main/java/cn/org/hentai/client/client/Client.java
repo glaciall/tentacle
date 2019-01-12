@@ -239,13 +239,19 @@ public class Client extends Thread
             int seq = packet.nextInt();
             if (seq == 0)
             {
+                if (fileWriter != null)
+                {
+                    try { bufferedFileWriter.close(); } catch(Exception e) { }
+                    try { fileWriter.close(); } catch(Exception e) { }
+                }
+
                 restBytesToReceive = packet.nextLong();
                 int pathLength = packet.nextInt();
                 String filePath = new String(packet.nextBytes(pathLength), "UTF-8");
                 int nameLength = packet.nextInt();
                 String fileName = new String(packet.nextBytes(nameLength), "UTF-8");
                 File file = new File(new File(filePath), fileName);
-                bufferedFileWriter = new BufferedOutputStream(fileWriter = new FileOutputStream(file), 4096 * 10);
+                bufferedFileWriter = new BufferedOutputStream(fileWriter = new FileOutputStream(file), 1024 * 1024);
             }
             else
             {
