@@ -37,7 +37,6 @@ public class ListFileResponseController extends BaseMessageController
             i += strlen;
             files.add(new File(isDirectory, length, mtime, name));
         }
-        System.out.println("Files: " + String.valueOf(files));
         session.getWebsocketContext().sendFiles(files);
 
         return null;
