@@ -33,6 +33,7 @@ public final class TentacleDesktopSessionHandler
         registerController(Command.CONTROL_RESPONSE, RemoteControlResponseController.class);
         registerController(Command.CLOSE_RESPONSE, RemoteControlCloseResponseController.class);
         registerController(Command.COMMON_RESPONSE, CommonResponseController.class);
+        registerController(Command.UPLOAD_FILE_RESPONSE, UploadFileResponseController.class);
     }
 
     private static final void registerController(byte command, Class<? extends BaseMessageController> controllerClass)

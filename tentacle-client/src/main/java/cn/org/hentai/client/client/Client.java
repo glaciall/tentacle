@@ -76,6 +76,7 @@ public class Client extends Thread
             {
                 lastActiveTime = System.currentTimeMillis();
                 processCommand(packet);
+                continue;
             }
 
             // 处理服务器下发的指令

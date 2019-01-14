@@ -20,7 +20,8 @@ public class UploadFileResponseController extends BaseMessageController
     @Override
     public Message service(TentacleDesktopSession session, Message msg) throws Exception
     {
-        Log.debug("Upload: " + ByteUtils.toString(msg.getBody().getBytes()));
+        byte result = msg.getBodyBytes()[0];
+        if (result != 0x00) throw new RuntimeException(String.format("upload file failed: %x", result));
         return null;
     }
 }

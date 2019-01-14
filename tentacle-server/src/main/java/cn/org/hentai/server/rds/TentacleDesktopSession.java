@@ -272,7 +272,7 @@ public class TentacleDesktopSession extends Thread
                 Log.error(ex);
                 this.close();
             }
-            else throw new RuntimeException(ex);
+            throw new RuntimeException(ex);
         }
     }
 
