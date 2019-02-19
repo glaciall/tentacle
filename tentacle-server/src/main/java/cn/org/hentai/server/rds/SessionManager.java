@@ -31,6 +31,6 @@ public final class SessionManager
 
     public static void removeSession(TentacleDesktopSession session)
     {
-        sessions.remove(session);
+        sessions.remove(session.getClient().getId());
     }
 }
