@@ -12,6 +12,16 @@ public class Client
     private String name;
     private SocketAddress address;
     private boolean controlling;
+    private String secret;
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public Client setSecret(String secret) {
+        this.secret = secret;
+        return this;
+    }
 
     public long getId() {
         return id;

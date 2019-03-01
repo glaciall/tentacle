@@ -40,6 +40,8 @@ public class Client extends Thread
     OutputStream outputStream;
 
     long lastActiveTime = 0L;
+    long sessionId = 0L;
+    String sessionSecret = null;
 
     // 与服务器间的会话处理
     private void converse() throws Exception
@@ -110,7 +112,12 @@ public class Client extends Thread
         if (cmd != Command.AUTHENTICATE_RESPONSE && authenticated == false) return;
         if (cmd == Command.AUTHENTICATE_RESPONSE)
         {
-            if (packet.nextByte() == 0x00) authenticated = true;
+            if (packet.nextByte() == 0x00)
+            {
+                authenticated = true;
+                sessionId = packet.nextLong();
+                sessionSecret = new String(packet.nextBytes(32));
+            }
             else
             {
                 Log.info("会话认证失败");

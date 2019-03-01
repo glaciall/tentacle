@@ -1,5 +1,7 @@
 package cn.org.hentai.server.app;
 
+import cn.org.hentai.server.rds.udp.UDPServer;
+import cn.org.hentai.server.rds.worker.PacketPorterManager;
 import cn.org.hentai.server.util.BeanUtils;
 import cn.org.hentai.tentacle.util.Configs;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,8 @@ public class ServerApp
         ApplicationContext context = SpringApplication.run(ServerApp.class, args);
         BeanUtils.init(context);
         Configs.init("/application.properties");
+        PacketPorterManager.getInstance().init();
+        UDPServer.init();
         RemoteDesktopApp.init();
         // new Thread(new RemoteDesktopServer()).start();
     }

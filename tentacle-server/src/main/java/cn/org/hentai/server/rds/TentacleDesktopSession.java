@@ -3,6 +3,8 @@ package cn.org.hentai.server.rds;
 import cn.org.hentai.server.controller.FileDownloadController;
 import cn.org.hentai.server.rds.coder.TentacleMessageDecoder;
 import cn.org.hentai.server.util.ByteHolder;
+import cn.org.hentai.server.util.Configs;
+import cn.org.hentai.server.util.MD5;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Message;
@@ -29,10 +31,12 @@ public class TentacleDesktopSession extends Thread
     private OutputStream outputStream = null;
 
     private Client clientInfo = null;
+    private String clientKey = null;
 
     public TentacleDesktopSession(Socket connection)
     {
         this.connection = connection;
+        this.clientKey = Configs.get("client.key");
     }
 
     public void run()
@@ -291,5 +295,17 @@ public class TentacleDesktopSession extends Thread
     public void setClient(Client clientInfo)
     {
         this.clientInfo = clientInfo;
+    }
+
+    // 分包的验签
+    public String getSecret()
+    {
+        return this.clientInfo.getSecret();
+    }
+
+    // 检查UDP消息包里的secret是否正确
+    public boolean checkSecret(int seq, int packetIndex, String secret)
+    {
+        return secret.equals(MD5.encode(clientInfo.getSecret() + ":::" + seq + ":::" + packetIndex + clientKey));
     }
 }
