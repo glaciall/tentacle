@@ -1,6 +1,7 @@
 package cn.org.hentai.server.rds;
 
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.util.Log;
 
 import java.util.LinkedList;
 
@@ -25,9 +26,29 @@ public class FragmentManager
     // 第一层：定义类：总包数，已经收到的包数量，有一个分包的数组，用来作分包的桶
     // 第二层：随便什么样的实体类，关键是每加一个分包，都要确定整体包是否完整
     LinkedList<Image> cachedImages = new LinkedList<Image>();
-    public void add(Packet packet)
+    public void arrange(long sessionId, int sequence, int packetIndex, int packetCount, Packet packet)
     {
         // 如果已经拼够了，那就下发到浏览器端吧
+        Image image = null;
+        for (Image item : cachedImages)
+        {
+            if (item.sessionId != sessionId || item.sequence != sequence) continue;
+            image = item;
+            break;
+        }
+        if (image == null)
+        {
+            image = new Image(sessionId, sequence, packetCount);
+            cachedImages.add(image);
+        }
+        image.addFragment(packetIndex, packet);
+        if (image.isBroken()) return;
+
+        cachedImages.remove(image);
+        TentacleDesktopSession session = SessionManager.getSession(sessionId);
+        if (session != null) session.sendScreenshot(sequence, image.merge());
+
+        Log.debug("拼够一个包了，发到浏览器去了");
     }
 
     static class Image
@@ -36,6 +57,7 @@ public class FragmentManager
         private long sessionId;
         private int packetCount;
         private int packetReceived;
+        private long createTime;
 
         public Packet[] fragments;
 
@@ -46,6 +68,7 @@ public class FragmentManager
             this.packetCount = packetCount;
 
             this.fragments = new Packet[packetCount];
+            this.createTime = System.currentTimeMillis();
         }
 
         // 添加分包
@@ -60,6 +83,12 @@ public class FragmentManager
         public boolean isBroken()
         {
             return packetCount != packetReceived;
+        }
+
+        // 是否缓存超时
+        public boolean isExpired()
+        {
+            return System.currentTimeMillis() - createTime > 5000;
         }
 
         // TODO: 消息包整合

@@ -8,6 +8,11 @@ import cn.org.hentai.tentacle.util.Log;
  */
 public class CaptureWorker extends BaseWorker
 {
+    public CaptureWorker()
+    {
+        this.setName("capture-worker");
+    }
+
     private void captureAndStore() throws Exception
     {
         ScreenImages.addScreenshot(LocalComputer.captureScreen());

@@ -3,12 +3,10 @@ package cn.org.hentai.server.rds.worker;
 import cn.org.hentai.server.rds.FragmentManager;
 import cn.org.hentai.server.rds.SessionManager;
 import cn.org.hentai.server.rds.TentacleDesktopSession;
-import cn.org.hentai.server.util.Configs;
 import cn.org.hentai.tentacle.protocol.Packet;
 import cn.org.hentai.tentacle.util.Log;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -28,8 +26,10 @@ public final class PacketPorterManager
     {
         if (porters != null) return;
         porters = new PacketPorter[Runtime.getRuntime().availableProcessors()];
+        int i = 0;
         for (PacketPorter porter : porters)
         {
+            porter.setName("packet-porter-" + (i++));
             porter.start();
         }
     }
@@ -51,17 +51,15 @@ public final class PacketPorterManager
 
     static class PacketPorter extends Thread
     {
-        LinkedBlockingDeque<Packet> packets = new LinkedBlockingDeque<Packet>();
+        Object lock = new Object();
+        LinkedList<Packet> packets = new LinkedList<Packet>();
 
         public void dispatch(Packet packet)
         {
-            try
+            synchronized (lock)
             {
-                packets.put(packet);
-            }
-            catch(Exception e)
-            {
-                Log.error(e);
+                packets.add(packet);
+                lock.notifyAll();
             }
         }
 
@@ -80,9 +78,10 @@ public final class PacketPorterManager
             if (session.checkSecret(sequence, packetIndex, secret) == false) return;
 
             // 将其加入到某某树里去
-            FragmentManager.getInstance().add(packet);
+            FragmentManager.getInstance().arrange(sessionId, sequence, packetIndex, packetCount, packet);
 
             // 向受控端发送确认消息
+            session.replyForPacket(sequence, packetIndex);
         }
 
         public void run()
@@ -91,8 +90,13 @@ public final class PacketPorterManager
             {
                 try
                 {
-                    Packet p = packets.take();
-                    checkAndReform(p);
+                    Packet p = null;
+                    synchronized (lock)
+                    {
+                        lock.wait();
+                        if (packets.size() > 0) p = packets.removeFirst();
+                    }
+                    if (p != null) checkAndReform(p);
                 }
                 catch(Exception e)
                 {

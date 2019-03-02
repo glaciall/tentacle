@@ -15,12 +15,18 @@ import java.net.DatagramSocket;
  */
 public class UDPServer extends Thread
 {
+    public UDPServer()
+    {
+        this.setName("udp-server");
+    }
+
     public void run()
     {
         try
         {
             DatagramSocket server = new DatagramSocket(Configs.getInt("rds.server.udp-port", 1987));
-            DatagramPacket p = new DatagramPacket(new byte[65507], 65507);
+            server.setReceiveBufferSize(4096 * 100);
+            DatagramPacket p = new DatagramPacket(new byte[4096], 4096);
             while (!this.isInterrupted())
             {
                 server.receive(p);

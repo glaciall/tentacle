@@ -19,15 +19,23 @@ public class CompressWorker extends BaseWorker
     String compressMethod = "rle";          // 压缩方式
     Screenshot lastScreen = null;           // 上一屏的截屏，用于比较图像差
     int sequence = 0;
+    boolean resetScreenshot = false;
+    PacketDeliveryWorker deliveryWorker = null;
 
     public CompressWorker()
     {
-        // do nothing here
+        deliveryWorker = new PacketDeliveryWorker(this);
+        this.setName("compress-worker");
     }
 
     public CompressWorker(String method)
     {
         this.compressMethod = method;
+    }
+
+    public void resetScreenshot()
+    {
+        resetScreenshot = true;
     }
 
     private void compress() throws Exception
@@ -39,6 +47,8 @@ public class CompressWorker extends BaseWorker
             screenshot = ScreenImages.getScreenshot();
         }
         if (screenshot == null || screenshot.isExpired()) return;
+
+        if (resetScreenshot) lastScreen = null;
 
         // 分辨率是否发生了变化？
         if (lastScreen != null && (lastScreen.width != screenshot.width || lastScreen.height != screenshot.height)) lastScreen = null;
@@ -85,7 +95,8 @@ public class CompressWorker extends BaseWorker
                 .addInt(sequence++);
         packet.addBytes(compressedData);
         // Log.debug(String.format("screenshot: %d", packet.size()));
-        ScreenImages.addCompressedScreen(packet);
+        // ScreenImages.addCompressedScreen(packet);
+        deliveryWorker.send(packet);
 
         lastScreen = screenshot;
     }
@@ -104,5 +115,6 @@ public class CompressWorker extends BaseWorker
                 Log.error(e);
             }
         }
+        if (deliveryWorker != null) deliveryWorker.terminate();
     }
 }

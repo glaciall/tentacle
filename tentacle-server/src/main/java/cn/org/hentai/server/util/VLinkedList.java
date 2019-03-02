@@ -109,17 +109,17 @@ public class VLinkedList<E>
             }
         };
         list.add(a = new String("a"));
-        // list.add(b = new String("b"));
-        // list.add(c = new String("c"));
-        // list.add(d = new String("d"));
-        // list.add(e = new String("e"));
-        // list.add(f = new String("f"));
-        // list.add(g = new String("g"));
-        // list.add(h = new String("h"));
-        // list.add(i = new String("i"));
-        // list.add(j = new String("j"));
-        // list.add(k = new String("k"));
-        // list.add(l = new String("l"));
+        // list.arrange(b = new String("b"));
+        // list.arrange(c = new String("c"));
+        // list.arrange(d = new String("d"));
+        // list.arrange(e = new String("e"));
+        // list.arrange(f = new String("f"));
+        // list.arrange(g = new String("g"));
+        // list.arrange(h = new String("h"));
+        // list.arrange(i = new String("i"));
+        // list.arrange(j = new String("j"));
+        // list.arrange(k = new String("k"));
+        // list.arrange(l = new String("l"));
         System.out.println("Size: " + list.size());
         list.traverse(awalker);
 

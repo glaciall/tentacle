@@ -27,6 +27,8 @@ public class HIDCommandExecutor extends BaseWorker
         robot.setAutoDelay(0);
         robot.setAutoWaitForIdle(false);
         commands = new LinkedList<HIDCommand>();
+
+        this.setName("hid-command-executor");
     }
 
     public void add(HIDCommand cmd)
