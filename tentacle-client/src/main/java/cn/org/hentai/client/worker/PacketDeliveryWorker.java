@@ -22,11 +22,14 @@ public class PacketDeliveryWorker extends BaseWorker
     LinkedList<Packet> packets;
     boolean[] fragmentAckFlags = new boolean[10240];
 
+    static PacketDeliveryWorker instance = null;
+
     public PacketDeliveryWorker(CompressWorker compressWorker)
     {
         this.compressWorker = compressWorker;
         this.packets = new LinkedList<Packet>();
         this.setName("packet-delivery-worker");
+        PacketDeliveryWorker.instance = this;
     }
 
     public void send(Packet packet)
@@ -38,9 +41,9 @@ public class PacketDeliveryWorker extends BaseWorker
         }
     }
 
-    public void fragmentReceived(int sequence, int packetIndex)
+    public static void fragmentReceived(int sequence, int packetIndex)
     {
-        fragmentAckFlags[packetIndex] = true;
+        instance.fragmentAckFlags[packetIndex] = true;
     }
 
     public void run()
@@ -116,6 +119,9 @@ public class PacketDeliveryWorker extends BaseWorker
                     if (time > 5) continue;
                     else sleep(5);
                 }
+
+                System.exit(0);
+                return;
             }
             catch(Exception e)
             {

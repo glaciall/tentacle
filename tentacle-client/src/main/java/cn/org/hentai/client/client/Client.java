@@ -208,6 +208,14 @@ public class Client extends Thread
             hidCommandExecutor.terminate();
             ScreenImages.clear();
         }
+        // 截图分包的回应
+        else if (cmd == Command.SCREENSHOT_FRAGMENT_RESPONSE)
+        {
+            int sequence = packet.nextInt();
+            int packetIndex = packet.nextShort() & 0xffff;
+            PacketDeliveryWorker.fragmentReceived(sequence, packetIndex);
+            Log.debug(String.format("reply --> seq: %d, index: %d", sequence, packetIndex));
+        }
         // 列出文件列表
         else if (cmd == Command.LIST_FILES)
         {
