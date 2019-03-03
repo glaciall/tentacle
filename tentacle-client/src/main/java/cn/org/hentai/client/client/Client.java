@@ -43,6 +43,19 @@ public class Client extends Thread
     long sessionId = 0L;
     String sessionSecret = null;
 
+    static long currentSessionId;
+    static String currentSessionSecret;
+
+    public static long getCurrentSessionId()
+    {
+        return currentSessionId;
+    }
+
+    public static String getCurrentSessionSecret()
+    {
+        return currentSessionSecret;
+    }
+
     // 与服务器间的会话处理
     private void converse() throws Exception
     {
@@ -117,6 +130,8 @@ public class Client extends Thread
                 authenticated = true;
                 sessionId = packet.nextLong();
                 sessionSecret = new String(packet.nextBytes(32));
+                currentSessionId = sessionId;
+                currentSessionSecret = sessionSecret;
             }
             else
             {

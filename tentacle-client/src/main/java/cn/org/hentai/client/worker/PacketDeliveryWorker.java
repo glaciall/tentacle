@@ -1,9 +1,13 @@
 package cn.org.hentai.client.worker;
 
+import cn.org.hentai.client.client.Client;
+import cn.org.hentai.tentacle.encrypt.MD5;
 import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.protocol.Packet;
+import cn.org.hentai.tentacle.util.ByteUtils;
 import cn.org.hentai.tentacle.util.Configs;
 import cn.org.hentai.tentacle.util.Log;
+import cn.org.hentai.tentacle.util.Nonce;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -58,6 +62,7 @@ public class PacketDeliveryWorker extends BaseWorker
         {
             Log.error(e);
         }
+        String key = Configs.get("client.key");
 
         while (!this.isTerminated())
         {
@@ -67,36 +72,45 @@ public class PacketDeliveryWorker extends BaseWorker
                 synchronized (lock)
                 {
                     lock.wait();
-                    if (packet.size() > 0) packet = packets.removeFirst();
+                    if (packets.size() > 0) packet = packets.removeFirst();
                 }
                 if (null == packet) continue;
 
-                packet.seek(12);
+                packet.seek(12 + 11);
                 int sequence = packet.nextInt();
-                Arrays.fill(fragmentAckFlags, false);
+                Arrays.fill(instance.fragmentAckFlags, false);
                 // 分包发送
                 // 循环遍历，是否已经全部发送完毕了？
                 // 加个重发次数计数
                 int packetCount = (int)Math.ceil(packet.size() / 1024f);
                 DatagramSocket socket = new DatagramSocket();
                 socket.setSendBufferSize(4096 * 100);
+                packet.rewind();
                 for (int i = 0; i < packetCount; i++)
                 {
                     int len = 1024;
-                    if (i + len > packet.size()) len = packet.size() - i;
-                    byte[] fragment = packet.nextBytes(len);
-                    DatagramPacket p = new DatagramPacket(fragment, fragment.length, serverAddr, serverPort);
+                    if (i == packetCount - 1) len = packet.size() - i * 1024;
+
+                    Packet fragment = Packet.create(8 + 4 + 2 + 2 + 32 + len);
+                    fragment.addLong(Client.getCurrentSessionId());
+                    fragment.addInt(sequence);
+                    fragment.addShort((short)i);
+                    fragment.addShort((short)packetCount);
+                    fragment.addBytes(MD5.encode(Client.getCurrentSessionSecret() + ":::" + sequence + ":::" + i + ":::" + key).getBytes());
+                    fragment.addBytes(packet.nextBytes(len));
+                    DatagramPacket p = new DatagramPacket(fragment.getBytes(), fragment.size(), serverAddr, serverPort);
                     socket.send(p);
                     // if (i % 100 == 99) sleep(5);
                 }
 
                 // 检查各分包是否已经到达，同时需要注意是否有超时
+                sleep(20);
                 boolean expired = false;
                 for (int k = 0; k < 1000; k++)
                 {
-                    Log.debug(String.format("resend sequence[%d] for %d times", sequence, k));
                     long stime = System.currentTimeMillis();
                     int fragmentReceived = 0;
+                    int packetResendCount = 0;
                     for (int i = 0; i < packetCount; i++)
                     {
                         if (fragmentAckFlags[i])
@@ -108,20 +122,27 @@ public class PacketDeliveryWorker extends BaseWorker
                         // 补发分包
                         packet.seek(i * 1024);
                         int len = 1024;
-                        if (i + len > packet.size()) len = packet.size() - i;
-                        byte[] fragment = packet.nextBytes(len);
-                        DatagramPacket p = new DatagramPacket(fragment, fragment.length, serverAddr, serverPort);
+                        if (i == packetCount - 1) len = packet.size() - i * 1024;
+
+                        Packet fragment = Packet.create(8 + 4 + 2 + 2 + 32 + len);
+                        fragment.addLong(Client.getCurrentSessionId());
+                        fragment.addInt(sequence);
+                        fragment.addShort((short)i);
+                        fragment.addShort((short)packetCount);
+                        fragment.addBytes(MD5.encode(Client.getCurrentSessionSecret() + ":::" + sequence + ":::" + i + ":::" + key).getBytes());
+                        fragment.addBytes(packet.nextBytes(len));
+                        DatagramPacket p = new DatagramPacket(fragment.getBytes(), fragment.size(), serverAddr, serverPort);
                         socket.send(p);
+
+                        packetResendCount += 1;
                     }
+                    Log.debug(String.format("resend sequence[%d] for %d times and %d packets resend...", sequence, k, packetResendCount));
                     if (fragmentReceived == packetCount) break;
                     // 最低停留5毫秒
                     long time = System.currentTimeMillis() - stime;
                     if (time > 5) continue;
                     else sleep(5);
                 }
-
-                System.exit(0);
-                return;
             }
             catch(Exception e)
             {

@@ -18,7 +18,7 @@ public class CompressWorker extends BaseWorker
 {
     String compressMethod = "rle";          // 压缩方式
     Screenshot lastScreen = null;           // 上一屏的截屏，用于比较图像差
-    int sequence = 0;
+    int sequence = 10000;
     boolean resetScreenshot = false;
     PacketDeliveryWorker deliveryWorker = null;
 
@@ -26,6 +26,7 @@ public class CompressWorker extends BaseWorker
     {
         deliveryWorker = new PacketDeliveryWorker(this);
         this.setName("compress-worker");
+        deliveryWorker.start();
     }
 
     public CompressWorker(String method)
@@ -94,7 +95,7 @@ public class CompressWorker extends BaseWorker
                 .addLong(screenshot.captureTime)
                 .addInt(sequence++);
         packet.addBytes(compressedData);
-        // Log.debug(String.format("screenshot: %d", packet.size()));
+        Log.debug(String.format("screenshot: %d", sequence));
         // ScreenImages.addCompressedScreen(packet);
         deliveryWorker.send(packet);
 
