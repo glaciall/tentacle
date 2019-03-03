@@ -24,8 +24,11 @@ public class UDPServer extends Thread
     {
         try
         {
-            DatagramSocket server = new DatagramSocket(Configs.getInt("rds.server.udp-port", 1987));
+            int port = Configs.getInt("rds.server.udp-port", 1987);
+
+            DatagramSocket server = new DatagramSocket(port);
             server.setReceiveBufferSize(4096 * 100);
+
             DatagramPacket p = new DatagramPacket(new byte[4096], 4096);
             while (!this.isInterrupted())
             {

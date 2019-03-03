@@ -57,6 +57,7 @@ public class FragmentManager
         private long sessionId;
         private int packetCount;
         private int packetReceived;
+        private int totalBytes;
         private long createTime;
 
         public Packet[] fragments;
@@ -77,6 +78,7 @@ public class FragmentManager
             if (this.fragments[packetIndex] != null) return;
             this.fragments[packetIndex] = packet;
             this.packetReceived += 1;
+            this.totalBytes += packet.size() - 8 - 4 - 2 - 2 - 32;
         }
 
         // 是否还是支离破碎的还没有接收完全？
@@ -94,7 +96,14 @@ public class FragmentManager
         // TODO: 消息包整合
         public byte[] merge()
         {
-            return null;
+            Packet p = Packet.create(totalBytes);
+            for (int i = 0; i < packetCount; i++)
+            {
+                fragments[i].seek(8 + 4 + 2 + 2 + 32);
+                p.addBytes(fragments[i].nextBytes());
+                fragments[i] = null;
+            }
+            return p.getBytes();
         }
     }
 }

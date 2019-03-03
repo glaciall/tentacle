@@ -316,7 +316,7 @@ public class TentacleDesktopSession extends Thread
     // 检查UDP消息包里的secret是否正确
     public boolean checkSecret(int seq, int packetIndex, String secret)
     {
-        return secret.equals(MD5.encode(clientInfo.getSecret() + ":::" + seq + ":::" + packetIndex + clientKey));
+        return secret.equals(MD5.encode(clientInfo.getSecret() + ":::" + seq + ":::" + packetIndex + ":::" + clientKey));
     }
 
     // 回应受控端已经妥妥的收到某分包了
