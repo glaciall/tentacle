@@ -50,7 +50,7 @@ public class AuthenticateController extends BaseMessageController
         session.setClient(info);
         SessionManager.register(session);
 
-        Message resp = new Message().withCommand(Command.AUTHENTICATE_RESPONSE).withBody(Packet.create(1).addByte((byte)0x00).addLong(info.getId()).addBytes(info.getSecret().getBytes()));
+        Message resp = new Message().withCommand(Command.AUTHENTICATE_RESPONSE).withBody(Packet.create(41).addByte((byte)0x00).addLong(info.getId()).addBytes(info.getSecret().getBytes()));
         return resp;
     }
 }

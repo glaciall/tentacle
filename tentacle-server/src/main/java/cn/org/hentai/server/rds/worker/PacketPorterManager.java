@@ -26,11 +26,12 @@ public final class PacketPorterManager
     {
         if (porters != null) return;
         porters = new PacketPorter[Runtime.getRuntime().availableProcessors()];
-        int i = 0;
-        for (PacketPorter porter : porters)
+        for (int i = 0; i < porters.length; i++)
         {
-            porter.setName("packet-porter-" + (i++));
+            PacketPorter porter = new PacketPorter();
+            porter.setName("packet-porter-" + i);
             porter.start();
+            porters[i] = porter;
         }
     }
 
@@ -40,12 +41,14 @@ public final class PacketPorterManager
         if (instance == null)
         {
             instance = new PacketPorterManager();
+            instance.init();
         }
         return instance;
     }
 
     public void receiveAndReform(Packet packet)
     {
+        packet.rewind();
         porters[(int)Math.abs(packet.nextLong() % porters.length)].dispatch(packet);
     }
 
@@ -73,9 +76,15 @@ public final class PacketPorterManager
             int packetCount = packet.nextShort() & 0xffff;
             String secret = new String(packet.nextBytes(32));
 
+            Log.debug(String.format("Reform --> session: %d, sequence: %d, index: %d, count: %d", sessionId, sequence, packetIndex, packetCount));
+
             TentacleDesktopSession session = SessionManager.getSession(sessionId);
             if (null == session) return;
-            if (session.checkSecret(sequence, packetIndex, secret) == false) return;
+            if (session.checkSecret(sequence, packetIndex, secret) == false)
+            {
+                System.out.println(String.format("验证没通过~~~seq: %d, index: %d, secret: %s", sequence, packetIndex, secret));
+                return;
+            }
 
             // 将其加入到某某树里去
             FragmentManager.getInstance().arrange(sessionId, sequence, packetIndex, packetCount, packet);
