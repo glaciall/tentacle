@@ -41,18 +41,19 @@ public class CompressWorker extends BaseWorker
 
     private void compress() throws Exception
     {
-        Screenshot screenshot = null;
-        while (true)
-        {
-            if (!ScreenImages.hasScreenshots()) break;
-            screenshot = ScreenImages.getScreenshot();
-        }
+        Screenshot screenshot = ScreenImages.getScreenshot();
         if (screenshot == null || screenshot.isExpired()) return;
 
-        if (resetScreenshot) lastScreen = null;
+        if (resetScreenshot)
+        {
+            lastScreen = null;
+            resetScreenshot = false;
+        }
 
         // 分辨率是否发生了变化？
         if (lastScreen != null && (lastScreen.width != screenshot.width || lastScreen.height != screenshot.height)) lastScreen = null;
+
+        long stime = System.currentTimeMillis();
 
         // 1. 求差
         int[] bitmap = new int[screenshot.bitmap.length];
@@ -89,14 +90,16 @@ public class CompressWorker extends BaseWorker
         // Log.debug("After: " + (compressedData.length / 1024));
 
         // 3. 入队列
+        int seq = sequence++;
         Packet packet = Packet.create(Command.SCREENSHOT, compressedData.length + 16);
         packet.addShort((short)screenshot.width)
                 .addShort((short)screenshot.height)
                 .addLong(screenshot.captureTime)
-                .addInt(sequence++);
+                .addInt(seq);
         packet.addBytes(compressedData);
-        Log.debug(String.format("screenshot: %d", sequence));
+        // Log.debug(String.format("screenshot: %d", seq));
         // ScreenImages.addCompressedScreen(packet);
+        // Log.debug(String.format("compress screenshot[%d], spend: %d", seq, System.currentTimeMillis() - stime));
         deliveryWorker.send(packet);
 
         lastScreen = screenshot;
@@ -109,7 +112,6 @@ public class CompressWorker extends BaseWorker
             try
             {
                 compress();
-                sleep(100);
             }
             catch(Exception e)
             {

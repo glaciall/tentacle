@@ -26,6 +26,7 @@ public class PacketDeliveryWorker extends BaseWorker
     LinkedList<Packet> packets;
     boolean[] fragmentAckFlags = new boolean[10240];
 
+    static int currentFrameSequence = 0;
     static PacketDeliveryWorker instance = null;
 
     public PacketDeliveryWorker(CompressWorker compressWorker)
@@ -47,6 +48,7 @@ public class PacketDeliveryWorker extends BaseWorker
 
     public static void fragmentReceived(int sequence, int packetIndex)
     {
+        if (instance.currentFrameSequence != sequence) return;
         instance.fragmentAckFlags[packetIndex] = true;
     }
 
@@ -78,7 +80,10 @@ public class PacketDeliveryWorker extends BaseWorker
 
                 packet.seek(12 + 11);
                 int sequence = packet.nextInt();
+                String md5 = MD5.encode(packet.getBytes());
+                System.out.println("seq: " + sequence + ", sign: " + md5);
                 Arrays.fill(instance.fragmentAckFlags, false);
+                instance.currentFrameSequence = sequence;
                 // 分包发送
                 // 循环遍历，是否已经全部发送完毕了？
                 // 加个重发次数计数
@@ -100,11 +105,10 @@ public class PacketDeliveryWorker extends BaseWorker
                     fragment.addBytes(packet.nextBytes(len));
                     DatagramPacket p = new DatagramPacket(fragment.getBytes(), fragment.size(), serverAddr, serverPort);
                     socket.send(p);
-                    // if (i % 100 == 99) sleep(5);
                 }
 
                 // 检查各分包是否已经到达，同时需要注意是否有超时
-                sleep(20);
+                sleep(40);
                 boolean expired = false;
                 for (int k = 0; k < 1000; k++)
                 {
@@ -140,9 +144,11 @@ public class PacketDeliveryWorker extends BaseWorker
                     if (fragmentReceived == packetCount) break;
                     // 最低停留5毫秒
                     long time = System.currentTimeMillis() - stime;
-                    if (time > 5) continue;
-                    else sleep(5);
+                    if (time > 25) continue;
+                    else sleep(25);
                 }
+                System.exit(0);
+                return;
             }
             catch(Exception e)
             {

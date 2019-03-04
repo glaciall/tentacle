@@ -13,19 +13,13 @@ public class CaptureWorker extends BaseWorker
         this.setName("capture-worker");
     }
 
-    private void captureAndStore() throws Exception
-    {
-        ScreenImages.addScreenshot(LocalComputer.captureScreen());
-    }
-
     public void run()
     {
         while (!this.isTerminated())
         {
             try
             {
-                captureAndStore();
-                // TODO: FPS控制
+                ScreenImages.addScreenshot(LocalComputer.captureScreen());
                 sleep(50);
             }
             catch(Exception e)

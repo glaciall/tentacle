@@ -32,16 +32,25 @@ public final class ScreenImages
         synchronized (screenshotImages)
         {
             screenshotImages.addLast(screenshot);
+            screenshotImages.notifyAll();
         }
     }
 
     public static Screenshot getScreenshot()
     {
+        Screenshot screen = null;
         synchronized (screenshotImages)
         {
-            if (screenshotImages.size() == 0) return null;
-            return screenshotImages.removeFirst();
+            try
+            {
+                screenshotImages.wait();
+            }
+            catch(Exception e) { }
+            screen = screenshotImages.removeLast();
+            if (screenshotImages.size() > 1) System.out.println("drop screenshots: " + screenshotImages.size());
+            screenshotImages.clear();
         }
+        return screen;
     }
 
     public static boolean hasScreenshots()
