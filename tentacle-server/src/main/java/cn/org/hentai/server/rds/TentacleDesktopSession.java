@@ -133,8 +133,9 @@ public class TentacleDesktopSession extends Thread
     private int lastScreenshotSequence = -1;
     public boolean sendScreenshot(int sequence, byte[] data)
     {
+        String md5 = MD5.encode(data);
         if (lastScreenshotSequence == -1) lastScreenshotSequence = sequence;
-        if (sequence < lastScreenshotSequence) return false;
+        if (sequence <= lastScreenshotSequence) return false;
         if (websocketContext != null) websocketContext.sendScreenshot(data);
         return true;
     }
@@ -320,11 +321,13 @@ public class TentacleDesktopSession extends Thread
     }
 
     // 回应受控端已经妥妥的收到某分包了
-    public void replyForPacket(int sequence, int packetIndex)
+    public boolean replyForPacket(int sequence, int packetIndex)
     {
+        if (sequence <= lastScreenshotSequence) return false;
         Message ack = new Message()
                 .withCommand(Command.SCREENSHOT_FRAGMENT_RESPONSE)
                 .withBody(Packet.create(7).addInt(sequence).addShort((short)packetIndex).addByte((byte)0x00));
         send(ack);
+        return true;
     }
 }

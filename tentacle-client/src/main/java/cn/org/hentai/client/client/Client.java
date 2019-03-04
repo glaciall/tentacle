@@ -89,19 +89,10 @@ public class Client extends Thread
             packet = Packet.read(inputStream);
             if (packet != null)
             {
-                lastActiveTime = System.currentTimeMillis();
                 processCommand(packet);
-                continue;
             }
 
             // 处理服务器下发的指令
-            // 有无需要上报的截图
-            if (ScreenImages.hasCompressedScreens())
-            {
-                lastActiveTime = System.currentTimeMillis();
-                sendScreenImages();
-                continue;
-            }
             // 如果闲置超过20秒，则发送一个心跳包
             if (System.currentTimeMillis() - lastActiveTime > 3000)
             {
@@ -304,6 +295,7 @@ public class Client extends Thread
         if (resp != null)
         {
             send(resp);
+            lastActiveTime = System.currentTimeMillis();
         }
     }
 

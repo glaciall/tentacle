@@ -25,10 +25,12 @@ public class FragmentManager
     // 最外层：链表？
     // 第一层：定义类：总包数，已经收到的包数量，有一个分包的数组，用来作分包的桶
     // 第二层：随便什么样的实体类，关键是每加一个分包，都要确定整体包是否完整
+    int lastFrameSequence = -1;
     LinkedList<Image> cachedImages = new LinkedList<Image>();
     public void arrange(long sessionId, int sequence, int packetIndex, int packetCount, Packet packet)
     {
         // 如果已经拼够了，那就下发到浏览器端吧
+        if (sequence <= lastFrameSequence) return;
         Image image = null;
         for (Image item : cachedImages)
         {
@@ -45,10 +47,11 @@ public class FragmentManager
         if (image.isBroken()) return;
 
         cachedImages.remove(image);
+        lastFrameSequence = sequence;
         TentacleDesktopSession session = SessionManager.getSession(sessionId);
         if (session != null) session.sendScreenshot(sequence, image.merge());
 
-        Log.debug("拼够一个包了，发到浏览器去了");
+        Log.debug("拼够一个包了，发到浏览器去了: " + sequence);
     }
 
     static class Image

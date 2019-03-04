@@ -76,21 +76,21 @@ public final class PacketPorterManager
             int packetCount = packet.nextShort() & 0xffff;
             String secret = new String(packet.nextBytes(32));
 
-            Log.debug(String.format("Reform --> session: %d, sequence: %d, index: %d, count: %d", sessionId, sequence, packetIndex, packetCount));
+            // Log.debug(String.format("Reform --> session: %d, sequence: %d, index: %d, count: %d", sessionId, sequence, packetIndex, packetCount));
 
             TentacleDesktopSession session = SessionManager.getSession(sessionId);
             if (null == session) return;
-            if (session.checkSecret(sequence, packetIndex, secret) == false)
+            // 向受控端发送确认消息
+            if (session.replyForPacket(sequence, packetIndex) == false)
             {
-                System.out.println(String.format("验证没通过~~~seq: %d, index: %d, secret: %s", sequence, packetIndex, secret));
+                Log.debug(String.format("packet drop: %d, %d", sequence, packetIndex));
                 return;
             }
 
+            if (session.checkSecret(sequence, packetIndex, secret) == false) return;
+
             // 将其加入到某某树里去
             FragmentManager.getInstance().arrange(sessionId, sequence, packetIndex, packetCount, packet);
-
-            // 向受控端发送确认消息
-            session.replyForPacket(sequence, packetIndex);
         }
 
         public void run()
@@ -102,10 +102,10 @@ public final class PacketPorterManager
                     Packet p = null;
                     synchronized (lock)
                     {
-                        lock.wait();
-                        if (packets.size() > 0) p = packets.removeFirst();
+                        while (packets.size() == 0) lock.wait();
+                        p = packets.removeFirst();
                     }
-                    if (p != null) checkAndReform(p);
+                    checkAndReform(p);
                 }
                 catch(Exception e)
                 {

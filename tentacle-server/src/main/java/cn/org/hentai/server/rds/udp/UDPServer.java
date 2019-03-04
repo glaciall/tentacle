@@ -36,7 +36,6 @@ public class UDPServer extends Thread
                 byte[] data = new byte[p.getLength()];
                 System.arraycopy(p.getData(), 0, data, 0, p.getLength());
                 try { dispatch(data); } catch(Exception e) { Log.error(e); }
-                data = null;
             }
         }
         catch(Exception e)
