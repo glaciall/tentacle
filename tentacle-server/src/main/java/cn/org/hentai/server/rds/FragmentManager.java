@@ -51,7 +51,7 @@ public class FragmentManager
         TentacleDesktopSession session = SessionManager.getSession(sessionId);
         if (session != null) session.sendScreenshot(sequence, image.merge());
 
-        Log.debug("拼够一个包了，发到浏览器去了: " + sequence);
+        // Log.debug("拼够一个包了，发到浏览器去了: " + sequence);
     }
 
     static class Image
@@ -96,7 +96,7 @@ public class FragmentManager
             return System.currentTimeMillis() - createTime > 5000;
         }
 
-        // TODO: 消息包整合
+        // 消息包整合
         public byte[] merge()
         {
             Packet p = Packet.create(totalBytes);

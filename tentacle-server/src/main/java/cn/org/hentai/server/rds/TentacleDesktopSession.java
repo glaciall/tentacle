@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 
 /**
  * Created by matrixy on 2019/1/8.
@@ -133,10 +134,13 @@ public class TentacleDesktopSession extends Thread
     private int lastScreenshotSequence = -1;
     public boolean sendScreenshot(int sequence, byte[] data)
     {
-        String md5 = MD5.encode(data);
         if (lastScreenshotSequence == -1) lastScreenshotSequence = sequence;
         if (sequence <= lastScreenshotSequence) return false;
         if (websocketContext != null) websocketContext.sendScreenshot(data);
+        lastScreenshotSequence = sequence;
+
+        System.out.println(String.format("sequence: %d\t\t%s\t\t%6d", sequence, MD5.encode(data), data.length));
+
         return true;
     }
 

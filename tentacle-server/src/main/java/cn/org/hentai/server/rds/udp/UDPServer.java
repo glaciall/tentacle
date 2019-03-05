@@ -29,7 +29,7 @@ public class UDPServer extends Thread
             DatagramSocket server = new DatagramSocket(port);
             server.setReceiveBufferSize(4096 * 100);
 
-            DatagramPacket p = new DatagramPacket(new byte[4096], 4096);
+            DatagramPacket p = new DatagramPacket(new byte[30720], 30720);
             while (!this.isInterrupted())
             {
                 server.receive(p);

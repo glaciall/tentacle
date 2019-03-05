@@ -48,7 +48,11 @@ public class PacketDeliveryWorker extends BaseWorker
     {
         synchronized (PacketDeliveryWorker.class)
         {
-            if (instance.currentFrameSequence != sequence) return;
+            if (instance.currentFrameSequence != sequence)
+            {
+                System.err.println(String.format("current-seq: %d\treply-seq: %d\tindex: %4d", currentFrameSequence, sequence, packetIndex));
+                return;
+            }
             instance.fragmentAckFlags[packetIndex] = true;
         }
     }
@@ -68,6 +72,7 @@ public class PacketDeliveryWorker extends BaseWorker
             Log.error(e);
         }
         String key = Configs.get("client.key");
+        final int FRAGMENT_SIZE = 30720;
 
         while (!this.isTerminated())
         {
@@ -83,6 +88,7 @@ public class PacketDeliveryWorker extends BaseWorker
                 packet.seek(12 + 11);
                 int sequence = packet.nextInt();
                 String md5 = MD5.encode(packet.getBytes());
+                System.out.println(String.format("seq: %d\t\t%s\t\t%6d", sequence, md5, packet.size()));
                 synchronized (PacketDeliveryWorker.class)
                 {
                     Arrays.fill(instance.fragmentAckFlags, false);
@@ -91,16 +97,16 @@ public class PacketDeliveryWorker extends BaseWorker
                 // 分包发送
                 // 循环遍历，是否已经全部发送完毕了？
                 // 加个重发次数计数
-                int packetCount = (int)Math.ceil(packet.size() / 1024f);
+                int packetCount = (int)Math.ceil(packet.size() / (float)FRAGMENT_SIZE);
                 DatagramSocket socket = new DatagramSocket();
-                socket.setSendBufferSize(4096 * 100);
+                socket.setSendBufferSize(FRAGMENT_SIZE * 100);
                 socket.connect(serverAddr, serverPort);
                 packet.rewind();
                 for (int i = 0; i < packetCount; i++)
                 {
-                    int len = 1024;
-                    if (i == packetCount - 1) len = packet.size() - i * 1024;
-
+                    int len = FRAGMENT_SIZE;
+                    if (i == packetCount - 1) len = packet.size() - i * FRAGMENT_SIZE;
+                    // TODO: 丢掉了92字节，明天再跟，可能是48的n倍关系
                     Packet fragment = Packet.create(8 + 4 + 2 + 2 + 32 + len);
                     fragment.addLong(Client.getCurrentSessionId());
                     fragment.addInt(sequence);
@@ -114,23 +120,28 @@ public class PacketDeliveryWorker extends BaseWorker
 
                 // 检查各分包是否已经到达，同时需要注意是否有超时
                 sleep(20);
+                boolean[] flags = new boolean[packetCount];
                 for (int k = 0; k < 1000; k++)
                 {
                     long stime = System.currentTimeMillis();
                     int fragmentReceived = 0;
                     int packetResendCount = 0;
+                    synchronized (PacketDeliveryWorker.class)
+                    {
+                        System.arraycopy(instance.fragmentAckFlags, 0, flags, 0, packetCount);
+                    }
                     for (int i = 0; i < packetCount; i++)
                     {
-                        if (fragmentAckFlags[i])
+                        if (flags[i])
                         {
                             fragmentReceived += 1;
                             continue;
                         }
 
                         // 补发分包
-                        packet.seek(i * 1024);
-                        int len = 1024;
-                        if (i == packetCount - 1) len = packet.size() - i * 1024;
+                        packet.seek(i * FRAGMENT_SIZE);
+                        int len = FRAGMENT_SIZE;
+                        if (i == packetCount - 1) len = packet.size() - i * FRAGMENT_SIZE;
 
                         Packet fragment = Packet.create(8 + 4 + 2 + 2 + 32 + len);
                         fragment.addLong(Client.getCurrentSessionId());
@@ -144,12 +155,12 @@ public class PacketDeliveryWorker extends BaseWorker
 
                         packetResendCount += 1;
                     }
-                    Log.debug(String.format("resend sequence[%d] for %d times and %d packets resend...", sequence, k, packetResendCount));
+                    // Log.debug(String.format("resend sequence[%d] for %3d times and %3d packets resend, total: %4d", sequence, k, packetResendCount, packetCount));
                     if (fragmentReceived == packetCount) break;
                     // 最低停留10毫秒
                     long time = System.currentTimeMillis() - stime;
-                    if (time >= 10) continue;
-                    else sleep(Math.min(10, 10 - time));
+                    if (time >= 5) continue;
+                    else sleep(Math.min(5, Math.max(0, 5 - time)));
                 }
             }
             catch(Exception e)
