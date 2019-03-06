@@ -17,7 +17,7 @@ public final class LocalComputer
      */
     public static Screenshot captureScreen()
     {
-        return new Screenshot(robot.createScreenCapture(new Rectangle(400, 300)));
+        return new Screenshot(robot.createScreenCapture(getScreenSize()));
     }
 
     /**
