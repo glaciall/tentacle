@@ -99,10 +99,10 @@ public class FragmentManager
         // 消息包整合
         public byte[] merge()
         {
-            Packet p = Packet.create(totalBytes);
+            Packet p = Packet.create(totalBytes - 11);
             for (int i = 0; i < packetCount; i++)
             {
-                fragments[i].seek(8 + 4 + 2 + 2 + 32);
+                fragments[i].seek(8 + 4 + 2 + 2 + 32 + (i == 0 ? 11 : 0));
                 p.addBytes(fragments[i].nextBytes());
                 fragments[i] = null;
             }
