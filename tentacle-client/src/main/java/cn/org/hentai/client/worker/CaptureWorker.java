@@ -8,9 +8,9 @@ import cn.org.hentai.tentacle.util.Log;
  */
 public class CaptureWorker extends BaseWorker
 {
-    private void captureAndStore() throws Exception
+    public CaptureWorker()
     {
-        ScreenImages.addScreenshot(LocalComputer.captureScreen());
+        this.setName("capture-worker");
     }
 
     public void run()
@@ -19,8 +19,7 @@ public class CaptureWorker extends BaseWorker
         {
             try
             {
-                captureAndStore();
-                // TODO: FPS控制
+                ScreenImages.addScreenshot(LocalComputer.captureScreen());
                 sleep(50);
             }
             catch(Exception e)

@@ -19,6 +19,8 @@ public class FileTransferWorker extends BaseWorker
     {
         this.file = file;
         this.clientSession = clientSession;
+
+        this.setName("file-transfer-worker");
     }
 
     private void transfer() throws Exception

@@ -43,6 +43,19 @@ public class Client extends Thread
     long sessionId = 0L;
     String sessionSecret = null;
 
+    static long currentSessionId;
+    static String currentSessionSecret;
+
+    public static long getCurrentSessionId()
+    {
+        return currentSessionId;
+    }
+
+    public static String getCurrentSessionSecret()
+    {
+        return currentSessionSecret;
+    }
+
     // 与服务器间的会话处理
     private void converse() throws Exception
     {
@@ -76,19 +89,10 @@ public class Client extends Thread
             packet = Packet.read(inputStream);
             if (packet != null)
             {
-                lastActiveTime = System.currentTimeMillis();
                 processCommand(packet);
-                continue;
             }
 
             // 处理服务器下发的指令
-            // 有无需要上报的截图
-            if (ScreenImages.hasCompressedScreens())
-            {
-                lastActiveTime = System.currentTimeMillis();
-                sendScreenImages();
-                continue;
-            }
             // 如果闲置超过20秒，则发送一个心跳包
             if (System.currentTimeMillis() - lastActiveTime > 3000)
             {
@@ -117,6 +121,8 @@ public class Client extends Thread
                 authenticated = true;
                 sessionId = packet.nextLong();
                 sessionSecret = new String(packet.nextBytes(32));
+                currentSessionId = sessionId;
+                currentSessionSecret = sessionSecret;
             }
             else
             {
@@ -208,6 +214,13 @@ public class Client extends Thread
             hidCommandExecutor.terminate();
             ScreenImages.clear();
         }
+        // 截图分包的回应
+        else if (cmd == Command.SCREENSHOT_FRAGMENT_RESPONSE)
+        {
+            int sequence = packet.nextInt();
+            int packetIndex = packet.nextShort() & 0xffff;
+            PacketDeliveryWorker.fragmentReceived(sequence, packetIndex);
+        }
         // 列出文件列表
         else if (cmd == Command.LIST_FILES)
         {
@@ -281,6 +294,7 @@ public class Client extends Thread
         if (resp != null)
         {
             send(resp);
+            lastActiveTime = System.currentTimeMillis();
         }
     }
 

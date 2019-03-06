@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 
 /**
  * Created by matrixy on 2019/1/8.
@@ -127,6 +128,20 @@ public class TentacleDesktopSession extends Thread
     public TentacleDesktopWSS getWebsocketContext()
     {
         return websocketContext;
+    }
+
+    // 发送截图画面到浏览器端，确保有序发送
+    private int lastScreenshotSequence = -1;
+    public boolean sendScreenshot(int sequence, byte[] data)
+    {
+        if (sequence <= lastScreenshotSequence) return false;
+
+        if (lastScreenshotSequence == -1) lastScreenshotSequence = sequence;
+        if (websocketContext != null) websocketContext.sendScreenshot(data);
+        lastScreenshotSequence = sequence;
+        System.out.println(String.format("sequence: %d\t\t%s\t\t%6d", sequence, MD5.encode(data), data.length));
+
+        return true;
     }
 
     /**
@@ -306,6 +321,17 @@ public class TentacleDesktopSession extends Thread
     // 检查UDP消息包里的secret是否正确
     public boolean checkSecret(int seq, int packetIndex, String secret)
     {
-        return secret.equals(MD5.encode(clientInfo.getSecret() + ":::" + seq + ":::" + packetIndex + clientKey));
+        return secret.equals(MD5.encode(clientInfo.getSecret() + ":::" + seq + ":::" + packetIndex + ":::" + clientKey));
+    }
+
+    // 回应受控端已经妥妥的收到某分包了
+    public boolean replyForPacket(int sequence, int packetIndex)
+    {
+        if (sequence <= lastScreenshotSequence) return false;
+        Message ack = new Message()
+                .withCommand(Command.SCREENSHOT_FRAGMENT_RESPONSE)
+                .withBody(Packet.create(7).addInt(sequence).addShort((short)packetIndex).addByte((byte)0x00));
+        send(ack);
+        return true;
     }
 }

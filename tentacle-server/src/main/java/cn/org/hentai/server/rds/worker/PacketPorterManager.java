@@ -3,12 +3,10 @@ package cn.org.hentai.server.rds.worker;
 import cn.org.hentai.server.rds.FragmentManager;
 import cn.org.hentai.server.rds.SessionManager;
 import cn.org.hentai.server.rds.TentacleDesktopSession;
-import cn.org.hentai.server.util.Configs;
 import cn.org.hentai.tentacle.protocol.Packet;
 import cn.org.hentai.tentacle.util.Log;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.LinkedList;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -28,9 +26,12 @@ public final class PacketPorterManager
     {
         if (porters != null) return;
         porters = new PacketPorter[Runtime.getRuntime().availableProcessors()];
-        for (PacketPorter porter : porters)
+        for (int i = 0; i < porters.length; i++)
         {
+            PacketPorter porter = new PacketPorter();
+            porter.setName("packet-porter-" + i);
             porter.start();
+            porters[i] = porter;
         }
     }
 
@@ -40,28 +41,28 @@ public final class PacketPorterManager
         if (instance == null)
         {
             instance = new PacketPorterManager();
+            instance.init();
         }
         return instance;
     }
 
     public void receiveAndReform(Packet packet)
     {
+        packet.rewind();
         porters[(int)Math.abs(packet.nextLong() % porters.length)].dispatch(packet);
     }
 
     static class PacketPorter extends Thread
     {
-        LinkedBlockingDeque<Packet> packets = new LinkedBlockingDeque<Packet>();
+        Object lock = new Object();
+        LinkedList<Packet> packets = new LinkedList<Packet>();
 
         public void dispatch(Packet packet)
         {
-            try
+            synchronized (lock)
             {
-                packets.put(packet);
-            }
-            catch(Exception e)
-            {
-                Log.error(e);
+                packets.add(packet);
+                lock.notifyAll();
             }
         }
 
@@ -75,14 +76,21 @@ public final class PacketPorterManager
             int packetCount = packet.nextShort() & 0xffff;
             String secret = new String(packet.nextBytes(32));
 
+            // Log.debug(String.format("Reform --> session: %d, sequence: %d, index: %d, count: %d", sessionId, sequence, packetIndex, packetCount));
+
             TentacleDesktopSession session = SessionManager.getSession(sessionId);
             if (null == session) return;
+            // 向受控端发送确认消息
+            if (session.replyForPacket(sequence, packetIndex) == false)
+            {
+                Log.debug(String.format("packet drop: %d, %d", sequence, packetIndex));
+                return;
+            }
+
             if (session.checkSecret(sequence, packetIndex, secret) == false) return;
 
             // 将其加入到某某树里去
-            FragmentManager.getInstance().add(packet);
-
-            // 向受控端发送确认消息
+            FragmentManager.getInstance().arrange(sessionId, sequence, packetIndex, packetCount, packet);
         }
 
         public void run()
@@ -91,7 +99,12 @@ public final class PacketPorterManager
             {
                 try
                 {
-                    Packet p = packets.take();
+                    Packet p = null;
+                    synchronized (lock)
+                    {
+                        while (packets.size() == 0) lock.wait();
+                        p = packets.removeFirst();
+                    }
                     checkAndReform(p);
                 }
                 catch(Exception e)

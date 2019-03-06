@@ -193,6 +193,14 @@ public class Packet
         return buf;
     }
 
+    public byte[] nextBytes()
+    {
+        byte[] buf = new byte[this.size - this.offset];
+        System.arraycopy(this.data, offset, buf, 0, buf.length);
+        offset += buf.length;
+        return buf;
+    }
+
     public Packet skip(int offset)
     {
         this.offset += offset;
@@ -232,5 +240,17 @@ public class Packet
             System.out.print(Long.toHexString(p.nextLong()) + " ");
         System.out.println();
         System.out.println(ByteUtils.toString(p.getBytes()));
+    }
+
+    /**
+     * 复制len个字节，到dest的offset位置处
+     * @param dest
+     * @param offset
+     * @param len
+     */
+    public void copyBytes(byte[] dest, int offset, int len)
+    {
+        System.arraycopy(this.data, this.offset, dest, offset, len);
+        this.offset += len;
     }
 }

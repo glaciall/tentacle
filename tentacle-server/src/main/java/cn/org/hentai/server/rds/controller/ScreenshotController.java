@@ -26,7 +26,7 @@ public class ScreenshotController extends BaseMessageController
         int height = packet.nextShort();
         long captureTime = packet.nextLong();
         int sequence = packet.nextInt();
-        session.getWebsocketContext().sendScreenshot(packet.getBytes());
+        session.sendScreenshot(sequence, packet.getBytes());
         return null;
     }
 }
