@@ -50,7 +50,6 @@ public class PacketDeliveryWorker extends BaseWorker
         {
             if (instance.currentFrameSequence != sequence)
             {
-                System.err.println(String.format("current-seq: %d\treply-seq: %d\tindex: %4d", currentFrameSequence, sequence, packetIndex));
                 return;
             }
             instance.fragmentAckFlags[packetIndex] = true;
@@ -87,8 +86,6 @@ public class PacketDeliveryWorker extends BaseWorker
 
                 packet.seek(12 + 11);
                 int sequence = packet.nextInt();
-                String md5 = MD5.encode(packet.getBytes());
-                System.out.println(String.format("seq: %d\t\t%s\t\t%6d", sequence, md5, packet.size()));
                 synchronized (PacketDeliveryWorker.class)
                 {
                     Arrays.fill(instance.fragmentAckFlags, false);

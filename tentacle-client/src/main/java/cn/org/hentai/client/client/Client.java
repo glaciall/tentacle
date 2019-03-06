@@ -220,7 +220,6 @@ public class Client extends Thread
             int sequence = packet.nextInt();
             int packetIndex = packet.nextShort() & 0xffff;
             PacketDeliveryWorker.fragmentReceived(sequence, packetIndex);
-            // Log.debug(String.format("reply --> seq: %d, index: %d", sequence, packetIndex));
         }
         // 列出文件列表
         else if (cmd == Command.LIST_FILES)
