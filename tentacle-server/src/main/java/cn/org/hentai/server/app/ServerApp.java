@@ -33,8 +33,8 @@ public class ServerApp
         ApplicationContext context = SpringApplication.run(ServerApp.class, args);
         BeanUtils.init(context);
         Configs.init("/application.properties");
-        // PacketPorterManager.getInstance().init();
-        // UDPServer.init();
+        PacketPorterManager.getInstance().init();
+        UDPServer.init();
         RemoteDesktopApp.init();
         // new Thread(new RemoteDesktopServer()).start();
     }
