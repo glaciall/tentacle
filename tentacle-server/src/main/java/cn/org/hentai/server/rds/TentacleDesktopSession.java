@@ -139,7 +139,6 @@ public class TentacleDesktopSession extends Thread
         if (lastScreenshotSequence == -1) lastScreenshotSequence = sequence;
         if (websocketContext != null) websocketContext.sendScreenshot(data);
         lastScreenshotSequence = sequence;
-        System.out.println(String.format("sequence: %d\t\t%s\t\t%6d", sequence, MD5.encode(data), data.length));
 
         return true;
     }

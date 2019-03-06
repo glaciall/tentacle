@@ -83,7 +83,6 @@ public final class PacketPorterManager
             // 向受控端发送确认消息
             if (session.replyForPacket(sequence, packetIndex) == false)
             {
-                Log.debug(String.format("packet drop: %d, %d", sequence, packetIndex));
                 return;
             }
 
