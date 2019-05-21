@@ -1,6 +1,5 @@
 package cn.org.hentai.client.desktop;
 
-import cn.org.hentai.client.worker.BaseWorker;
 import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.hid.KeyMapping;
 import cn.org.hentai.tentacle.hid.KeyboardCommand;
@@ -9,8 +8,6 @@ import cn.org.hentai.tentacle.util.Log;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.util.LinkedList;
 
 /**
  * Created by Expect on 2018/4/21.

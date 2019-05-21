@@ -1,6 +1,5 @@
 package cn.org.hentai.client.desktop;
 
-import cn.org.hentai.client.worker.*;
 import cn.org.hentai.tentacle.compress.CompressUtil;
 import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.protocol.Command;
