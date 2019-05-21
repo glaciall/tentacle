@@ -50,8 +50,12 @@ public class FragmentManager
         lastFrameSequence = sequence;
         TentacleDesktopSession session = SessionManager.getSession(sessionId);
         if (session != null) session.sendScreenshot(sequence, image.merge());
+    }
 
-        // Log.debug("拼够一个包了，发到浏览器去了: " + sequence);
+    public void reset()
+    {
+        lastFrameSequence = -1;
+        cachedImages.clear();
     }
 
     static class Image

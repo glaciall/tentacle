@@ -281,4 +281,9 @@ public class TentacleDesktopWSS
         if (null == remoteDesktopSession) return;
         remoteDesktopSession.unbind();
     }
+
+    public void close()
+    {
+        try { this.httpSession.invalidate(); } catch(Exception e) { }
+    }
 }

@@ -86,7 +86,10 @@ public final class PacketPorterManager
                 return;
             }
 
-            if (session.checkSecret(sequence, packetIndex, secret) == false) return;
+            if (session.checkSecret(sequence, packetIndex, secret) == false)
+            {
+                return;
+            }
 
             // 将其加入到某某树里去
             FragmentManager.getInstance().arrange(sessionId, sequence, packetIndex, packetCount, packet);

@@ -38,6 +38,7 @@ public class TentacleDesktopSession extends Thread
     {
         this.connection = connection;
         this.clientKey = Configs.get("client.key");
+        this.setName("tentacle-desktop-session-thread");
     }
 
     public void run()
@@ -151,6 +152,7 @@ public class TentacleDesktopSession extends Thread
     {
         if (this.websocketContext != null) throw new RuntimeException("目标主机已经处于其它会话的控制中");
         this.websocketContext = websocketSession;
+        FragmentManager.getInstance().reset();
         Client info = this.getClient();
         info.setControlling(true);
 
@@ -168,6 +170,7 @@ public class TentacleDesktopSession extends Thread
      */
     public void unbind()
     {
+        lastScreenshotSequence = -1;
         try
         {
             Message msg = new Message().withCommand(Command.CLOSE_REQUEST).withBody("CLOSE".getBytes());
@@ -175,7 +178,7 @@ public class TentacleDesktopSession extends Thread
         }
         catch(Exception ex)
         {
-            ex.printStackTrace();
+            Log.error(ex.toString());
         }
         try
         {
@@ -285,12 +288,12 @@ public class TentacleDesktopSession extends Thread
         }
         catch(Exception ex)
         {
+            if (websocketContext != null) websocketContext.close();
+
             if (ex instanceof SocketException || ex instanceof IOException)
             {
-                Log.error(ex);
                 this.close();
             }
-            throw new RuntimeException(ex);
         }
     }
 

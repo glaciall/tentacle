@@ -1,6 +1,6 @@
 package cn.org.hentai.client.client;
 
-import cn.org.hentai.client.worker.*;
+import cn.org.hentai.client.desktop.*;
 import cn.org.hentai.tentacle.encrypt.MD5;
 import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.hid.KeyboardCommand;
@@ -31,9 +31,10 @@ public class Client extends Thread
 
     boolean authenticated = false;
 
-    BaseWorker captureWorker;
-    BaseWorker compressWorker;
+    CaptureWorker captureWorker;
+    CompressWorker compressWorker;
     HIDCommandExecutor hidCommandExecutor;
+    PacketDeliveryWorker packetDeliveryWorker;
 
     Socket conn;
     InputStream inputStream;
@@ -45,6 +46,11 @@ public class Client extends Thread
 
     static long currentSessionId;
     static String currentSessionSecret;
+
+    public Client()
+    {
+        this.setName("client-session-thread");
+    }
 
     public static long getCurrentSessionId()
     {
@@ -155,6 +161,7 @@ public class Client extends Thread
                     .addLong(System.currentTimeMillis());           // 当前系统时间戳
             (captureWorker = new CaptureWorker()).start();
             (compressWorker = new CompressWorker()).start();
+            (packetDeliveryWorker = new PacketDeliveryWorker()).start();
             (hidCommandExecutor = new HIDCommandExecutor()).start();
         }
         // 获取剪切板内容
@@ -202,17 +209,19 @@ public class Client extends Thread
             {
                 hidCommand = new KeyboardCommand(key, eventType, timestamp);
             }
-            hidCommandExecutor.add(hidCommand);
+            HIDCommands.getInstance().add(hidCommand);
         }
         // 停止远程控制
         else if (cmd == Command.CLOSE_REQUEST)
         {
+            Log.debug("remote control closed...");
             resp = Packet.create(Command.CLOSE_RESPONSE, 4).addBytes("OJBK".getBytes());
             working = false;
-            captureWorker.terminate();
-            compressWorker.terminate();
-            hidCommandExecutor.terminate();
-            ScreenImages.clear();
+            captureWorker.interrupt();
+            compressWorker.interrupt();
+            hidCommandExecutor.interrupt();
+            packetDeliveryWorker.interrupt();
+            ScreenImages.getInstance().awakeAll();
         }
         // 截图分包的回应
         else if (cmd == Command.SCREENSHOT_FRAGMENT_RESPONSE)
@@ -311,15 +320,6 @@ public class Client extends Thread
         outputStream.flush();
     }
 
-    // 发送压缩后的屏幕截图
-    private void sendScreenImages() throws Exception
-    {
-        if (!working) return;
-        Packet p = ScreenImages.getCompressedScreen();
-        // p.skip(6 + 1 + 4 + 2 + 2 + 8);
-        send(p);
-    }
-
     // 关闭连接，中断工作线程
     private void release()
     {
@@ -327,14 +327,15 @@ public class Client extends Thread
         try { inputStream.close(); } catch(Exception e) { }
         try { outputStream.close(); } catch(Exception e) { }
         try { conn.close(); } catch(Exception e) { }
+        ScreenImages.getInstance().awakeAll();
         try
         {
-            captureWorker.terminate();
+            captureWorker.interrupt();
         }
         catch(Exception e) { }
         try
         {
-            compressWorker.terminate();
+            compressWorker.interrupt();
         }
         catch(Exception e) { }
     }
