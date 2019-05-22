@@ -1,47 +1,35 @@
-package cn.org.hentai.client.worker;
+package cn.org.hentai.client.desktop;
 
 import cn.org.hentai.tentacle.compress.CompressUtil;
 import cn.org.hentai.tentacle.graphic.Screenshot;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Packet;
-import cn.org.hentai.tentacle.util.ByteUtils;
 import cn.org.hentai.tentacle.util.Log;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.FileOutputStream;
-
 /**
- * Created by matrixy on 2018/4/10.
+ * Created by matrixy on 2019/5/18.
  */
-public class CompressWorker extends BaseWorker
+public class CompressWorker extends Thread
 {
     String compressMethod = "rle";          // 压缩方式
     Screenshot lastScreen = null;           // 上一屏的截屏，用于比较图像差
-    int sequence = 0;
+    int sequence = 10000;
 
     public CompressWorker()
     {
-        // do nothing here
+        this.setName("compress-worker");
     }
 
-    public CompressWorker(String method)
+    private boolean compress() throws Exception
     {
-        this.compressMethod = method;
-    }
-
-    private void compress() throws Exception
-    {
-        Screenshot screenshot = null;
-        while (true)
-        {
-            if (!ScreenImages.hasScreenshots()) break;
-            screenshot = ScreenImages.getScreenshot();
-        }
-        if (screenshot == null || screenshot.isExpired()) return;
+        Screenshot screenshot = ScreenImages.getInstance().getScreenshot();
+        if (screenshot == null) return false;
+        if (screenshot.isExpired()) return true;
 
         // 分辨率是否发生了变化？
         if (lastScreen != null && (lastScreen.width != screenshot.width || lastScreen.height != screenshot.height)) lastScreen = null;
+
+        long stime = System.currentTimeMillis();
 
         // 1. 求差
         int[] bitmap = new int[screenshot.bitmap.length];
@@ -65,8 +53,7 @@ public class CompressWorker extends BaseWorker
         }
         else bitmap = screenshot.bitmap;
 
-        if (lastScreen != null && changedColors == 0) return;
-        // Log.debug("Changed colors: " + changedColors);
+        if (lastScreen != null && changedColors == 0) return true;
 
         // 2. 压缩
         start = Math.max(start, 0);
@@ -74,35 +61,38 @@ public class CompressWorker extends BaseWorker
         end = bitmap.length;
         byte[] compressedData = CompressUtil.process(this.compressMethod, bitmap, start, end);
 
-        // Log.debug("Compress Ratio: " + (screenshot.bitmap.length * 4.0f / compressedData.length));
-        // Log.debug("After: " + (compressedData.length / 1024));
-
-        // 3. 入队列
+        // 3. 加入已压缩待发送列表中去
+        int seq = sequence++;
         Packet packet = Packet.create(Command.SCREENSHOT, compressedData.length + 16);
         packet.addShort((short)screenshot.width)
                 .addShort((short)screenshot.height)
                 .addLong(screenshot.captureTime)
-                .addInt(sequence++);
+                .addInt(seq);
         packet.addBytes(compressedData);
-        // Log.debug(String.format("screenshot: %d", packet.size()));
-        ScreenImages.addCompressedScreen(packet);
+        ScreenImages.getInstance().addCompressedScreenshot(packet);
 
         lastScreen = screenshot;
+        return true;
     }
 
     public void run()
     {
-        while (!this.isTerminated())
+        while (!this.isInterrupted())
         {
             try
             {
-                compress();
-                sleep(100);
+                boolean goOn = compress();
+                if (goOn == false) break;
             }
-            catch(Exception e)
+            catch (InterruptedException e)
             {
-                Log.error(e);
+                break;
+            }
+            catch (Exception e)
+            {
+                lastScreen = null;
             }
         }
+        Log.debug(this.getName() + " terminated...");
     }
 }

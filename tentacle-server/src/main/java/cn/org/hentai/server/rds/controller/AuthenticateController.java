@@ -2,6 +2,7 @@ package cn.org.hentai.server.rds.controller;
 
 import cn.org.hentai.server.rds.*;
 import cn.org.hentai.server.util.MD5;
+import cn.org.hentai.server.util.NonceStr;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Message;
 import cn.org.hentai.tentacle.protocol.Packet;
@@ -44,11 +45,12 @@ public class AuthenticateController extends BaseMessageController
         info.setName(name);
         info.setControlling(false);
         info.setAddress(session.getRemoteAddress());
+        info.setSecret(NonceStr.generate(32));
 
         session.setClient(info);
         SessionManager.register(session);
 
-        Message resp = new Message().withCommand(Command.AUTHENTICATE_RESPONSE).withBody(Packet.create(1).addByte((byte)0x00));
+        Message resp = new Message().withCommand(Command.AUTHENTICATE_RESPONSE).withBody(Packet.create(41).addByte((byte)0x00).addLong(info.getId()).addBytes(info.getSecret().getBytes()));
         return resp;
     }
 }

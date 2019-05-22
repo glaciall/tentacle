@@ -26,6 +26,10 @@ public final class Command
     public static final byte AUTHENTICATE = 0x18;                   // 客户端认证
     public static final byte AUTHENTICATE_RESPONSE = 0x19;          // 客户端认证应答
 
+    public static final byte SCREENSHOT_FRAGMENT = 0x20;            // 屏幕截图的分包
+    public static final byte SCREENSHOT_FRAGMENT_RESPONSE = 0x21;   // 确认收到屏幕截图分包的应答
+
+
     public static final byte TYPE_MOUSE = 0x01;                     // 类型：鼠标
     public static final byte TYPE_KEYBOARD = 0x02;                  // 类型：键盘
 }

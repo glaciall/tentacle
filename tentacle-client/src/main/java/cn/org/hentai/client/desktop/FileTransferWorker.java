@@ -1,4 +1,4 @@
-package cn.org.hentai.client.worker;
+package cn.org.hentai.client.desktop;
 
 import cn.org.hentai.client.client.Client;
 import cn.org.hentai.tentacle.protocol.Command;
@@ -11,7 +11,7 @@ import java.io.FileInputStream;
 /**
  * Created by matrixy on 2018/5/15.
  */
-public class FileTransferWorker extends BaseWorker
+public class FileTransferWorker extends Thread
 {
     File file = null;
     Client clientSession = null;
@@ -19,6 +19,8 @@ public class FileTransferWorker extends BaseWorker
     {
         this.file = file;
         this.clientSession = clientSession;
+
+        this.setName("file-transfer-worker");
     }
 
     private void transfer() throws Exception

@@ -1,6 +1,6 @@
 package cn.org.hentai.client.client;
 
-import cn.org.hentai.client.worker.*;
+import cn.org.hentai.client.desktop.*;
 import cn.org.hentai.tentacle.encrypt.MD5;
 import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.hid.KeyboardCommand;
@@ -31,15 +31,36 @@ public class Client extends Thread
 
     boolean authenticated = false;
 
-    BaseWorker captureWorker;
-    BaseWorker compressWorker;
+    CaptureWorker captureWorker;
+    CompressWorker compressWorker;
     HIDCommandExecutor hidCommandExecutor;
+    PacketDeliveryWorker packetDeliveryWorker;
 
     Socket conn;
     InputStream inputStream;
     OutputStream outputStream;
 
     long lastActiveTime = 0L;
+    long sessionId = 0L;
+    String sessionSecret = null;
+
+    static long currentSessionId;
+    static String currentSessionSecret;
+
+    public Client()
+    {
+        this.setName("client-session-thread");
+    }
+
+    public static long getCurrentSessionId()
+    {
+        return currentSessionId;
+    }
+
+    public static String getCurrentSessionSecret()
+    {
+        return currentSessionSecret;
+    }
 
     // 与服务器间的会话处理
     private void converse() throws Exception
@@ -74,19 +95,10 @@ public class Client extends Thread
             packet = Packet.read(inputStream);
             if (packet != null)
             {
-                lastActiveTime = System.currentTimeMillis();
                 processCommand(packet);
-                continue;
             }
 
             // 处理服务器下发的指令
-            // 有无需要上报的截图
-            if (ScreenImages.hasCompressedScreens())
-            {
-                lastActiveTime = System.currentTimeMillis();
-                sendScreenImages();
-                continue;
-            }
             // 如果闲置超过20秒，则发送一个心跳包
             if (System.currentTimeMillis() - lastActiveTime > 3000)
             {
@@ -110,7 +122,14 @@ public class Client extends Thread
         if (cmd != Command.AUTHENTICATE_RESPONSE && authenticated == false) return;
         if (cmd == Command.AUTHENTICATE_RESPONSE)
         {
-            if (packet.nextByte() == 0x00) authenticated = true;
+            if (packet.nextByte() == 0x00)
+            {
+                authenticated = true;
+                sessionId = packet.nextLong();
+                sessionSecret = new String(packet.nextBytes(32));
+                currentSessionId = sessionId;
+                currentSessionSecret = sessionSecret;
+            }
             else
             {
                 Log.info("会话认证失败");
@@ -142,6 +161,7 @@ public class Client extends Thread
                     .addLong(System.currentTimeMillis());           // 当前系统时间戳
             (captureWorker = new CaptureWorker()).start();
             (compressWorker = new CompressWorker()).start();
+            (packetDeliveryWorker = new PacketDeliveryWorker()).start();
             (hidCommandExecutor = new HIDCommandExecutor()).start();
         }
         // 获取剪切板内容
@@ -189,17 +209,26 @@ public class Client extends Thread
             {
                 hidCommand = new KeyboardCommand(key, eventType, timestamp);
             }
-            hidCommandExecutor.add(hidCommand);
+            HIDCommands.getInstance().add(hidCommand);
         }
         // 停止远程控制
         else if (cmd == Command.CLOSE_REQUEST)
         {
+            Log.debug("remote control closed...");
             resp = Packet.create(Command.CLOSE_RESPONSE, 4).addBytes("OJBK".getBytes());
             working = false;
-            captureWorker.terminate();
-            compressWorker.terminate();
-            hidCommandExecutor.terminate();
-            ScreenImages.clear();
+            captureWorker.interrupt();
+            compressWorker.interrupt();
+            hidCommandExecutor.interrupt();
+            packetDeliveryWorker.interrupt();
+            ScreenImages.getInstance().awakeAll();
+        }
+        // 截图分包的回应
+        else if (cmd == Command.SCREENSHOT_FRAGMENT_RESPONSE)
+        {
+            int sequence = packet.nextInt();
+            int packetIndex = packet.nextShort() & 0xffff;
+            PacketDeliveryWorker.fragmentReceived(sequence, packetIndex);
         }
         // 列出文件列表
         else if (cmd == Command.LIST_FILES)
@@ -274,6 +303,7 @@ public class Client extends Thread
         if (resp != null)
         {
             send(resp);
+            lastActiveTime = System.currentTimeMillis();
         }
     }
 
@@ -290,15 +320,6 @@ public class Client extends Thread
         outputStream.flush();
     }
 
-    // 发送压缩后的屏幕截图
-    private void sendScreenImages() throws Exception
-    {
-        if (!working) return;
-        Packet p = ScreenImages.getCompressedScreen();
-        // p.skip(6 + 1 + 4 + 2 + 2 + 8);
-        send(p);
-    }
-
     // 关闭连接，中断工作线程
     private void release()
     {
@@ -306,14 +327,15 @@ public class Client extends Thread
         try { inputStream.close(); } catch(Exception e) { }
         try { outputStream.close(); } catch(Exception e) { }
         try { conn.close(); } catch(Exception e) { }
+        ScreenImages.getInstance().awakeAll();
         try
         {
-            captureWorker.terminate();
+            captureWorker.interrupt();
         }
         catch(Exception e) { }
         try
         {
-            compressWorker.terminate();
+            compressWorker.interrupt();
         }
         catch(Exception e) { }
     }

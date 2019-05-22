@@ -73,7 +73,7 @@
     white-space: normal;
 }
 
-/*add padding for jquery ui*/
+/*arrange padding for jquery ui*/
 .editable-error-block.ui-state-error {
     padding: 3px;  
 }  
@@ -90,7 +90,7 @@
     float: left;
 }
 
-/* move datepicker icon to center of add-on button. See https://github.com/vitalets/x-editable/issues/183 */
+/* move datepicker icon to center of arrange-on button. See https://github.com/vitalets/x-editable/issues/183 */
 .editable-inline .add-on .icon-th {
    margin-top: 3px;
    margin-left: 1px; 

@@ -1,4 +1,4 @@
-package cn.org.hentai.client.worker;
+package cn.org.hentai.client.desktop;
 
 import cn.org.hentai.tentacle.hid.HIDCommand;
 import cn.org.hentai.tentacle.hid.KeyMapping;
@@ -8,15 +8,13 @@ import cn.org.hentai.tentacle.util.Log;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.util.LinkedList;
 
 /**
  * Created by Expect on 2018/4/21.
  */
-public class HIDCommandExecutor extends BaseWorker
+public class HIDCommandExecutor extends Thread
 {
-    LinkedList<HIDCommand> commands = null;
+
     HIDCommand nextCommand = null;
     int timespan = 0;
     long nextExecuteTime = 0L;
@@ -26,35 +24,19 @@ public class HIDCommandExecutor extends BaseWorker
         robot = new Robot();
         robot.setAutoDelay(0);
         robot.setAutoWaitForIdle(false);
-        commands = new LinkedList<HIDCommand>();
-    }
 
-    public void add(HIDCommand cmd)
-    {
-        synchronized (commands)
-        {
-            commands.addLast(cmd);
-        }
-    }
-
-    private HIDCommand get()
-    {
-        synchronized (commands)
-        {
-            if (commands.size() == 0) return null;
-            return commands.removeFirst();
-        }
+        this.setName("hid-command-executor");
     }
 
     private void execute() throws Exception
     {
         // if (System.currentTimeMillis() < nextExecuteTime) return;
-        if (null == nextCommand) nextCommand = get();
+        if (null == nextCommand) nextCommand = HIDCommands.getInstance().get();
         if (nextCommand == null) return;
 
         int timespan = nextCommand.timestamp;
         doCommand(nextCommand);
-        nextCommand = get();
+        nextCommand = HIDCommands.getInstance().get();
         if (nextCommand != null)
         {
             timespan = nextCommand.timestamp - timespan;
@@ -117,17 +99,22 @@ public class HIDCommandExecutor extends BaseWorker
 
     public void run()
     {
-        while (!this.isTerminated())
+        while (!this.isInterrupted())
         {
             try
             {
                 execute();
                 sleep(5);
             }
+            catch(InterruptedException e)
+            {
+                break;
+            }
             catch(Exception e)
             {
                 Log.error(e);
             }
         }
+        Log.debug(this.getName() + " terminated...");
     }
 }

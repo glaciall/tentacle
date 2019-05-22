@@ -3,6 +3,8 @@ package cn.org.hentai.server.rds;
 import cn.org.hentai.server.controller.FileDownloadController;
 import cn.org.hentai.server.rds.coder.TentacleMessageDecoder;
 import cn.org.hentai.server.util.ByteHolder;
+import cn.org.hentai.server.util.Configs;
+import cn.org.hentai.server.util.MD5;
 import cn.org.hentai.server.wss.TentacleDesktopWSS;
 import cn.org.hentai.tentacle.protocol.Command;
 import cn.org.hentai.tentacle.protocol.Message;
@@ -18,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.Arrays;
 
 /**
  * Created by matrixy on 2019/1/8.
@@ -29,10 +32,13 @@ public class TentacleDesktopSession extends Thread
     private OutputStream outputStream = null;
 
     private Client clientInfo = null;
+    private String clientKey = null;
 
     public TentacleDesktopSession(Socket connection)
     {
         this.connection = connection;
+        this.clientKey = Configs.get("client.key");
+        this.setName("tentacle-desktop-session-thread");
     }
 
     public void run()
@@ -125,6 +131,19 @@ public class TentacleDesktopSession extends Thread
         return websocketContext;
     }
 
+    // 发送截图画面到浏览器端，确保有序发送
+    private int lastScreenshotSequence = -1;
+    public boolean sendScreenshot(int sequence, byte[] data)
+    {
+        if (sequence <= lastScreenshotSequence) return false;
+
+        if (lastScreenshotSequence == -1) lastScreenshotSequence = sequence;
+        if (websocketContext != null) websocketContext.sendScreenshot(data);
+        lastScreenshotSequence = sequence;
+
+        return true;
+    }
+
     /**
      * 与websocket建立关联关系
      * @param websocketSession
@@ -133,6 +152,7 @@ public class TentacleDesktopSession extends Thread
     {
         if (this.websocketContext != null) throw new RuntimeException("目标主机已经处于其它会话的控制中");
         this.websocketContext = websocketSession;
+        FragmentManager.getInstance().reset();
         Client info = this.getClient();
         info.setControlling(true);
 
@@ -150,6 +170,7 @@ public class TentacleDesktopSession extends Thread
      */
     public void unbind()
     {
+        lastScreenshotSequence = -1;
         try
         {
             Message msg = new Message().withCommand(Command.CLOSE_REQUEST).withBody("CLOSE".getBytes());
@@ -157,7 +178,7 @@ public class TentacleDesktopSession extends Thread
         }
         catch(Exception ex)
         {
-            ex.printStackTrace();
+            Log.error(ex.toString());
         }
         try
         {
@@ -267,12 +288,12 @@ public class TentacleDesktopSession extends Thread
         }
         catch(Exception ex)
         {
+            if (websocketContext != null) websocketContext.close();
+
             if (ex instanceof SocketException || ex instanceof IOException)
             {
-                Log.error(ex);
                 this.close();
             }
-            throw new RuntimeException(ex);
         }
     }
 
@@ -291,5 +312,28 @@ public class TentacleDesktopSession extends Thread
     public void setClient(Client clientInfo)
     {
         this.clientInfo = clientInfo;
+    }
+
+    // 分包的验签
+    public String getSecret()
+    {
+        return this.clientInfo.getSecret();
+    }
+
+    // 检查UDP消息包里的secret是否正确
+    public boolean checkSecret(int seq, int packetIndex, String secret)
+    {
+        return secret.equals(MD5.encode(clientInfo.getSecret() + ":::" + seq + ":::" + packetIndex + ":::" + clientKey));
+    }
+
+    // 回应受控端已经妥妥的收到某分包了
+    public boolean replyForPacket(int sequence, int packetIndex)
+    {
+        if (sequence <= lastScreenshotSequence) return false;
+        Message ack = new Message()
+                .withCommand(Command.SCREENSHOT_FRAGMENT_RESPONSE)
+                .withBody(Packet.create(7).addInt(sequence).addShort((short)packetIndex).addByte((byte)0x00));
+        send(ack);
+        return true;
     }
 }
