@@ -1,5 +1,5 @@
 ## 基于Java AWT、SpringBoot、websocket、canvas的跨平台远程桌面实现
-> 基于C#版的客户端正在开发中，在windows平台上会有更好的体验，仓库地址：https://gitee.com/matrixy/tentacle-client-win
+> UDP协议版本有很严重的通信问题，先将UDP部分拆分到了udp分支上了，此分支还是TCP协议版本
 
 <img src="./additional/tentacle.png" />
 <img src="./additional/keyboard.png" />
